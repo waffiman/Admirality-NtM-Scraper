@@ -389,7 +389,135 @@ function parseAdmiraltyNtMText(fullText, defaultYear = "26") {
   };
 }
 
-// ── 2. JRC ECDIS (.uchm) Binary Generator ──
+// ── 2. JRC ECDIS (.uchm) Binary Generator & Concise ECDIS Warning Snapshot Builder ──
+function buildNoticeEcdisSnapshot(n, idx, maxLen = 62) {
+  if (!n) return `WARN-${(idx || 0) + 1}`;
+  if (n.isManualUserChart) {
+    const manualTxt = String(n.manualShapeLabel || n.subject || n.title || n.id || `DRAW-${(idx || 0) + 1}`)
+      .replace(/\s+/g, " ")
+      .trim();
+    return manualTxt.slice(0, maxLen);
+  }
+
+  // 1. Build clean Identifier prefix: e.g. "Navarea IV 1117/26" or "NtM 4687/26"
+  let rawId = String(n.id || n.noticeNumber || n.num || "").replace(/\s+/g, " ").trim();
+  // Shorten 4-digit year "/2026" -> "/26" for compact ECDIS display
+  rawId = rawId.replace(/\/20(\d{2})\b/g, "/$1");
+  const navRom = String(n.navarea || "").trim().toUpperCase();
+  const isNavtex = String(n.type || "").toUpperCase() === "NAVTEX" || /NAVAREA|NAVTEX|HYDROLANT|HYDROPAC|HYDROARC/i.test(rawId);
+
+  let idPart = "";
+  const navMatch = rawId.match(/^(NAVAREA\s+[IVX0-9]+)(?:\s+[A-Z]{2,4})?\s+(\d+\/\d+)/i);
+  const hydroMatch = rawId.match(/^(HYDRO(?:LANT|PAC|ARC))\s+(\d+\/\d+)/i);
+  const numSlashMatch = rawId.match(/(\d+(?:\([TP]\))?\/\d{2,4})/i);
+
+  if (navMatch) {
+    const areaPart = navMatch[1].replace(/^NAVAREA/i, "Navarea");
+    idPart = `${areaPart} ${navMatch[2]}`;
+  } else if (hydroMatch) {
+    const hPrefix = hydroMatch[1].charAt(0).toUpperCase() + hydroMatch[1].slice(1).toLowerCase();
+    idPart = `${hPrefix} ${hydroMatch[2]}`;
+  } else if (isNavtex) {
+    const numTok = numSlashMatch ? numSlashMatch[1] : (String(n.noticeNumber || n.num || "").replace(/\/20(\d{2})\b/g, "/$1") || rawId);
+    if (navRom) {
+      idPart = `Navarea ${navRom} ${numTok}`.trim();
+    } else if (/^NAVTEX/i.test(rawId)) {
+      idPart = rawId.replace(/^NAVTEX/i, "Navtex");
+    } else {
+      idPart = `Navtex ${numTok}`.trim();
+    }
+  } else {
+    const ntmTok = numSlashMatch ? numSlashMatch[1] : (rawId || `${(idx || 0) + 1}`);
+    idPart = /^NtM\b/i.test(ntmTok) ? ntmTok : `NtM ${ntmTok}`;
+  }
+
+  // 2. Extract concise hazard essence: e.g. "Oil rig exists", "Diving operations", "Obstruction"
+  const rawSubj = String(n.subject || n.title || "").replace(/\s+/g, " ").trim();
+  const bracketMatch = rawSubj.match(/^\[([^\]]+)\]\s*(.*)$/);
+  const bracketTag = bracketMatch ? bracketMatch[1].trim() : "";
+  let subjClean = (bracketMatch ? bracketMatch[2] : rawSubj)
+    .replace(/\b(?:OFFICIAL\s+WARNING|BROADCAST\s+WARNING)\b/gi, "")
+    .replace(/\s+-\s+(?:NOTICE|CAUTION|WARNING)\.?$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const rawBody = String(n.body || n.rawText || n.description || "")
+    .replace(/https?:\/\/\S+/gi, "")
+    .replace(/\r?\n+/g, " | ")
+    .trim();
+
+  // Check body for a high-signal maritime hazard phrase if subject is just an area name or generic
+  let hazardPhrase = "";
+  const hazardPatterns = [
+    /\b(OIL\s+RIG\s+[A-Z0-9'\-\s]{0,24}(?:EXISTS|ESTABLISHED|MOVED|DRILLING|OPERATING)?)/i,
+    /\b((?:DRILLING|SEISMIC|DIVING|DREDGING|CABLE|PIPELINE|SURVEY|GUNNERY|MISSILE|ROCKET|MILITARY|SUBSURFACE|OFFSHORE)\s+(?:RIG|OPERATIONS?|SURVEY|WORKS?|EXERCISES?|FIRING|LAYING|IN\s+PROGRESS|AREA)[A-Z0-9'\-\s]{0,18})/i,
+    /\b((?:LIGHT|BUOY|BEACON|DGPS|RACON|AIS|VHF|FOG\s+SIGNAL)[A-Z0-9'\-\s]{0,26}(?:IS\s+UNLIT|UNLIT|OUT\s+OF\s+ORDER|NOT\s+VISIBLE|MISSING|ADRIFT|EXTINGUISHED|INOPERATIVE|MOVED|DAMAGED))/i,
+    /\b((?:DANGEROUS\s+WRECK|WRECK|DERELICT|OBSTRUCTION|SHOAL|SHALLOW\s+DEPTH|CONTAINER|BUOY\s+ADRIFT|PROTRUDING\s+PIPES?)[A-Z0-9'\-\s]{0,22})/i,
+    /\b(RIGLIST\b)/i
+  ];
+  for (let p = 0; p < hazardPatterns.length; p++) {
+    const m = rawBody.match(hazardPatterns[p]) || subjClean.match(hazardPatterns[p]);
+    if (m && m[1]) {
+      hazardPhrase = m[1].replace(/\s+/g, " ").trim();
+      break;
+    }
+  }
+  if (/^RIGLIST\b/i.test(hazardPhrase)) {
+    hazardPhrase = "Oil rig list active";
+  }
+
+  let essence = "";
+  if (hazardPhrase) {
+    essence = hazardPhrase;
+  } else if (subjClean && !/^RIGLIST\b/i.test(subjClean)) {
+    // Take the first meaningful clause of subject
+    const firstClause = subjClean.split(/\.|\s+—\s+|\s+-\s+/)[0].trim();
+    if (bracketTag && !/^(?:Navigational Warning|Broadcast Warning)$/i.test(bracketTag) && firstClause.length < 18) {
+      essence = `${bracketTag}: ${firstClause}`;
+    } else {
+      essence = firstClause || bracketTag;
+    }
+  } else if (bracketTag) {
+    essence = bracketTag;
+  } else if (n.category) {
+    essence = String(n.category).trim();
+  }
+
+  // Normalize ALL-CAPS essence into readable sentence case while preserving maritime acronyms
+  essence = essence
+    .replace(/['"“”‘’]+/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/[.,;:]+$/, "")
+    .trim();
+
+  if (essence && essence === essence.toUpperCase() && essence.length > 4) {
+    const keepUpper = new Set(["AIS", "DGPS", "GPS", "VHF", "TSS", "UKC", "MODU", "FPSO", "LNG", "LPG", "ODAS", "N", "S", "E", "W", "NE", "NW", "SE", "SW", "NM", "UKHO"]);
+    essence = essence
+      .toLowerCase()
+      .split(" ")
+      .map((w, wIdx) => {
+        const up = w.toUpperCase();
+        if (keepUpper.has(up)) return up;
+        if (wIdx === 0) return w.charAt(0).toUpperCase() + w.slice(1);
+        return w;
+      })
+      .join(" ");
+  } else if (essence) {
+    essence = essence.charAt(0).toUpperCase() + essence.slice(1);
+  }
+
+  const combined = (essence ? `${idPart} ${essence}` : idPart)
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (combined.length <= maxLen) return combined;
+  return combined.slice(0, maxLen).replace(/\s+\S*$/, "").trim() || combined.slice(0, maxLen).trim();
+}
+if (typeof window !== "undefined") {
+  window.buildNoticeEcdisSnapshot = buildNoticeEcdisSnapshot;
+}
+
 /**
  * Generates a JRC User Chart Map file (Version 1.1) from filtered notices
  * @param {Array<Object>} notices List of notices with coords
@@ -407,15 +535,7 @@ function buildJrcUchmBuffer(notices) {
       .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon));
     if (cleanCoords.length === 0) return;
 
-    const rawTitle = [
-      n.noticeNumber || n.id || `OBJ-${idx + 1}`,
-      n.region || "",
-      n.subject || n.title || ""
-    ]
-      .filter((part) => part && String(part).trim() && String(part).trim() !== "undefined")
-      .join(" ")
-      .replace(/\s+/g, " ")
-      .trim();
+    const rawTitle = buildNoticeEcdisSnapshot(n, idx, 62);
 
     const isPoly = Boolean(n.isPolygon && cleanCoords.length >= 3);
     const isLine = Boolean(!isPoly && (n.isLine || cleanCoords.length >= 2));
@@ -441,6 +561,20 @@ function buildJrcUchmBuffer(notices) {
       if (ring.length >= 3) {
         ring.push({ lat: ring[0].lat, lon: ring[0].lon });
         records.push({ title: rawTitle, objType: 2, pts: ring });
+        // Also emit a point/text snapshot record at polygon centroid so real JRC ECDIS shows the symbol + text snapshot
+        if (!n.isManualUserChart || n.manualShapeLabel) {
+          let sumLat = 0, sumLon = 0;
+          const cnt = Math.max(1, ring.length - 1);
+          for (let k = 0; k < cnt; k++) {
+            sumLat += ring[k].lat;
+            sumLon += ring[k].lon;
+          }
+          records.push({
+            title: rawTitle,
+            objType: 0,
+            pts: [{ lat: sumLat / cnt, lon: sumLon / cnt }]
+          });
+        }
       }
     } else if (isLine) {
       // Split polylines / brush strokes longer than MAX_REC_PTS into connected segments
@@ -453,12 +587,16 @@ function buildJrcUchmBuffer(notices) {
           const chunk = cleanCoords.slice(start, start + MAX_REC_PTS);
           if (chunk.length >= 2) {
             records.push({
-              title: `${rawTitle} #${part++}`,
+              title: `${rawTitle.slice(0, 57)} #${part++}`,
               objType: 1,
               pts: chunk
             });
           }
         }
+      }
+      if (!n.isManualUserChart || n.manualShapeLabel) {
+        const midPt = cleanCoords[Math.floor(cleanCoords.length / 2)];
+        records.push({ title: rawTitle, objType: 0, pts: [midPt] });
       }
     } else {
       records.push({ title: rawTitle, objType: 0, pts: [cleanCoords[0]] });

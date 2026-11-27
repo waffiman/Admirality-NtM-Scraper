@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.278" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.279" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10225,7 +10225,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.278" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.279" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -15765,7 +15765,7 @@ body.light-theme .ntm-wx-unified {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.278" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.278';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.279" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.279';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15787,7 +15787,7 @@ body.light-theme .ntm-wx-unified {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.278" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.279" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -17250,13 +17250,14 @@ body.light-theme .ntm-wx-unified {
               <div class="excel-tabs-scroll">
                 <div class="excel-tab-stack" id="warningsTabStack">
                   <div class="excel-tab-flyout ss-warn-filter-panel" id="ssWarnFilterPanel" hidden role="dialog" aria-label="Warnings distance filter">
-                    <div class="ss-warn-flyout-title">Filter by route distance</div>
-                    <div class="ss-warn-flyout-row">
-                      <label for="ssWarnCorrEnable"><input type="checkbox" id="ssWarnCorrEnable" /> Along route only</label>
-                      <span class="ss-warn-flyout-val" id="ssWarnCorrLbl">±25 NM</span>
+                    <label class="ss-warn-flyout-chk" for="ssWarnCorrEnable" title="Show only warnings along the active route">
+                      <input type="checkbox" id="ssWarnCorrEnable" />
+                      <span>Along route</span>
+                    </label>
+                    <div class="ss-warn-flyout-num-row">
+                      <input type="number" class="ss-warn-flyout-num" id="ssWarnCorrNm" min="1" max="250" step="1" value="25" inputmode="numeric" aria-label="Max distance from route in NM" />
+                      <span class="ss-warn-flyout-unit">NM</span>
                     </div>
-                    <input type="range" class="ss-warn-flyout-range" id="ssWarnCorrNm" min="1" max="250" step="1" value="25" aria-label="Max distance from route in NM" />
-                    <div class="ss-warn-flyout-hint">Shows warnings within the selected distance of the active passage track. Requires a loaded route.</div>
                   </div>
                   <button type="button" class="excel-tab" data-overlay="notices" id="tabOverlayNotices" aria-pressed="false" title="Toggle Admiralty NtM &amp; NAVTEX Warnings Overlay">
                     <span class="excel-tab-ico-wrap" aria-hidden="true">
@@ -23597,27 +23598,27 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.278"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.278" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.278"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.278"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.279"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.279" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.279"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.279"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.278",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.279",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.278"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.278"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.278"></script>
-  <script src="assets/Auto NtM Plotting/userchart_draw.js?v=5.278"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.279"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.279"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.279"></script>
+  <script src="assets/Auto NtM Plotting/userchart_draw.js?v=5.279"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.278"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.279"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23690,15 +23691,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.278"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.278"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.279"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.279"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.278"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.278"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.278"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.278"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.278"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.278"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.279"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.279"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.279"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.279"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.279"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.279"></script>
 
 
 
@@ -24412,7 +24413,7 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.278', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.279', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.272 registered, scope:', reg.scope);
             if (navigator.onLine) {

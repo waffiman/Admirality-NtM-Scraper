@@ -8614,8 +8614,9 @@ function renderRouteOnMap(route, shouldFly = true) {
       }
       const stNow = window._sidebarNavtorState;
       if (!stNow || !stNow.editMode) return;
+      const targetMap = leafletMap || window.leafletMap || (marker && marker._map);
       if (typeof window.openRouteWpDeletePopup === "function") {
-        window.openRouteWpDeletePopup(map, marker, idx);
+        window.openRouteWpDeletePopup(targetMap, marker, idx);
       }
     });
 
@@ -16804,7 +16805,8 @@ function convertManualUserChartFeaturesToNotices() {
     const props = f.properties || {};
     const kind = String(props.kind || "draw").toLowerCase();
     const chartName = String(props.chartName || "Manual User Chart").trim();
-    const rawLabel = String(props.text || `${kind.toUpperCase()}-${idx + 1}`).replace(/\r?\n/g, " ").trim();
+    const shapeCaption = String(props.label || "").replace(/\r?\n/g, " ").trim();
+    const rawLabel = String(props.text || shapeCaption || `${kind.toUpperCase()}-${idx + 1}`).replace(/\r?\n/g, " ").trim();
     const idLabel = rawLabel.slice(0, 48) || `DRAW-${idx + 1}`;
 
     if (g.type === "Polygon" && Array.isArray(g.coordinates) && Array.isArray(g.coordinates[0])) {
@@ -22779,17 +22781,30 @@ function initMapContextMenu(map) {
 
 
   map.on("contextmenu", (e) => {
-
     if (e && e.originalEvent) {
-
       e.originalEvent.preventDefault();
-
       e.originalEvent.stopPropagation();
-
     }
-
+    const stNow = window._sidebarNavtorState;
+    if (stNow && stNow.editMode && e && e.latlng && leafletRouteLayer && typeof leafletRouteLayer.eachLayer === "function") {
+      let hitWpMarker = null;
+      let bestPx = 20;
+      const clickPt = map.latLngToContainerPoint(e.latlng);
+      leafletRouteLayer.eachLayer((ly) => {
+        if (!ly || ly._setsailRouteWptIdx == null || typeof ly.getLatLng !== "function") return;
+        const mPt = map.latLngToContainerPoint(ly.getLatLng());
+        const dPx = Math.hypot(clickPt.x - mPt.x, clickPt.y - mPt.y);
+        if (dPx <= bestPx) {
+          bestPx = dPx;
+          hitWpMarker = ly;
+        }
+      });
+      if (hitWpMarker && typeof window.openRouteWpDeletePopup === "function") {
+        window.openRouteWpDeletePopup(map, hitWpMarker, hitWpMarker._setsailRouteWptIdx);
+        return;
+      }
+    }
     openMapContextMenu(e.latlng, map);
-
   });
 
 }
@@ -35288,48 +35303,38 @@ function downloadFurunoUserChartXml(notices, filename) {
 
 
 
+  const getSnap = (item, i, maxL) => {
+    if (typeof window.buildNoticeEcdisSnapshot === "function") {
+      return window.buildNoticeEcdisSnapshot(item, i, maxL || 64);
+    }
+    return String(item.id || item.noticeNumber || `NTM-${i + 1}`).slice(0, maxL || 64);
+  };
+
   (notices || []).forEach((n, idx) => {
     if (n && n.isManualUserChart) return;
-    const name = esc(n.noticeNumber || `NTM-${idx + 1}`);
-
-    const desc = esc((n.title || n.category || "").slice(0, 120));
+    const snapText = getSnap(n, idx, 64);
+    const name = esc(snapText);
+    const desc = esc((n.subject || n.title || n.category || snapText).slice(0, 120));
 
     const coords = Array.isArray(n.coords) && n.coords.length > 0
-
       ? n.coords
-
       : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
-
     if (coords.length === 0) return;
 
-
-
+    const c0 = coords[0];
     if (coords.length >= 3) {
-
       const vtxXml = coords.map((c, i) => `        <vertex id="${i + 1}" latitude="${Number(c.lat).toFixed(6)}" longitude="${Number(c.lon).toFixed(6)}"/>`).join("\n");
-
       areas.push(`    <area name="${name}" description="${desc}">\n      <position>\n${vtxXml}\n      </position>\n      <type checkDanger="1" displayRadar="0" hasNotes="0" notesType="0"/>\n    </area>`);
-
+      points.push(`    <point name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${Number(c0.lat).toFixed(6)}" longitude="${Number(c0.lon).toFixed(6)}"/>\n      </position>\n      <type checkDanger="1" displayRadar="0" shape="1" hasNotes="0" notesType="0"/>\n    </point>`);
     } else if (coords.length === 2) {
-
       const vtxXml = coords.map((c, i) => `        <vertex id="${i + 1}" latitude="${Number(c.lat).toFixed(6)}" longitude="${Number(c.lon).toFixed(6)}"/>`).join("\n");
-
       lines.push(`    <line name="${name}" description="${desc}">\n      <position>\n${vtxXml}\n      </position>\n      <type checkDanger="1" displayRadar="0" hasNotes="0" notesType="0"/>\n    </line>`);
-
+      points.push(`    <point name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${Number(c0.lat).toFixed(6)}" longitude="${Number(c0.lon).toFixed(6)}"/>\n      </position>\n      <type checkDanger="1" displayRadar="0" shape="1" hasNotes="0" notesType="0"/>\n    </point>`);
     } else {
-
-      const c = coords[0];
-
-      points.push(`    <point name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${Number(c.lat).toFixed(6)}" longitude="${Number(c.lon).toFixed(6)}"/>\n      </position>\n      <type checkDanger="1" displayRadar="0" shape="1" hasNotes="0" notesType="0"/>\n    </point>`);
-
+      points.push(`    <point name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${Number(c0.lat).toFixed(6)}" longitude="${Number(c0.lon).toFixed(6)}"/>\n      </position>\n      <type checkDanger="1" displayRadar="0" shape="1" hasNotes="0" notesType="0"/>\n    </point>`);
     }
 
-
-
-    const c0 = coords[0];
-
-    labels.push(`    <label name="${name}" description="${name}">\n      <position>\n        <vertex id="1" latitude="${Number(c0.lat).toFixed(6)}" longitude="${Number(c0.lon).toFixed(6)}"/>\n      </position>\n      <attribute labelStyle="2" labelText="${name}"/>\n      <type checkDanger="0" displayRadar="0"/>\n    </label>`);
-
+    labels.push(`    <label name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${Number(c0.lat).toFixed(6)}" longitude="${Number(c0.lon).toFixed(6)}"/>\n      </position>\n      <attribute labelStyle="2" labelText="${name}"/>\n      <type checkDanger="0" displayRadar="0"/>\n    </label>`);
   });
 
 
@@ -35379,8 +35384,9 @@ function downloadJrcUchFile(notices, filename) {
   const chunks = [];
 
   (notices || []).forEach((n, idx) => {
-
-    const label = String(n.noticeNumber || `NTM ${idx + 1}`).slice(0, 60);
+    const label = (typeof window.buildNoticeEcdisSnapshot === "function"
+      ? window.buildNoticeEcdisSnapshot(n, idx, 60)
+      : String(n.id || n.noticeNumber || `NTM ${idx + 1}`).slice(0, 60));
 
     const coords = Array.isArray(n.coords) && n.coords.length > 0
 
@@ -35437,7 +35443,17 @@ function downloadJrcUchFile(notices, filename) {
       }
 
       chunks.push(rec);
-
+      // Also emit Type 1 = Point Symbol (~WARNSY0) at anchor so real JRC ECDIS shows both warning icon and text snapshot
+      const symRec = new Uint8Array(96);
+      const sdv = new DataView(symRec.buffer);
+      sdv.setUint32(0, 1, true);
+      sdv.setUint32(4, 100000000, true);
+      sdv.setUint32(8, 1000, true);
+      writeAscii(symRec, 12, label, 64);
+      writeAscii(symRec, 76, "~WARNSY0", 12);
+      sdv.setInt32(88, Math.round(Number(coords[0].lat) * SCALE), true);
+      sdv.setInt32(92, Math.round(Number(coords[0].lon) * SCALE), true);
+      chunks.push(symRec);
     } else {
 
       // Type 1 = Point Symbol (96 bytes)
@@ -35596,9 +35612,12 @@ function downloadSperryUpdateFile(notices, filename) {
 
     const objType = isArea ? "CUSTOM_AREA" : "CHINFO09";
 
-    const label = esc(`${n.noticeNumber || `NTM-${idx + 1}`} ${(n.category || "").toUpperCase()}`.trim());
+    const snap = typeof window.buildNoticeEcdisSnapshot === "function"
+      ? window.buildNoticeEcdisSnapshot(n, idx, 68)
+      : `${n.id || n.noticeNumber || `NTM-${idx + 1}`} ${n.subject || n.category || ""}`.trim();
+    const label = esc(snap);
 
-    const note = esc((n.rawText || n.description || n.title || "").slice(0, 950));
+    const note = esc((n.body || n.rawText || n.description || n.subject || n.title || snap).slice(0, 950));
 
     const objId = makeGuid(`sperry-${n.id || idx}-${n.noticeNumber}`);
 
@@ -35867,39 +35886,25 @@ function downloadTransasAizFile(notices, filename) {
   ];
 
   (notices || []).forEach((n, idx) => {
-
-    const id = n.noticeNumber || `NTM-${idx + 1}`;
-
-    const cat = (n.category || "WARNING").toUpperCase();
-
+    const snap = typeof window.buildNoticeEcdisSnapshot === "function"
+      ? window.buildNoticeEcdisSnapshot(n, idx, 68)
+      : String(n.id || n.noticeNumber || `NTM-${idx + 1}`);
+    const cat = (n.category || n.type || "WARNING").toUpperCase();
     const coords = Array.isArray(n.coords) && n.coords.length > 0
-
       ? n.coords
-
       : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
-
     if (coords.length === 0) return;
-
     const objType = coords.length >= 3 ? "AREA" : (coords.length === 2 ? "LINE" : "POINT");
-
     const ptsStr = coords.map(c => `${Number(c.lat).toFixed(6)},${Number(c.lon).toFixed(6)}`).join(";");
-
-    const txt = String(n.title || n.rawText || "").replace(/\r?\n/g, " ").slice(0, 240);
-
+    const txt = String(n.body || n.rawText || n.subject || n.title || snap).replace(/\r?\n/g, " ").slice(0, 240);
     lines.push(`[OBJECT_${idx + 1}]`);
-
-    lines.push(`ID=${id}`);
-
+    lines.push(`ID=${snap}`);
+    lines.push(`LABEL=${snap}`);
     lines.push(`TYPE=${objType}`);
-
     lines.push(`CATEGORY=${cat}`);
-
     lines.push(`DANGER=1`);
-
     lines.push(`VERTICES=${ptsStr}`);
-
-    lines.push(`COMMENT=${txt}`);
-
+    lines.push(`COMMENT=${snap} — ${txt}`);
   });
 
   const aiBytes = new TextEncoder().encode(lines.join("\r\n") + "\r\n");
@@ -35925,27 +35930,20 @@ function downloadSamUserChartFile(notices, filename) {
   const items = [];
 
   (notices || []).forEach((n, idx) => {
-
-    const id = esc(n.noticeNumber || `NTM-${idx + 1}`);
-
+    const snap = typeof window.buildNoticeEcdisSnapshot === "function"
+      ? window.buildNoticeEcdisSnapshot(n, idx, 68)
+      : String(n.id || n.noticeNumber || `NTM-${idx + 1}`);
+    const id = esc(n.id || n.noticeNumber || `NTM-${idx + 1}`);
+    const lbl = esc(snap);
     const cat = esc(n.category || "Navigational Warning");
-
     const coords = Array.isArray(n.coords) && n.coords.length > 0
-
       ? n.coords
-
       : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
-
     if (coords.length === 0) return;
-
     const geomType = coords.length >= 3 ? "POLYGON" : (coords.length === 2 ? "POLYLINE" : "SYMBOL");
-
     const vtx = coords.map((c, i) => `      <Point seq="${i + 1}" lat="${Number(c.lat).toFixed(6)}" lon="${Number(c.lon).toFixed(6)}" />`).join("\n");
-
-    const note = esc((n.rawText || n.title || "").replace(/\r?\n/g, " ").slice(0, 300));
-
-    items.push(`    <UserMapObject id="${id}" type="${geomType}" category="${cat}" dangerHighlight="true">\n      <Label>${id}</Label>\n      <Description>${note}</Description>\n${vtx}\n    </UserMapObject>`);
-
+    const note = esc((n.body || n.rawText || n.subject || n.title || snap).replace(/\r?\n/g, " ").slice(0, 300));
+    items.push(`    <UserMapObject id="${id}" type="${geomType}" category="${cat}" dangerHighlight="true">\n      <Label>${lbl}</Label>\n      <Description>${note}</Description>\n${vtx}\n    </UserMapObject>`);
   });
 
 
@@ -48044,7 +48042,8 @@ if (document.readyState === "loading") {
   window.updateRouteInsertGhost = updateRouteInsertGhost;
   window.hideRouteInsertGhost = hideRouteInsertGhost;
 
-  function openRouteWpDeletePopup(map, marker, idx) {
+  function openRouteWpDeletePopup(mapArg, marker, idx) {
+    const map = mapArg || (marker && marker._map) || window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
     if (!map || !marker || typeof L === "undefined") return;
     const st = window._sidebarNavtorState;
     if (!st || !st.editMode) return;
@@ -48052,8 +48051,18 @@ if (document.readyState === "loading") {
     const box = document.createElement("div");
     box.className = "ss-wp-del-popup";
     box.innerHTML =
-      '<button type="button" class="ss-wp-open-btn">WP' + (idx + 1) + ' Details</button>' +
-      '<button type="button" class="ss-wp-del-btn">Delete WP</button>';
+      '<button type="button" class="ss-wp-open-btn" title="Open WP' + (idx + 1) + ' details in left panel">' +
+        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/>' +
+        '</svg>' +
+        '<span>Details</span>' +
+      '</button>' +
+      '<button type="button" class="ss-wp-del-btn" title="Delete WP' + (idx + 1) + ' from route">' +
+        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>' +
+        '</svg>' +
+        '<span>Delete WP</span>' +
+      '</button>';
     L.DomEvent.disableClickPropagation(box);
 
     const openBtn = box.querySelector(".ss-wp-open-btn");
@@ -48101,6 +48110,12 @@ if (document.readyState === "loading") {
         st.wptIdx = Math.min(idx, rt.waypoints.length - 1);
       }
       try { map.closePopup(); } catch (eC) {}
+      if (typeof renderRouteOnMap === "function") {
+        try {
+          window._setsailLastRouteRenderSig = "";
+          renderRouteOnMap(rt, false);
+        } catch (eR0) {}
+      }
       if (typeof renderNavtorSidebar === "function") renderNavtorSidebar();
       if (typeof showSetSailToast === "function") showSetSailToast("Deleted WP" + (idx + 1), "info");
     };

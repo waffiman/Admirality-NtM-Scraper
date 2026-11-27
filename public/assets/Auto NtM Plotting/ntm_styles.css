@@ -30298,3 +30298,171 @@ html body .ss-uc-draw-rail .ss-uc-tool-lbl {
 #ntmSidebar .ntm-mon-email-drawer[hidden] {
   display: none !important;
 }
+
+/* ── v5.279: (1) Auto-Sized Inline & Above-Line Text Captions on Draw Geometric Shapes ── */
+.ss-uc-shape-label-marker {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+.ss-uc-shape-label-marker.is-editing {
+  pointer-events: auto !important;
+  z-index: 950 !important;
+}
+.ss-uc-shape-label-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.92), 0 0 8px rgba(8, 14, 30, 0.88);
+  transform-origin: center center;
+}
+.ss-uc-shape-label-wrap.is-above-line {
+  transform-origin: bottom center;
+  white-space: nowrap;
+}
+.ss-uc-shape-label-wrap.is-editing {
+  pointer-events: auto !important;
+  background: rgba(8, 15, 34, 0.84);
+  border: 1.5px dashed var(--uc-lbl-color, #38bdf8);
+  border-radius: 6px;
+  padding: 2px 5px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+}
+.ss-uc-shape-label-text {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+.ss-uc-shape-label-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  text-align: center;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+  resize: none !important;
+  overflow: hidden;
+  pointer-events: auto !important;
+}
+
+/* ── v5.279: (2) Warnings "^" Flyout (#ssWarnFilterPanel) Same Width as Warnings Tile + Numeric NM Input ── */
+#warningsTabStack > #ssWarnFilterPanel,
+#excelOverlayDock #warningsTabStack > #ssWarnFilterPanel {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  padding: 7px 8px !important;
+  box-sizing: border-box !important;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#warningsTabStack > #ssWarnFilterPanel[hidden] {
+  display: none !important;
+}
+#ssWarnFilterPanel .ss-warn-flyout-chk {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  cursor: pointer;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#ssWarnFilterPanel .ss-warn-flyout-chk input[type="checkbox"] {
+  margin: 0;
+  width: 13px;
+  height: 13px;
+  accent-color: #f05a36;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+#ssWarnFilterPanel .ss-warn-flyout-num-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+#ssWarnFilterPanel .ss-warn-flyout-num {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 25px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  box-sizing: border-box;
+}
+#ssWarnFilterPanel .ss-warn-flyout-num:focus {
+  border-color: #f05a36;
+  box-shadow: 0 0 0 2px rgba(240, 90, 54, 0.25);
+}
+#ssWarnFilterPanel .ss-warn-flyout-unit {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #f05a36;
+  letter-spacing: 0.03em;
+  flex: 0 0 auto;
+}
+[data-theme="light"] #ssWarnFilterPanel .ss-warn-flyout-chk {
+  color: #0f172a !important;
+}
+[data-theme="light"] #ssWarnFilterPanel .ss-warn-flyout-num {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: rgba(2, 132, 199, 0.4) !important;
+}
+
+/* ── v5.279: (4) Editing Mode WP Right-Click Popup Buttons with Icons + Text ── */
+.ss-wp-del-popup {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  min-width: 122px !important;
+}
+.ss-wp-del-popup .ss-wp-open-btn,
+.ss-wp-del-popup .ss-wp-del-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  width: 100% !important;
+  padding: 7px 11px !important;
+  border-radius: 6px !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+}
+.ss-wp-del-popup .ss-wp-open-btn svg,
+.ss-wp-del-popup .ss-wp-del-btn svg {
+  flex: 0 0 auto;
+}

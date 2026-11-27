@@ -53,6 +53,7 @@
   var SHAPE_CATALOG = [
     { kind: "rect", label: "Rectangle", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1.5"/></svg>' },
     { kind: "circle", label: "Circle", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/></svg>' },
+    { kind: "line", label: "Straight Line", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="4" cy="20" r="2" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/></svg>' },
     { kind: "ellipse", label: "Ellipse", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="9.5" ry="6"/></svg>' },
     { kind: "triangle", label: "Triangle", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 4 21 19 3 19"/></svg>' },
     { kind: "diamond", label: "Diamond", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 3 21 12 12 21 3 12"/></svg>' },
@@ -68,6 +69,7 @@
     shapeKind: "rect",
     color: "#f05a36",
     selectedFeatureId: null,
+    editingLabelFeatureId: null,
     draftPts: [],
     draftLayer: null,
     mapHandlersBound: false,
@@ -79,6 +81,7 @@
   };
 
   var layerById = Object.create(null);
+  var labelLayerById = Object.create(null);
 
   function uid() {
     return "uc_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
@@ -488,12 +491,320 @@
     window.addEventListener("mouseup", onUp, true);
   }
 
-  function rebuildMapLayers(focusTextId) {
+  /* ── Auto-Sized Inline / Above-Line Captions for Geometric Shapes ── */
+  function computeShapeLabelLayout(f) {
+    var m = map();
+    if (!m || !f || !f.geometry) return null;
+    var g = f.geometry;
+    var props = f.properties || {};
+    var kind = String(props.kind || "").toLowerCase();
+    if (kind === "text") return null;
+
+    var labelText = String(props.label != null ? props.label : "");
+    var charCount = Math.max(4, labelText.trim().length || 6);
+
+    // 1. Circle -> Fit inside circle
+    if (g.type === "Point" && kind === "circle" && Number.isFinite(props.radiusM)) {
+      var cLl = L.latLng(g.coordinates[1], g.coordinates[0]);
+      var cPt = m.latLngToContainerPoint(cLl);
+      var edgeLl = L.latLng(cLl.lat, cLl.lng + (props.radiusM / (111320 * Math.max(0.1, Math.cos(cLl.lat * Math.PI / 180)))));
+      var edgePt = m.latLngToContainerPoint(edgeLl);
+      var radPx = Math.max(12, Math.hypot(edgePt.x - cPt.x, edgePt.y - cPt.y));
+      var boxW = Math.max(36, Math.round(radPx * 1.48));
+      var boxH = Math.max(18, Math.round(radPx * 1.25));
+      var fsByBox = Math.min(boxW * 0.22, boxH * 0.38);
+      var fsByChars = (boxW * 1.35) / Math.max(4, Math.sqrt(charCount) * 1.85);
+      var fontSize = Math.round(Math.max(8, Math.min(34, Math.min(fsByBox, fsByChars))));
+      return {
+        latlng: cLl,
+        placement: "inside",
+        angleDeg: 0,
+        boxW: boxW,
+        boxH: boxH,
+        fontSize: fontSize
+      };
+    }
+
+    // 2. Closed Polygon / Shape -> Fit inside shape area
+    if (g.type === "Polygon" && Array.isArray(g.coordinates) && Array.isArray(g.coordinates[0])) {
+      var ring = g.coordinates[0];
+      if (ring.length < 3) return null;
+      var minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+      var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      ring.forEach(function (c) {
+        if (c[1] < minLat) minLat = c[1];
+        if (c[1] > maxLat) maxLat = c[1];
+        if (c[0] < minLon) minLon = c[0];
+        if (c[0] > maxLon) maxLon = c[0];
+        var pt = m.latLngToContainerPoint([c[1], c[0]]);
+        if (pt.x < minX) minX = pt.x;
+        if (pt.x > maxX) maxX = pt.x;
+        if (pt.y < minY) minY = pt.y;
+        if (pt.y > maxY) maxY = pt.y;
+      });
+      var cLat = (minLat + maxLat) * 0.5;
+      var cLon = (minLon + maxLon) * 0.5;
+      if (kind === "triangle") {
+        // Shift centroid slightly toward base so text sits inside the wider lower part of the triangle
+        cLat = minLat + (maxLat - minLat) * 0.38;
+      }
+      var wPx = Math.max(24, maxX - minX);
+      var hPx = Math.max(18, maxY - minY);
+      var factorW = (kind === "triangle" || kind === "diamond") ? 0.62 : (kind === "arrow" ? 0.72 : 0.84);
+      var factorH = (kind === "triangle" || kind === "diamond") ? 0.58 : 0.78;
+      var pBoxW = Math.max(34, Math.round(wPx * factorW));
+      var pBoxH = Math.max(16, Math.round(hPx * factorH));
+      var pFsByBox = Math.min(pBoxW * 0.22, pBoxH * 0.42);
+      var pFsByChars = (pBoxW * 1.35) / Math.max(4, Math.sqrt(charCount) * 1.85);
+      var pFontSize = Math.round(Math.max(8, Math.min(34, Math.min(pFsByBox, pFsByChars))));
+      return {
+        latlng: L.latLng(cLat, cLon),
+        placement: "inside",
+        angleDeg: 0,
+        boxW: pBoxW,
+        boxH: pBoxH,
+        fontSize: pFontSize
+      };
+    }
+
+    // 3. LineString -> Place above the line, sized to line length
+    if (g.type === "LineString" && Array.isArray(g.coordinates) && g.coordinates.length >= 2) {
+      var coords = g.coordinates;
+      var pts = coords.map(function (c) { return m.latLngToContainerPoint([c[1], c[0]]); });
+      var totalPx = 0;
+      var segLens = [];
+      for (var i = 0; i < pts.length - 1; i++) {
+        var sl = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+        segLens.push(sl);
+        totalPx += sl;
+      }
+      var halfPx = totalPx * 0.5;
+      var acc = 0;
+      var midIdx = 0;
+      var segFrac = 0.5;
+      for (var j = 0; j < segLens.length; j++) {
+        if (acc + segLens[j] >= halfPx || j === segLens.length - 1) {
+          midIdx = j;
+          segFrac = segLens[j] > 1e-3 ? (halfPx - acc) / segLens[j] : 0.5;
+          break;
+        }
+        acc += segLens[j];
+      }
+      var pA = pts[midIdx];
+      var pB = pts[Math.min(pts.length - 1, midIdx + 1)];
+      var midPt = L.point(pA.x + (pB.x - pA.x) * segFrac, pA.y + (pB.y - pA.y) * segFrac);
+      var midLl = m.containerPointToLatLng(midPt);
+      var dx = pB.x - pA.x;
+      var dy = pB.y - pA.y;
+      var ang = Math.atan2(dy, dx) * (180 / Math.PI);
+      if (ang > 90) ang -= 180;
+      if (ang < -90) ang += 180;
+      var lBoxW = Math.max(48, Math.round(Math.min(340, Math.max(60, totalPx * 0.86))));
+      var lFsByLen = totalPx * 0.12;
+      var lFsByChars = (lBoxW * 1.15) / Math.max(5, charCount * 0.62);
+      var lFontSize = Math.round(Math.max(9, Math.min(26, Math.min(lFsByLen, lFsByChars))));
+      return {
+        latlng: midLl,
+        placement: "above-line",
+        angleDeg: Math.round(ang * 10) / 10,
+        boxW: lBoxW,
+        boxH: Math.max(18, Math.round(lFontSize * 1.45)),
+        fontSize: lFontSize
+      };
+    }
+
+    return null;
+  }
+
+  function buildShapeLabelHtml(f, layout, isEditing) {
+    var props = (f && f.properties) || {};
+    var fId = props.id || (f && f.id) || "";
+    var color = props.color || state.color || "#f05a36";
+    var textVal = String(props.label != null ? props.label : "");
+    var isAbove = layout.placement === "above-line";
+    var lineH = Math.max(11, Math.round(layout.fontSize * 1.24));
+    var rotTransform = isAbove
+      ? "translate(-50%, -100%) rotate(" + (layout.angleDeg || 0) + "deg) translateY(-6px)"
+      : "translate(-50%, -50%)";
+
+    if (isEditing) {
+      return (
+        '<div class="ss-uc-shape-label-wrap is-editing' + (isAbove ? " is-above-line" : " is-inside") + '" ' +
+          'data-uc-label-for="' + escapeHtml(fId) + '" ' +
+          'style="width:' + layout.boxW + 'px;max-height:' + Math.max(24, layout.boxH) + 'px;transform:' + rotTransform + ';--uc-lbl-color:' + escapeHtml(color) + ';">' +
+          '<textarea class="ss-uc-shape-label-input" data-uc-label-for="' + escapeHtml(fId) + '" rows="1" spellcheck="false" placeholder="Type label…" ' +
+            'style="color:' + escapeHtml(color) + ';font-size:' + layout.fontSize + 'px;line-height:' + lineH + 'px;width:100%;">' +
+            escapeHtml(textVal) +
+          '</textarea>' +
+        '</div>'
+      );
+    }
+
+    return (
+      '<div class="ss-uc-shape-label-wrap' + (isAbove ? " is-above-line" : " is-inside") + '" ' +
+        'data-uc-label-for="' + escapeHtml(fId) + '" ' +
+        'style="width:' + layout.boxW + 'px;max-height:' + Math.max(20, layout.boxH) + 'px;transform:' + rotTransform + ';color:' + escapeHtml(color) + ';font-size:' + layout.fontSize + 'px;line-height:' + lineH + 'px;">' +
+        '<span class="ss-uc-shape-label-text">' + escapeHtml(textVal) + '</span>' +
+      '</div>'
+    );
+  }
+
+  function createOrUpdateShapeLabelMarker(f, group, focusLabelId) {
+    var m = map();
+    if (!m || !global.L || !f || !f.geometry) return null;
+    var props = f.properties || {};
+    if (props.kind === "text") return null;
+    var fId = props.id || f.id;
+    var isEditing = state.editingLabelFeatureId === fId;
+    var hasLabel = Boolean(props.label && String(props.label).trim().length > 0);
+
+    if (!isEditing && !hasLabel) {
+      if (labelLayerById[fId]) {
+        try {
+          if (group) group.removeLayer(labelLayerById[fId]);
+          else m.removeLayer(labelLayerById[fId]);
+        } catch (eR) {}
+        delete labelLayerById[fId];
+      }
+      return null;
+    }
+
+    var layout = computeShapeLabelLayout(f);
+    if (!layout || !layout.latlng) return null;
+    var html = buildShapeLabelHtml(f, layout, isEditing);
+    var existing = labelLayerById[fId];
+
+    if (existing && !isEditing && focusLabelId !== fId) {
+      existing.setLatLng(layout.latlng);
+      var el0 = existing.getElement && existing.getElement();
+      if (el0) {
+        el0.innerHTML = html;
+        el0.style.pointerEvents = "none";
+      } else {
+        existing.setIcon(L.divIcon({
+          className: "ss-uc-shape-label-marker",
+          html: html,
+          iconSize: null
+        }));
+      }
+      return existing;
+    }
+
+    if (existing) {
+      try {
+        if (group) group.removeLayer(existing);
+        else m.removeLayer(existing);
+      } catch (eRm) {}
+      delete labelLayerById[fId];
+    }
+
+    var marker = L.marker(layout.latlng, {
+      pane: PANE,
+      interactive: isEditing,
+      keyboard: false,
+      icon: L.divIcon({
+        className: "ss-uc-shape-label-marker" + (isEditing ? " is-editing" : ""),
+        html: html,
+        iconSize: null
+      })
+    });
+    labelLayerById[fId] = marker;
+    if (group) group.addLayer(marker);
+    else m.addLayer(marker);
+
+    var el = marker.getElement && marker.getElement();
+    if (el) {
+      el.style.pointerEvents = isEditing ? "auto" : "none";
+    }
+
+    if (isEditing) {
+      wireShapeLabelEditorEvents(marker, f);
+      if (focusLabelId === fId) {
+        setTimeout(function () {
+          try {
+            var mEl = marker.getElement && marker.getElement();
+            var inp = mEl && mEl.querySelector(".ss-uc-shape-label-input");
+            if (inp) {
+              inp.focus();
+              var len = inp.value.length;
+              if (typeof inp.setSelectionRange === "function") inp.setSelectionRange(len, len);
+            }
+          } catch (eF) {}
+        }, 20);
+      }
+    }
+    return marker;
+  }
+
+  function wireShapeLabelEditorEvents(marker, f) {
+    var el = marker.getElement && marker.getElement();
+    if (!el) return;
+    var inp = el.querySelector(".ss-uc-shape-label-input");
+    var wrap = el.querySelector(".ss-uc-shape-label-wrap");
+    if (!inp || inp.dataset.ssWired === "1") return;
+    inp.dataset.ssWired = "1";
+    var fId = (f.properties && f.properties.id) || f.id;
+
+    ["mousedown", "click", "dblclick", "pointerdown"].forEach(function (evName) {
+      inp.addEventListener(evName, function (ev) {
+        ev.stopPropagation();
+      });
+    });
+
+    inp.addEventListener("input", function () {
+      f.properties = f.properties || {};
+      f.properties.label = inp.value;
+      persist();
+      var layout = computeShapeLabelLayout(f);
+      if (layout) {
+        var lineH = Math.max(11, Math.round(layout.fontSize * 1.24));
+        inp.style.fontSize = layout.fontSize + "px";
+        inp.style.lineHeight = lineH + "px";
+        if (wrap) {
+          wrap.style.width = layout.boxW + "px";
+          wrap.style.maxHeight = Math.max(24, layout.boxH) + "px";
+        }
+      }
+    });
+
+    inp.addEventListener("keydown", function (ev) {
+      ev.stopPropagation();
+      if (ev.key === "Enter" && !ev.shiftKey) {
+        ev.preventDefault();
+        f.properties = f.properties || {};
+        f.properties.label = String(inp.value || "").trim();
+        state.editingLabelFeatureId = null;
+        persist();
+        rebuildMapLayers();
+      } else if (ev.key === "Escape") {
+        ev.preventDefault();
+        f.properties = f.properties || {};
+        f.properties.label = String(inp.value || "").trim();
+        state.editingLabelFeatureId = null;
+        persist();
+        rebuildMapLayers();
+      }
+    });
+
+    inp.addEventListener("blur", function () {
+      if (state.editingLabelFeatureId !== fId) return;
+      f.properties = f.properties || {};
+      f.properties.label = String(inp.value || "").trim();
+      state.editingLabelFeatureId = null;
+      persist();
+      setTimeout(function () {
+        rebuildMapLayers();
+      }, 15);
+    });
+  }
+
+  function rebuildMapLayers(focusTextId, focusShapeLabelId) {
     var m = map();
     var group = getRenderGroup();
     if (!m || !group) return;
     group.clearLayers();
     layerById = Object.create(null);
+    labelLayerById = Object.create(null);
 
     if (!state.overlayOn) {
       if (m.hasLayer(group)) m.removeLayer(group);
@@ -524,6 +835,8 @@
             } catch (eF) {}
           }, 25);
         }
+      } else {
+        createOrUpdateShapeLabelMarker(f, group, focusShapeLabelId);
       }
 
       try {
@@ -535,7 +848,7 @@
     var pane = m.getPane(PANE);
     if (pane) {
       pane.style.pointerEvents = "none";
-      Array.prototype.forEach.call(pane.querySelectorAll("path, .ss-uc-text-marker, .ss-uc-textbox"), function (node) {
+      Array.prototype.forEach.call(pane.querySelectorAll("path, .ss-uc-text-marker, .ss-uc-textbox, .ss-uc-shape-label-marker.is-editing, .ss-uc-shape-label-input"), function (node) {
         node.style.pointerEvents = "auto";
       });
     }
@@ -659,6 +972,21 @@
     var west = Math.min(p1.lng, p2.lng);
     var east = Math.max(p1.lng, p2.lng);
     var id = uid();
+
+    if (kind === "line") {
+      var lA = (dx < 8 && dy < 8)
+        ? m.containerPointToLatLng([ptA.x - 55, ptA.y + 35])
+        : m.containerPointToLatLng(ptA);
+      var lB = (dx < 8 && dy < 8)
+        ? m.containerPointToLatLng([ptA.x + 55, ptA.y - 35])
+        : m.containerPointToLatLng(ptB);
+      return {
+        type: "Feature",
+        id: id,
+        geometry: { type: "LineString", coordinates: [latLngToCoord(lA), latLngToCoord(lB)] },
+        properties: { id: id, kind: "line", color: state.color }
+      };
+    }
 
     if (kind === "circle") {
       var centerLl = (dx < 8 && dy < 8)
@@ -997,6 +1325,7 @@
         layer.setRadius(Math.max(5, Number(f.properties.radiusM) || 500));
       }
     }
+    createOrUpdateShapeLabelMarker(f, getRenderGroup(), null);
   }
 
   function finishFreePolygon() {
@@ -1379,11 +1708,55 @@
     }
   }
 
+  function hitTestFeatureForLabelDblClick(pt) {
+    var m = map();
+    var chart = activeChart();
+    if (!m || !chart || !Array.isArray(chart.features)) return null;
+    var direct = hitTestAllFeatures(pt);
+    if (direct && direct.feature && (!direct.feature.properties || direct.feature.properties.kind !== "text")) {
+      return direct;
+    }
+    // Also check within 24px of any LineString or its above-line label center
+    for (var i = chart.features.length - 1; i >= 0; i--) {
+      var f = chart.features[i];
+      if (!f || !f.geometry || (f.properties && f.properties.kind === "text")) continue;
+      var fId = (f.properties && f.properties.id) || f.id;
+      var lay = computeShapeLabelLayout(f);
+      if (lay && lay.latlng) {
+        var cPt = m.latLngToContainerPoint(lay.latlng);
+        if (Math.abs(pt.x - cPt.x) <= lay.boxW * 0.55 && Math.abs(pt.y - cPt.y) <= Math.max(24, lay.boxH * 0.7)) {
+          return { feature: f, id: fId };
+        }
+      }
+      if (f.geometry.type === "LineString" && Array.isArray(f.geometry.coordinates)) {
+        var lPts = f.geometry.coordinates.map(function (c) { return m.latLngToContainerPoint([c[1], c[0]]); });
+        for (var s = 0; s < lPts.length - 1; s++) {
+          if (distToSegmentPx(pt, lPts[s], lPts[s + 1]) <= 24) {
+            return { feature: f, id: fId };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   function onMapDblClick(e) {
     if (!state.overlayOn) return;
-    if (state.tool === "shapes" && state.shapeKind === "polygon") {
+    if (state.tool === "shapes" && state.shapeKind === "polygon" && state.draftPts.length > 0) {
       L.DomEvent.stop(e);
       finishFreePolygon();
+      return;
+    }
+    var m = map();
+    if (!m || !e || !e.originalEvent) return;
+    var pt = m.mouseEventToContainerPoint(e.originalEvent);
+    var hit = hitTestFeatureForLabelDblClick(pt);
+    if (hit && hit.feature && (!hit.feature.properties || hit.feature.properties.kind !== "text")) {
+      L.DomEvent.stop(e);
+      state.selectedFeatureId = hit.id;
+      state.editingLabelFeatureId = hit.id;
+      setTool("select");
+      rebuildMapLayers(null, hit.id);
     }
   }
 
@@ -1394,6 +1767,9 @@
     m.on("mousemove", onMapMouseMove);
     m.on("click", onMapClick);
     m.on("dblclick", onMapDblClick);
+    m.on("zoomend", function () {
+      if (state.overlayOn) rebuildMapLayers();
+    });
     window.addEventListener("mouseup", onGlobalMouseUp, true);
     state.mapHandlersBound = true;
   }
@@ -1411,11 +1787,8 @@
     } else {
       try { m.dragging.enable(); } catch (e3) {}
     }
-    if (state.tool === "shapes" && state.shapeKind === "polygon") {
-      try { m.doubleClickZoom.disable(); } catch (e4) {}
-    } else {
-      try { m.doubleClickZoom.enable(); } catch (e5) {}
-    }
+    // Always disable map doubleClickZoom while Draw overlay is active so double-clicking a shape opens its label editor
+    try { m.doubleClickZoom.disable(); } catch (e4) {}
   }
 
   function syncMapCursorClasses() {
@@ -1724,7 +2097,7 @@
     persist();
   }
 
-  /* ── Warnings corridor filter panel ── */
+  /* ── Warnings corridor filter panel (same width as Warnings dock tile, numeric NM input) ── */
   function syncWarnFilterUI() {
     var enabled = !!global.ROUTE_CORRIDOR_FILTER_ENABLED;
     var nm = Number(global.ROUTE_CORRIDOR_BUFFER_NM);
@@ -1734,7 +2107,7 @@
     var rng = document.getElementById("ssWarnCorrNm");
     var lbl = document.getElementById("ssWarnCorrLbl");
     if (chk) chk.checked = enabled;
-    if (rng) rng.value = String(nm);
+    if (rng && document.activeElement !== rng) rng.value = String(nm);
     if (lbl) lbl.textContent = "±" + nm + " NM";
   }
 
@@ -1742,7 +2115,8 @@
     var chk = document.getElementById("ssWarnCorrEnable");
     var rng = document.getElementById("ssWarnCorrNm");
     var enabled = !!(chk && chk.checked);
-    var nm = rng ? Number(rng.value) : 25;
+    var rawVal = rng ? String(rng.value || "").trim() : "25";
+    var nm = rawVal === "" ? 25 : Number(rawVal);
     if (!Number.isFinite(nm)) nm = 25;
     nm = Math.max(1, Math.min(250, Math.round(nm)));
     global.ROUTE_CORRIDOR_FILTER_ENABLED = enabled;
@@ -1859,11 +2233,24 @@
       if (chk) chk.addEventListener("change", applyWarnFilterFromPanel);
       if (rng) {
         rng.addEventListener("input", function () {
-          var lbl = document.getElementById("ssWarnCorrLbl");
-          var nm = Number(rng.value) || 25;
-          if (lbl) lbl.textContent = "±" + nm + " NM";
+          var v = String(rng.value || "").trim();
+          if (v !== "" && Number.isFinite(Number(v))) {
+            applyWarnFilterFromPanel();
+          }
         });
-        rng.addEventListener("change", applyWarnFilterFromPanel);
+        rng.addEventListener("change", function () {
+          applyWarnFilterFromPanel();
+          var nm = Number(global.ROUTE_CORRIDOR_BUFFER_NM) || 25;
+          rng.value = String(nm);
+        });
+        rng.addEventListener("keydown", function (ev) {
+          ev.stopPropagation();
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            applyWarnFilterFromPanel();
+            try { rng.blur(); } catch (eB) {}
+          }
+        });
       }
     }
 
