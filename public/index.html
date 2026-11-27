@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.274" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.275" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10225,7 +10225,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.274" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.275" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -15765,7 +15765,7 @@ body.light-theme .ntm-wx-unified {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.274" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.274';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.275" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.275';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15787,7 +15787,7 @@ body.light-theme .ntm-wx-unified {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.274" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.275" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -17128,29 +17128,32 @@ body.light-theme .ntm-wx-unified {
 
             <!-- Manual User Chart draw toolbar (shown when Draw tile is active) -->
             <div class="ss-uc-draw-rail" id="ssUcDrawRail" hidden role="toolbar" aria-label="Manual User Chart tools">
-              <button type="button" class="ss-uc-tool-btn" data-uc-tool="select" title="Select / pan" aria-label="Select">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l7 16 2-6 6-2L4 4z"/></svg>
+              <button type="button" class="ss-uc-tool-btn is-active" data-uc-tool="select" title="Cursor — pan chart, resize shapes on contour, move shapes &amp; text" aria-label="Cursor">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M5 3l14 8.5-6.2 1.8L9.5 19.5 5 3z"/></svg>
+                <span class="ss-uc-tool-lbl">Cursor</span>
               </button>
-              <button type="button" class="ss-uc-tool-btn" data-uc-tool="polyline" title="Line (dbl-click / Enter to finish)" aria-label="Line">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18L18 4"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/><circle cx="18" cy="4" r="1.5" fill="currentColor"/></svg>
+              <button type="button" class="ss-uc-tool-btn" data-uc-tool="brush" title="Brush — hold LMB to draw freehand on chart (map pan locked)" aria-label="Brush">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.4 3.6a2.1 2.1 0 0 1 3 3L12 16l-4 1 1-4 9.4-9.4z"/><path d="M8 16c-2.2 0-3.5 1.3-4 3.5-.3 1.2-1.2 1.5-2 1.5 1.2 1 3 1.5 4.8.8 1.5-.6 2.4-2 2.2-3.8"/></svg>
+                <span class="ss-uc-tool-lbl">Brush</span>
               </button>
-              <button type="button" class="ss-uc-tool-btn" data-uc-tool="polygon" title="Polygon (dbl-click / Enter to finish)" aria-label="Polygon">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 6-3 10H7L4 9l8-6z"/></svg>
+              <button type="button" class="ss-uc-tool-btn" data-uc-tool="shapes" title="Shapes &amp; Polygons — place blocks, drag contour to resize, drag inside to move" aria-label="Shapes">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3.5" width="9.5" height="8.5" rx="1.2"/><circle cx="16.5" cy="16.5" r="4.8"/><polygon points="7.5 13.5 12 21 3 21"/></svg>
+                <span class="ss-uc-tool-lbl">Shapes</span>
               </button>
-              <button type="button" class="ss-uc-tool-btn" data-uc-tool="rect" title="Rectangle (two corners)" aria-label="Rectangle">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>
+              <button type="button" class="ss-uc-tool-btn" data-uc-tool="text" title="Text Box — drag corner for font size, vertical edges for line width, horizontal edges for new lines" aria-label="Text">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" stroke-dasharray="3 2" stroke-width="1.6"/><path d="M7.5 8.5h9M12 8.5v8M9.5 16.5h5"/></svg>
+                <span class="ss-uc-tool-lbl">Text</span>
               </button>
-              <button type="button" class="ss-uc-tool-btn" data-uc-tool="circle" title="Circle (center + edge)" aria-label="Circle">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>
+              <button type="button" class="ss-uc-tool-btn" data-uc-tool="eraser" title="Eraser — touch or sweep across any drawn object to delete it" aria-label="Eraser">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-.8-.8-.8-2 0-2.8L13.6 2.6c.8-.8 2-.8 2.8 0l5 5c.8.8.8 2 0 2.8L12 19.8"/><path d="M6.5 12.5l5 5"/></svg>
+                <span class="ss-uc-tool-lbl">Eraser</span>
               </button>
-              <button type="button" class="ss-uc-tool-btn" data-uc-tool="text" title="Text label" aria-label="Text">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6h14M12 6v12M9 18h6"/></svg>
-              </button>
-              <div class="ss-uc-color-wrap" title="Stroke / fill color">
-                <input type="color" id="ssUcColorInput" value="#f05a36" aria-label="Draw color" />
-              </div>
-              <button type="button" class="ss-uc-tool-btn" data-uc-tool="eraser" title="Eraser — click an object to delete" aria-label="Eraser">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l8-8 6 6-4 4H6l-2-2z"/><path d="M9 19h11"/></svg>
+              <button type="button" class="ss-uc-tool-btn" data-uc-tool="palette" id="ssUcPaletteBtn" title="Color Palette — choose color for brush, shapes &amp; text" aria-label="Color Palette">
+                <span class="ss-uc-palette-ico-wrap">
+                  <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0 0 20c1.7 0 3-1.3 3-3 0-.8-.3-1.5-.8-2-.5-.5-.8-1.2-.8-2 0-1.7 1.3-3 3-3h1.6A4 4 0 0 0 22 8c0-3.3-4.5-6-10-6z"/><circle cx="7.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="11" cy="7.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"/></svg>
+                  <span class="ss-uc-color-dot" id="ssUcColorSwatchDot" style="background:#f05a36;"></span>
+                </span>
+                <span class="ss-uc-tool-lbl">Color</span>
               </button>
             </div>
 
@@ -23594,27 +23597,27 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.274"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.274" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.274"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.274"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.275"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.275" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.275"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.275"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.274",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.275",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.274"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.274"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.274"></script>
-  <script src="assets/Auto NtM Plotting/userchart_draw.js?v=5.274"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.275"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.275"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.275"></script>
+  <script src="assets/Auto NtM Plotting/userchart_draw.js?v=5.275"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.274"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.275"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23687,15 +23690,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.274"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.274"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.275"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.275"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.274"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.274"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.274"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.274"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.274"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.274"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.275"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.275"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.275"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.275"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.275"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.275"></script>
 
 
 
@@ -24409,7 +24412,7 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.274', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.275', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.272 registered, scope:', reg.scope);
             if (navigator.onLine) {

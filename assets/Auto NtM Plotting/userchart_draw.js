@@ -1,6 +1,23 @@
 /**
- * SetSail — Manual User Chart draw layer + Warnings corridor filter panel (v5.264)
- * Transparent Leaflet overlay for shapes/text; multi-layer CRUD in localStorage.
+ * SetSail — Manual User Chart Draw Suite + Warnings Corridor Filter Panel (v5.275)
+ * --------------------------------------------------------------------------------
+ * 6-tool floating eyebrow toolbar (#ssUcDrawRail):
+ *   1. Cursor (select)  — Default on Draw activation; normal arrow cursor; pan map;
+ *                         resize shapes by holding LMB on contour; move shapes/text
+ *                         by holding LMB on interior area.
+ *   2. Brush (brush)    — Brush cursor; map panning disabled; freehand draw with LMB.
+ *   3. Shapes (shapes)  — Opens visual block/shape/polygon picker (Rectangle, Circle,
+ *                         Ellipse, Triangle, Diamond, Hexagon, Arrow, Polygon);
+ *                         hold LMB on contour to resize, hold LMB on interior to move.
+ *   4. Text (text)      — Places interactive text field on chart:
+ *                         - Drag corner to scale font size up/down;
+ *                         - Drag vertical (left/right) borders to widen/narrow 1 line;
+ *                         - Drag horizontal (top/bottom) borders to add/remove lines;
+ *                         - Drag interior/handle to move across chart.
+ *   5. Eraser (eraser)  — Eraser cursor; touching (click or LMB sweep) any drawn
+ *                         object deletes it immediately.
+ *   6. Color (palette)  — Opens color palette popover (12 marine/ECDIS swatches +
+ *                         custom color picker); colors brush, shapes/blocks, and text.
  */
 (function (global) {
   "use strict";
@@ -8,17 +25,52 @@
   var STORAGE_KEY = "setsail_usercharts_v1";
   var PANE = "userChartPane";
   var PANE_Z = 860;
+  var BORDER_HIT_PX = 11;
+
+  var PALETTE_COLORS = [
+    { hex: "#f05a36", name: "Coral" },
+    { hex: "#ef4444", name: "Alarm Red" },
+    { hex: "#f59e0b", name: "Amber" },
+    { hex: "#facc15", name: "Yellow" },
+    { hex: "#22c55e", name: "Green" },
+    { hex: "#10b981", name: "Teal" },
+    { hex: "#06b6d4", name: "Cyan" },
+    { hex: "#38bdf8", name: "Sky Blue" },
+    { hex: "#3b82f6", name: "Royal Blue" },
+    { hex: "#a855f7", name: "Purple" },
+    { hex: "#f8fafc", name: "White" },
+    { hex: "#0f172a", name: "Navy Black" }
+  ];
+
+  var SHAPE_CATALOG = [
+    { kind: "rect", label: "Rectangle", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1.5"/></svg>' },
+    { kind: "circle", label: "Circle", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/></svg>' },
+    { kind: "ellipse", label: "Ellipse", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="9.5" ry="6"/></svg>' },
+    { kind: "triangle", label: "Triangle", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 4 21 19 3 19"/></svg>' },
+    { kind: "diamond", label: "Diamond", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 3 21 12 12 21 3 12"/></svg>' },
+    { kind: "hexagon", label: "Hexagon", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="7 4 17 4 22 12 17 20 7 20 2 12"/></svg>' },
+    { kind: "arrow", label: "Arrow Block", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="3 9 13 9 13 5 21 12 13 19 13 15 3 15"/></svg>' },
+    { kind: "polygon", label: "Free Polygon", icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 5.5-2.8 11H6.8L4 8.5 12 3z"/><circle cx="12" cy="3" r="1.6" fill="currentColor"/><circle cx="20" cy="8.5" r="1.6" fill="currentColor"/><circle cx="17.2" cy="19.5" r="1.6" fill="currentColor"/><circle cx="6.8" cy="19.5" r="1.6" fill="currentColor"/><circle cx="4" cy="8.5" r="1.6" fill="currentColor"/></svg>' }
+  ];
 
   var state = {
     charts: [],
     activeId: null,
     tool: "select",
+    shapeKind: "rect",
     color: "#f05a36",
+    selectedFeatureId: null,
     draftPts: [],
     draftLayer: null,
     mapHandlersBound: false,
-    overlayOn: false
+    overlayOn: false,
+    shapesMenuOpen: false,
+    paletteOpen: false,
+    action: null, // active drag/resize/brush/erase/create session
+    suppressNextClick: false
   };
+
+  var layerById = Object.create(null);
 
   function uid() {
     return "uc_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
@@ -56,6 +108,14 @@
     return state.charts.find(function (c) { return c.id === state.activeId; }) || state.charts[0];
   }
 
+  function findFeatureById(id) {
+    var chart = activeChart();
+    if (!chart || !id) return null;
+    return (chart.features || []).find(function (f) {
+      return (f.properties && f.properties.id) === id || f.id === id;
+    }) || null;
+  }
+
   function ensurePane(m) {
     if (!m || !m.createPane) return;
     if (!m.getPane(PANE)) {
@@ -68,24 +128,69 @@
     }
   }
 
-  function featureStyle(color) {
+  function featureStyle(color, isSelected, kind) {
     var c = color || state.color || "#f05a36";
+    var isBrush = kind === "brush" || kind === "polyline";
     return {
       color: c,
-      weight: 2.5,
-      opacity: 0.95,
+      weight: isSelected ? 3.8 : (isBrush ? 3.2 : 2.6),
+      opacity: 0.96,
       fillColor: c,
-      fillOpacity: 0.18
+      fillOpacity: isBrush ? 0 : (isSelected ? 0.28 : 0.18),
+      lineCap: "round",
+      lineJoin: "round"
     };
+  }
+
+  function escapeHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function buildTextBoxHtml(f) {
+    var props = (f && f.properties) || {};
+    var id = props.id || (f && f.id) || "";
+    var color = props.color || state.color || "#f05a36";
+    var fontSize = Math.max(10, Math.min(64, Number(props.fontSize) || 15));
+    var widthPx = Math.max(64, Math.min(680, Number(props.widthPx) || 148));
+    var rows = Math.max(1, Math.min(20, Number(props.rows) || 1));
+    var lineH = Math.round(fontSize * 1.32);
+    var heightPx = Math.max(lineH + 10, rows * lineH + 10);
+    var isSel = state.selectedFeatureId === id;
+    var textVal = String(props.text != null ? props.text : "Text");
+
+    return (
+      '<div class="ss-uc-textbox' + (isSel ? " is-selected" : "") + '" data-uc-id="' + escapeHtml(id) + '" style="--uc-tb-color:' + escapeHtml(color) + ';width:' + widthPx + 'px;">' +
+        '<div class="ss-uc-tb-movebar" data-tb-handle="move" title="Hold LMB to move text box"><span>⠿</span></div>' +
+        '<textarea class="ss-uc-tb-input" data-uc-id="' + escapeHtml(id) + '" rows="' + rows + '" spellcheck="false" placeholder="Type text…" ' +
+          'style="color:' + escapeHtml(color) + ';font-size:' + fontSize + 'px;line-height:' + lineH + 'px;width:' + widthPx + 'px;height:' + heightPx + 'px;">' +
+          escapeHtml(textVal) +
+        '</textarea>' +
+        '<span class="ss-uc-tb-edge ss-uc-tb-edge-l" data-tb-handle="edge-l" title="Drag vertical border to expand/shrink line width"></span>' +
+        '<span class="ss-uc-tb-edge ss-uc-tb-edge-r" data-tb-handle="edge-r" title="Drag vertical border to expand/shrink line width"></span>' +
+        '<span class="ss-uc-tb-edge ss-uc-tb-edge-t" data-tb-handle="edge-t" title="Drag horizontal border to add/remove lines"></span>' +
+        '<span class="ss-uc-tb-edge ss-uc-tb-edge-b" data-tb-handle="edge-b" title="Drag horizontal border to add/remove lines"></span>' +
+        '<span class="ss-uc-tb-corner ss-uc-tb-corner-tl" data-tb-handle="corner-tl" title="Drag corner to scale text size"></span>' +
+        '<span class="ss-uc-tb-corner ss-uc-tb-corner-tr" data-tb-handle="corner-tr" title="Drag corner to scale text size"></span>' +
+        '<span class="ss-uc-tb-corner ss-uc-tb-corner-bl" data-tb-handle="corner-bl" title="Drag corner to scale text size"></span>' +
+        '<span class="ss-uc-tb-corner ss-uc-tb-corner-br" data-tb-handle="corner-br" title="Drag corner to scale text size"></span>' +
+      '</div>'
+    );
   }
 
   function leafletFromFeature(f) {
     if (!global.L || !f || !f.geometry) return null;
     var g = f.geometry;
     var props = f.properties || {};
+    var fId = props.id || f.id;
     var color = props.color || state.color;
-    var style = featureStyle(color);
+    var isSel = state.selectedFeatureId === fId;
+    var style = featureStyle(color, isSel, props.kind);
     var layer = null;
+
     if (g.type === "LineString") {
       layer = L.polyline(
         (g.coordinates || []).map(function (c) { return [c[1], c[0]]; }),
@@ -102,36 +207,30 @@
       var lon = g.coordinates[0];
       if (props.kind === "circle" && Number.isFinite(props.radiusM)) {
         layer = L.circle([lat, lon], {
-          radius: props.radiusM,
+          radius: Math.max(5, Number(props.radiusM) || 500),
           pane: PANE,
           color: color,
-          weight: 2.5,
-          opacity: 0.95,
+          weight: isSel ? 3.8 : 2.6,
+          opacity: 0.96,
           fillColor: color,
-          fillOpacity: 0.15
+          fillOpacity: isSel ? 0.26 : 0.16
         });
       } else if (props.kind === "text") {
         layer = L.marker([lat, lon], {
           pane: PANE,
           interactive: true,
+          keyboard: false,
           icon: L.divIcon({
             className: "ss-uc-text-marker",
-            html:
-              '<div class="ss-uc-text-label" style="color:' +
-              color +
-              ';">' +
-              String(props.text || "")
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;") +
-              "</div>",
-            iconSize: null
+            html: buildTextBoxHtml(f),
+            iconSize: null,
+            iconAnchor: [14, 14]
           })
         });
       } else {
         layer = L.circleMarker([lat, lon], {
           pane: PANE,
-          radius: 5,
+          radius: 6,
           color: color,
           weight: 2,
           fillColor: color,
@@ -140,7 +239,7 @@
       }
     }
     if (layer) {
-      layer._ssUcId = props.id || f.id;
+      layer._ssUcId = fId;
       layer.options = layer.options || {};
       layer.options.interactive = true;
       if (layer._path) layer._path.style.pointerEvents = "auto";
@@ -167,11 +266,220 @@
     return m._ssUcGroup;
   }
 
-  function rebuildMapLayers() {
+  function wireTextBoxEvents(marker, f) {
+    var el = marker.getElement && marker.getElement();
+    if (!el) return;
+    var box = el.querySelector(".ss-uc-textbox");
+    if (!box || box.dataset.ssWired === "1") return;
+    box.dataset.ssWired = "1";
+    var fId = (f.properties && f.properties.id) || f.id;
+    var ta = box.querySelector(".ss-uc-tb-input");
+
+    if (ta) {
+      ta.addEventListener("mousedown", function (ev) {
+        if (state.tool === "eraser") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          removeFeatureById(fId);
+          return;
+        }
+        state.selectedFeatureId = fId;
+        box.classList.add("is-selected");
+        if (state.tool === "select") {
+          // In Cursor-Arrow mode: holding LMB on the interior moves the text box;
+          // double-click or simple click without drag focuses to edit text.
+          startTextBoxInteriorDragOrFocus(ev, f, marker, box, ta);
+          return;
+        }
+        ev.stopPropagation();
+      });
+
+      ta.addEventListener("input", function () {
+        f.properties = f.properties || {};
+        f.properties.text = ta.value;
+        persist();
+      });
+
+      ta.addEventListener("focus", function () {
+        state.selectedFeatureId = fId;
+        box.classList.add("is-selected");
+      });
+    }
+
+    box.addEventListener("mousedown", function (ev) {
+      if (ev.button !== 0) return;
+      if (state.tool === "eraser") {
+        ev.preventDefault();
+        ev.stopPropagation();
+        removeFeatureById(fId);
+        return;
+      }
+      var handleEl = ev.target.closest("[data-tb-handle]");
+      if (!handleEl) return;
+      var handle = handleEl.getAttribute("data-tb-handle");
+      ev.preventDefault();
+      ev.stopPropagation();
+      state.selectedFeatureId = fId;
+      box.classList.add("is-selected");
+      startTextBoxHandleAction(ev, f, marker, box, ta, handle);
+    });
+
+    box.addEventListener("mouseover", function (ev) {
+      if (state.tool === "eraser" && (ev.buttons & 1) === 1) {
+        removeFeatureById(fId);
+      }
+    });
+  }
+
+  function startTextBoxInteriorDragOrFocus(ev, f, marker, box, ta) {
+    if (ev.button !== 0) return;
+    var m = map();
+    if (!m) return;
+    ev.stopPropagation();
+    var startX = ev.clientX;
+    var startY = ev.clientY;
+    var origLat = f.geometry.coordinates[1];
+    var origLon = f.geometry.coordinates[0];
+    var origPt = m.latLngToContainerPoint([origLat, origLon]);
+    var moved = false;
+
+    try { m.dragging.disable(); } catch (e0) {}
+
+    function onMove(mv) {
+      var dx = mv.clientX - startX;
+      var dy = mv.clientY - startY;
+      if (!moved && Math.hypot(dx, dy) > 4) {
+        moved = true;
+        try { ta.blur(); } catch (eB) {}
+      }
+      if (!moved) return;
+      var nextLl = m.containerPointToLatLng([origPt.x + dx, origPt.y + dy]);
+      f.geometry.coordinates = [Number(nextLl.lng), Number(nextLl.lat)];
+      marker.setLatLng(nextLl);
+    }
+
+    function onUp() {
+      window.removeEventListener("mousemove", onMove, true);
+      window.removeEventListener("mouseup", onUp, true);
+      syncMapDragState();
+      if (moved) {
+        persist();
+      } else {
+        try { ta.focus(); } catch (eF) {}
+      }
+    }
+
+    window.addEventListener("mousemove", onMove, true);
+    window.addEventListener("mouseup", onUp, true);
+  }
+
+  function startTextBoxHandleAction(ev, f, marker, box, ta, handle) {
+    var m = map();
+    if (!m) return;
+    f.properties = f.properties || {};
+    var startX = ev.clientX;
+    var startY = ev.clientY;
+    var origFontSize = Math.max(10, Math.min(64, Number(f.properties.fontSize) || 15));
+    var origWidth = Math.max(64, Math.min(680, Number(f.properties.widthPx) || 148));
+    var origRows = Math.max(1, Math.min(20, Number(f.properties.rows) || 1));
+    var origLat = f.geometry.coordinates[1];
+    var origLon = f.geometry.coordinates[0];
+    var origPt = m.latLngToContainerPoint([origLat, origLon]);
+
+    try { m.dragging.disable(); } catch (e0) {}
+
+    function applyBoxDom() {
+      var fs = Math.max(10, Math.min(64, Number(f.properties.fontSize) || 15));
+      var wp = Math.max(64, Math.min(680, Number(f.properties.widthPx) || 148));
+      var rw = Math.max(1, Math.min(20, Number(f.properties.rows) || 1));
+      var lh = Math.round(fs * 1.32);
+      var hp = Math.max(lh + 10, rw * lh + 10);
+      box.style.width = wp + "px";
+      if (ta) {
+        ta.rows = rw;
+        ta.style.fontSize = fs + "px";
+        ta.style.lineHeight = lh + "px";
+        ta.style.width = wp + "px";
+        ta.style.height = hp + "px";
+      }
+    }
+
+    function onMove(mv) {
+      var dx = mv.clientX - startX;
+      var dy = mv.clientY - startY;
+
+      if (handle === "move") {
+        var nextLl = m.containerPointToLatLng([origPt.x + dx, origPt.y + dy]);
+        f.geometry.coordinates = [Number(nextLl.lng), Number(nextLl.lat)];
+        marker.setLatLng(nextLl);
+        return;
+      }
+
+      if (handle === "edge-r" || handle === "edge-l") {
+        // Vertical borders: expand/shrink single-line width
+        var signW = handle === "edge-r" ? 1 : -1;
+        f.properties.widthPx = Math.round(Math.max(64, Math.min(680, origWidth + signW * dx)));
+        applyBoxDom();
+        return;
+      }
+
+      if (handle === "edge-b" || handle === "edge-t") {
+        // Horizontal borders: add/remove new lines (rows)
+        var signH = handle === "edge-b" ? 1 : -1;
+        var lh = Math.max(14, Math.round(origFontSize * 1.32));
+        var deltaRows = Math.round((signH * dy) / lh);
+        var nextRows = Math.max(1, Math.min(20, origRows + deltaRows));
+        if (nextRows !== f.properties.rows) {
+          f.properties.rows = nextRows;
+          if (ta) {
+            var curLines = String(ta.value || "").split("\n");
+            while (curLines.length < nextRows) {
+              curLines.push("");
+            }
+            if (curLines.length > nextRows) {
+              while (curLines.length > nextRows && curLines[curLines.length - 1] === "") {
+                curLines.pop();
+              }
+            }
+            ta.value = curLines.join("\n");
+            f.properties.text = ta.value;
+          }
+          applyBoxDom();
+        }
+        return;
+      }
+
+      if (handle && handle.indexOf("corner-") === 0) {
+        // Corner handles: increase/decrease text font size
+        var sx = (handle === "corner-tr" || handle === "corner-br") ? 1 : -1;
+        var sy = (handle === "corner-bl" || handle === "corner-br") ? 1 : -1;
+        var diagDelta = (sx * dx + sy * dy) * 0.5;
+        var nextFs = Math.round(Math.max(10, Math.min(64, origFontSize + diagDelta * 0.18)));
+        var scaleRatio = nextFs / origFontSize;
+        f.properties.fontSize = nextFs;
+        f.properties.widthPx = Math.round(Math.max(64, Math.min(680, origWidth * scaleRatio)));
+        applyBoxDom();
+      }
+    }
+
+    function onUp() {
+      window.removeEventListener("mousemove", onMove, true);
+      window.removeEventListener("mouseup", onUp, true);
+      syncMapDragState();
+      persist();
+    }
+
+    window.addEventListener("mousemove", onMove, true);
+    window.addEventListener("mouseup", onUp, true);
+  }
+
+  function rebuildMapLayers(focusTextId) {
     var m = map();
     var group = getRenderGroup();
     if (!m || !group) return;
     group.clearLayers();
+    layerById = Object.create(null);
+
     if (!state.overlayOn) {
       if (m.hasLayer(group)) m.removeLayer(group);
       return;
@@ -179,25 +487,40 @@
     if (!m.hasLayer(group)) m.addLayer(group);
     var chart = activeChart();
     if (!chart) return;
+
     (chart.features || []).forEach(function (f) {
       var layer = leafletFromFeature(f);
       if (!layer) return;
-      layer.on("click", function (ev) {
-        if (state.tool !== "eraser") return;
-        L.DomEvent.stopPropagation(ev);
-        removeFeatureById(layer._ssUcId);
-      });
+      var fId = (f.properties && f.properties.id) || f.id;
+      layerById[fId] = layer;
       group.addLayer(layer);
+
+      if (f.properties && f.properties.kind === "text") {
+        wireTextBoxEvents(layer, f);
+        if (focusTextId && focusTextId === fId) {
+          setTimeout(function () {
+            try {
+              var el = layer.getElement && layer.getElement();
+              var ta = el && el.querySelector(".ss-uc-tb-input");
+              if (ta) {
+                ta.focus();
+                ta.select();
+              }
+            } catch (eF) {}
+          }, 20);
+        }
+      }
+
       try {
         var el = layer.getElement && layer.getElement();
         if (el) el.style.pointerEvents = "auto";
       } catch (e0) {}
     });
+
     var pane = m.getPane(PANE);
     if (pane) {
-      pane.style.pointerEvents = state.overlayOn && state.tool !== "select" ? "auto" : "none";
-      // Allow hit-testing drawn paths even when pane is none for empty space
-      Array.prototype.forEach.call(pane.querySelectorAll("path, .ss-uc-text-marker"), function (node) {
+      pane.style.pointerEvents = "none";
+      Array.prototype.forEach.call(pane.querySelectorAll("path, .ss-uc-text-marker, .ss-uc-textbox"), function (node) {
         node.style.pointerEvents = "auto";
       });
     }
@@ -206,21 +529,25 @@
   function removeFeatureById(id) {
     var chart = activeChart();
     if (!chart || !id) return;
+    var before = (chart.features || []).length;
     chart.features = (chart.features || []).filter(function (f) {
       return (f.properties && f.properties.id) !== id && f.id !== id;
     });
+    if (chart.features.length === before) return;
+    if (state.selectedFeatureId === id) state.selectedFeatureId = null;
     persist();
     rebuildMapLayers();
     renderLayerList();
   }
 
-  function pushFeature(feature) {
+  function pushFeature(feature, focusTextId) {
     var chart = activeChart();
     if (!chart) return;
     if (!chart.features) chart.features = [];
     chart.features.push(feature);
+    state.selectedFeatureId = (feature.properties && feature.properties.id) || feature.id;
     persist();
-    rebuildMapLayers();
+    rebuildMapLayers(focusTextId);
     renderLayerList();
   }
 
@@ -228,144 +555,759 @@
     return [Number(ll.lng), Number(ll.lat)];
   }
 
-  function finishPolyline(asPolygon) {
-    if (state.draftPts.length < (asPolygon ? 3 : 2)) {
+  /* ── Geometry Generators for Blocks / Shapes ── */
+  function buildShapeCoordsFromBox(kind, south, north, west, east) {
+    var cLat = (south + north) * 0.5;
+    var cLon = (west + east) * 0.5;
+    var rLat = Math.max(1e-5, (north - south) * 0.5);
+    var rLon = Math.max(1e-5, (east - west) * 0.5);
+    var ring = [];
+    var i, ang;
+
+    if (kind === "rect") {
+      ring = [
+        [west, south],
+        [east, south],
+        [east, north],
+        [west, north],
+        [west, south]
+      ];
+    } else if (kind === "triangle") {
+      ring = [
+        [cLon, north],
+        [east, south],
+        [west, south],
+        [cLon, north]
+      ];
+    } else if (kind === "diamond") {
+      ring = [
+        [cLon, north],
+        [east, cLat],
+        [cLon, south],
+        [west, cLat],
+        [cLon, north]
+      ];
+    } else if (kind === "hexagon") {
+      for (i = 0; i < 6; i++) {
+        ang = (Math.PI / 3) * i - Math.PI / 6;
+        ring.push([cLon + rLon * Math.cos(ang), cLat + rLat * Math.sin(ang)]);
+      }
+      ring.push(ring[0].slice());
+    } else if (kind === "ellipse") {
+      var steps = 28;
+      for (i = 0; i < steps; i++) {
+        ang = (2 * Math.PI * i) / steps;
+        ring.push([cLon + rLon * Math.cos(ang), cLat + rLat * Math.sin(ang)]);
+      }
+      ring.push(ring[0].slice());
+    } else if (kind === "arrow") {
+      var headLon = west + (east - west) * 0.58;
+      var shaftTop = cLat + rLat * 0.42;
+      var shaftBot = cLat - rLat * 0.42;
+      ring = [
+        [west, shaftBot],
+        [headLon, shaftBot],
+        [headLon, south],
+        [east, cLat],
+        [headLon, north],
+        [headLon, shaftTop],
+        [west, shaftTop],
+        [west, shaftBot]
+      ];
+    } else {
+      ring = [
+        [west, south],
+        [east, south],
+        [east, north],
+        [west, north],
+        [west, south]
+      ];
+    }
+    return ring;
+  }
+
+  function createShapeFeatureFromScreenBox(kind, ptA, ptB) {
+    var m = map();
+    if (!m) return null;
+    var dx = Math.abs(ptB.x - ptA.x);
+    var dy = Math.abs(ptB.y - ptA.y);
+    var p1, p2;
+    if (dx < 8 && dy < 8) {
+      // Single click: place a well-proportioned block centered at ptA
+      p1 = m.containerPointToLatLng([ptA.x - 56, ptA.y + 42]);
+      p2 = m.containerPointToLatLng([ptA.x + 56, ptA.y - 42]);
+    } else {
+      p1 = m.containerPointToLatLng(ptA);
+      p2 = m.containerPointToLatLng(ptB);
+    }
+    var south = Math.min(p1.lat, p2.lat);
+    var north = Math.max(p1.lat, p2.lat);
+    var west = Math.min(p1.lng, p2.lng);
+    var east = Math.max(p1.lng, p2.lng);
+    var id = uid();
+
+    if (kind === "circle") {
+      var centerLl = (dx < 8 && dy < 8)
+        ? m.containerPointToLatLng(ptA)
+        : L.latLng((south + north) * 0.5, (west + east) * 0.5);
+      var edgeLl = (dx < 8 && dy < 8)
+        ? m.containerPointToLatLng([ptA.x + 54, ptA.y])
+        : L.latLng(centerLl.lat, east);
+      var radiusM = Math.max(15, centerLl.distanceTo(edgeLl));
+      return {
+        type: "Feature",
+        id: id,
+        geometry: { type: "Point", coordinates: latLngToCoord(centerLl) },
+        properties: { id: id, kind: "circle", radiusM: radiusM, color: state.color }
+      };
+    }
+
+    var ring = buildShapeCoordsFromBox(kind, south, north, west, east);
+    return {
+      type: "Feature",
+      id: id,
+      geometry: { type: "Polygon", coordinates: [ring] },
+      properties: { id: id, kind: kind, color: state.color }
+    };
+  }
+
+  /* ── Screen-Space Hit Testing: Contour (Border) vs Interior vs Line ── */
+  function distToSegmentPx(p, a, b) {
+    var vx = b.x - a.x;
+    var vy = b.y - a.y;
+    var wx = p.x - a.x;
+    var wy = p.y - a.y;
+    var c1 = vx * wx + vy * wy;
+    if (c1 <= 0) return Math.hypot(p.x - a.x, p.y - a.y);
+    var c2 = vx * vx + vy * vy;
+    if (c2 <= c1) return Math.hypot(p.x - b.x, p.y - b.y);
+    var t = c1 / c2;
+    return Math.hypot(p.x - (a.x + t * vx), p.y - (a.y + t * vy));
+  }
+
+  function pointInPolygonPx(pt, ringPts) {
+    var inside = false;
+    for (var i = 0, j = ringPts.length - 1; i < ringPts.length; j = i++) {
+      var xi = ringPts[i].x, yi = ringPts[i].y;
+      var xj = ringPts[j].x, yj = ringPts[j].y;
+      var intersect = ((yi > pt.y) !== (yj > pt.y)) &&
+        (pt.x < ((xj - xi) * (pt.y - yi)) / ((yj - yi) || 1e-9) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  function classifyResizeCompass(pt, bbox) {
+    var cx = (bbox.minX + bbox.maxX) * 0.5;
+    var cy = (bbox.minY + bbox.maxY) * 0.5;
+    var hw = Math.max(12, (bbox.maxX - bbox.minX) * 0.5);
+    var hh = Math.max(12, (bbox.maxY - bbox.minY) * 0.5);
+    var nx = (pt.x - cx) / hw;
+    var ny = (pt.y - cy) / hh;
+    var nearL = nx < -0.45;
+    var nearR = nx > 0.45;
+    var nearT = ny < -0.45;
+    var nearB = ny > 0.45;
+
+    if ((nearT && nearL) || (nearB && nearR)) return { dir: (nearT ? "n" : "s") + (nearL ? "w" : "e"), cursor: "nwse-resize" };
+    if ((nearT && nearR) || (nearB && nearL)) return { dir: (nearT ? "n" : "s") + (nearR ? "e" : "w"), cursor: "nesw-resize" };
+    if (Math.abs(nx) >= Math.abs(ny)) {
+      return { dir: nx < 0 ? "w" : "e", cursor: "ew-resize" };
+    }
+    return { dir: ny < 0 ? "n" : "s", cursor: "ns-resize" };
+  }
+
+  function hitTestFeature(f, pt, m) {
+    if (!f || !f.geometry || !m) return null;
+    var g = f.geometry;
+    var props = f.properties || {};
+    var fId = props.id || f.id;
+
+    if (g.type === "Point" && props.kind === "circle" && Number.isFinite(props.radiusM)) {
+      var cLl = L.latLng(g.coordinates[1], g.coordinates[0]);
+      var cPt = m.latLngToContainerPoint(cLl);
+      var clickLl = m.containerPointToLatLng(pt);
+      var distM = cLl.distanceTo(clickLl);
+      var edgeLl = L.latLng(cLl.lat, cLl.lng + (props.radiusM / (111320 * Math.max(0.1, Math.cos(cLl.lat * Math.PI / 180)))));
+      var edgePt = m.latLngToContainerPoint(edgeLl);
+      var radPx = Math.max(6, Math.hypot(edgePt.x - cPt.x, edgePt.y - cPt.y));
+      var distPx = Math.hypot(pt.x - cPt.x, pt.y - cPt.y);
+
+      if (Math.abs(distPx - radPx) <= BORDER_HIT_PX) {
+        var ang = Math.atan2(pt.y - cPt.y, pt.x - cPt.x);
+        var deg = ((ang * 180 / Math.PI) + 360) % 180;
+        var cur = (deg >= 22.5 && deg < 67.5) ? "nwse-resize"
+          : (deg >= 67.5 && deg < 112.5) ? "ns-resize"
+          : (deg >= 112.5 && deg < 157.5) ? "nesw-resize"
+          : "ew-resize";
+        return { feature: f, id: fId, zone: "border", dir: "radial", cursor: cur };
+      }
+      if (distPx < radPx || distM < props.radiusM) {
+        return { feature: f, id: fId, zone: "interior", cursor: "move" };
+      }
+      return null;
+    }
+
+    if (g.type === "Polygon") {
+      var ring = (g.coordinates && g.coordinates[0]) || [];
+      if (ring.length < 3) return null;
+      var pts = [];
+      var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (var i = 0; i < ring.length; i++) {
+        var p = m.latLngToContainerPoint([ring[i][1], ring[i][0]]);
+        pts.push(p);
+        if (p.x < minX) minX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y > maxY) maxY = p.y;
+      }
+
+      var minEdgeDist = Infinity;
+      var nearestVertexIdx = -1;
+      var minVertDist = Infinity;
+      for (var k = 0; k < pts.length; k++) {
+        var vd = Math.hypot(pt.x - pts[k].x, pt.y - pts[k].y);
+        if (vd < minVertDist) {
+          minVertDist = vd;
+          nearestVertexIdx = k;
+        }
+        if (k < pts.length - 1) {
+          var ed = distToSegmentPx(pt, pts[k], pts[k + 1]);
+          if (ed < minEdgeDist) minEdgeDist = ed;
+        }
+      }
+
+      if (minEdgeDist <= BORDER_HIT_PX) {
+        var comp = classifyResizeCompass(pt, { minX: minX, minY: minY, maxX: maxX, maxY: maxY });
+        return {
+          feature: f,
+          id: fId,
+          zone: "border",
+          dir: comp.dir,
+          cursor: comp.cursor,
+          vertexIdx: minVertDist <= BORDER_HIT_PX + 3 ? nearestVertexIdx : -1
+        };
+      }
+
+      if (pointInPolygonPx(pt, pts)) {
+        return { feature: f, id: fId, zone: "interior", cursor: "move" };
+      }
+      return null;
+    }
+
+    if (g.type === "LineString") {
+      var lCoords = g.coordinates || [];
+      if (lCoords.length < 2) return null;
+      var lPts = lCoords.map(function (c) { return m.latLngToContainerPoint([c[1], c[0]]); });
+      for (var s = 0; s < lPts.length - 1; s++) {
+        if (distToSegmentPx(pt, lPts[s], lPts[s + 1]) <= BORDER_HIT_PX) {
+          return { feature: f, id: fId, zone: "stroke", cursor: "move" };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function hitTestAllFeatures(pt) {
+    var m = map();
+    var chart = activeChart();
+    if (!m || !chart || !Array.isArray(chart.features)) return null;
+    for (var i = chart.features.length - 1; i >= 0; i--) {
+      var hit = hitTestFeature(chart.features[i], pt, m);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  function updateFeatureLayerRealtime(f) {
+    var fId = (f.properties && f.properties.id) || f.id;
+    var layer = layerById[fId];
+    if (!layer) {
+      rebuildMapLayers();
+      return;
+    }
+    var g = f.geometry;
+    if (g.type === "Polygon" && typeof layer.setLatLngs === "function") {
+      var ring = (g.coordinates && g.coordinates[0]) || [];
+      layer.setLatLngs(ring.map(function (c) { return [c[1], c[0]]; }));
+    } else if (g.type === "LineString" && typeof layer.setLatLngs === "function") {
+      layer.setLatLngs((g.coordinates || []).map(function (c) { return [c[1], c[0]]; }));
+    } else if (g.type === "Point" && f.properties && f.properties.kind === "circle") {
+      if (typeof layer.setLatLng === "function") {
+        layer.setLatLng([g.coordinates[1], g.coordinates[0]]);
+      }
+      if (typeof layer.setRadius === "function") {
+        layer.setRadius(Math.max(5, Number(f.properties.radiusM) || 500));
+      }
+    }
+  }
+
+  function finishFreePolygon() {
+    if (state.draftPts.length < 3) {
       clearDraft();
       return;
     }
     var coords = state.draftPts.map(latLngToCoord);
+    var ring = coords.slice();
+    ring.push(coords[0].slice());
     var id = uid();
-    if (asPolygon) {
-      var ring = coords.slice();
-      ring.push(coords[0]);
-      pushFeature({
-        type: "Feature",
-        id: id,
-        geometry: { type: "Polygon", coordinates: [ring] },
-        properties: { id: id, kind: "polygon", color: state.color }
-      });
-    } else {
-      pushFeature({
-        type: "Feature",
-        id: id,
-        geometry: { type: "LineString", coordinates: coords },
-        properties: { id: id, kind: "polyline", color: state.color }
-      });
-    }
+    pushFeature({
+      type: "Feature",
+      id: id,
+      geometry: { type: "Polygon", coordinates: [ring] },
+      properties: { id: id, kind: "polygon", color: state.color }
+    });
     clearDraft();
+  }
+
+  /* ── Map Mouse / Pointer Interaction Engine ── */
+  function setMapHoverCursor(cursorVal) {
+    var mapEl = document.getElementById("ntmMap");
+    if (!mapEl) return;
+    if (cursorVal) {
+      mapEl.setAttribute("data-uc-hover-cursor", cursorVal);
+      mapEl.style.setProperty("--uc-dynamic-cursor", cursorVal);
+    } else {
+      mapEl.removeAttribute("data-uc-hover-cursor");
+      mapEl.style.removeProperty("--uc-dynamic-cursor");
+    }
+  }
+
+  function onMapMouseDown(e) {
+    if (!state.overlayOn) return;
+    if (!e || !e.originalEvent || e.originalEvent.button !== 0) return;
+    var origTarget = e.originalEvent.target;
+    if (origTarget && origTarget.closest && origTarget.closest("#ssUcDrawRail, #ssUcShapesMenu, #ssUcPalettePopover, .ss-uc-textbox")) {
+      return;
+    }
+    var m = map();
+    if (!m || !global.L) return;
+
+    var pt = m.mouseEventToContainerPoint(e.originalEvent);
+    var ll = m.containerPointToLatLng(pt);
+    var tool = state.tool;
+
+    // 1. ERASER TOOL: touch or sweep-erase any drawn object
+    if (tool === "eraser") {
+      L.DomEvent.stop(e);
+      try { m.dragging.disable(); } catch (e0) {}
+      var hitErase = hitTestAllFeatures(pt);
+      if (hitErase) removeFeatureById(hitErase.id);
+      state.action = { type: "erase-sweep" };
+      return;
+    }
+
+    // 2. BRUSH TOOL: hold LMB to freehand-draw on the chart (map dragging disabled)
+    if (tool === "brush") {
+      L.DomEvent.stop(e);
+      try { m.dragging.disable(); } catch (e1) {}
+      var style = featureStyle(state.color, false, "brush");
+      var draftPoly = L.polyline([ll], Object.assign({}, style, { pane: PANE, fillOpacity: 0 }));
+      m.addLayer(draftPoly);
+      state.action = {
+        type: "brush-draw",
+        pts: [ll],
+        lastPt: pt,
+        layer: draftPoly
+      };
+      return;
+    }
+
+    // 3. SELECT (CURSOR-ARROW) OR SHAPES TOOL: check if user pressed LMB on an existing shape's contour or interior
+    if (tool === "select" || tool === "shapes") {
+      var hit = hitTestAllFeatures(pt);
+      if (hit && !(tool === "shapes" && state.shapeKind === "polygon" && state.draftPts.length > 0)) {
+        state.selectedFeatureId = hit.id;
+        L.DomEvent.stop(e);
+        try { m.dragging.disable(); } catch (e2) {}
+        state.suppressNextClick = true;
+
+        var f = hit.feature;
+        var origGeom = JSON.parse(JSON.stringify(f.geometry));
+        var origProps = JSON.parse(JSON.stringify(f.properties || {}));
+
+        if (hit.zone === "interior" || hit.zone === "stroke") {
+          state.action = {
+            type: "move-feature",
+            feature: f,
+            startLl: ll,
+            origGeom: origGeom
+          };
+          return;
+        }
+
+        if (hit.zone === "border") {
+          var ring = (origGeom.type === "Polygon" && origGeom.coordinates && origGeom.coordinates[0]) || [];
+          var minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+          ring.forEach(function (c) {
+            if (c[1] < minLat) minLat = c[1];
+            if (c[1] > maxLat) maxLat = c[1];
+            if (c[0] < minLon) minLon = c[0];
+            if (c[0] > maxLon) maxLon = c[0];
+          });
+          state.action = {
+            type: "resize-feature",
+            feature: f,
+            dir: hit.dir,
+            vertexIdx: hit.vertexIdx,
+            startLl: ll,
+            origGeom: origGeom,
+            origProps: origProps,
+            bbox: { minLat: minLat, maxLat: maxLat, minLon: minLon, maxLon: maxLon }
+          };
+          return;
+        }
+      } else if (tool === "select") {
+        if (state.selectedFeatureId) {
+          state.selectedFeatureId = null;
+          rebuildMapLayers();
+        }
+        return;
+      }
+    }
+
+    // 4. SHAPES TOOL on empty chart space: place or drag-create a new block/shape
+    if (tool === "shapes" && state.shapeKind !== "polygon") {
+      closeFloatingMenus();
+      L.DomEvent.stop(e);
+      try { m.dragging.disable(); } catch (e3) {}
+      state.suppressNextClick = true;
+      state.action = {
+        type: "create-shape",
+        shapeKind: state.shapeKind,
+        startPt: pt,
+        curPt: pt,
+        previewLayer: null
+      };
+    }
+  }
+
+  function onMapMouseMove(e) {
+    if (!state.overlayOn) return;
+    var m = map();
+    if (!m || !e || !e.originalEvent) return;
+    var pt = m.mouseEventToContainerPoint(e.originalEvent);
+    var ll = m.containerPointToLatLng(pt);
+
+    if (state.action) {
+      var act = state.action;
+
+      if (act.type === "erase-sweep") {
+        var hitE = hitTestAllFeatures(pt);
+        if (hitE) removeFeatureById(hitE.id);
+        return;
+      }
+
+      if (act.type === "brush-draw") {
+        if (Math.hypot(pt.x - act.lastPt.x, pt.y - act.lastPt.y) >= 3) {
+          act.pts.push(ll);
+          act.lastPt = pt;
+          act.layer.setLatLngs(act.pts);
+        }
+        return;
+      }
+
+      if (act.type === "move-feature") {
+        var dLat = ll.lat - act.startLl.lat;
+        var dLon = ll.lng - act.startLl.lng;
+        var fMove = act.feature;
+        if (act.origGeom.type === "Polygon") {
+          fMove.geometry.coordinates = [
+            act.origGeom.coordinates[0].map(function (c) {
+              return [c[0] + dLon, c[1] + dLat];
+            })
+          ];
+        } else if (act.origGeom.type === "LineString") {
+          fMove.geometry.coordinates = act.origGeom.coordinates.map(function (c) {
+            return [c[0] + dLon, c[1] + dLat];
+          });
+        } else if (act.origGeom.type === "Point") {
+          fMove.geometry.coordinates = [
+            act.origGeom.coordinates[0] + dLon,
+            act.origGeom.coordinates[1] + dLat
+          ];
+        }
+        updateFeatureLayerRealtime(fMove);
+        return;
+      }
+
+      if (act.type === "resize-feature") {
+        var fRes = act.feature;
+        if (act.origGeom.type === "Point" && fRes.properties && fRes.properties.kind === "circle") {
+          var centerLl = L.latLng(act.origGeom.coordinates[1], act.origGeom.coordinates[0]);
+          fRes.properties.radiusM = Math.max(10, centerLl.distanceTo(ll));
+          updateFeatureLayerRealtime(fRes);
+          return;
+        }
+        if (act.origGeom.type === "Polygon") {
+          var bb = act.bbox;
+          var s = bb.minLat, n = bb.maxLat, w = bb.minLon, ea = bb.maxLon;
+          var dir = act.dir || "se";
+          if (dir.indexOf("n") >= 0) n = Math.max(s + 1e-5, ll.lat);
+          if (dir.indexOf("s") >= 0) s = Math.min(n - 1e-5, ll.lat);
+          if (dir.indexOf("e") >= 0) ea = Math.max(w + 1e-5, ll.lng);
+          if (dir.indexOf("w") >= 0) w = Math.min(ea - 1e-5, ll.lng);
+
+          var kind = (fRes.properties && fRes.properties.kind) || "polygon";
+          if (kind === "polygon" && act.vertexIdx >= 0) {
+            var newRing = act.origGeom.coordinates[0].map(function (c) { return c.slice(); });
+            newRing[act.vertexIdx] = [ll.lng, ll.lat];
+            if (act.vertexIdx === 0 || act.vertexIdx === newRing.length - 1) {
+              newRing[0] = [ll.lng, ll.lat];
+              newRing[newRing.length - 1] = [ll.lng, ll.lat];
+            }
+            fRes.geometry.coordinates = [newRing];
+          } else if (kind !== "polygon") {
+            fRes.geometry.coordinates = [buildShapeCoordsFromBox(kind, s, n, w, ea)];
+          } else {
+            var origSpanLat = Math.max(1e-6, bb.maxLat - bb.minLat);
+            var origSpanLon = Math.max(1e-6, bb.maxLon - bb.minLon);
+            fRes.geometry.coordinates = [
+              act.origGeom.coordinates[0].map(function (c) {
+                var u = (c[0] - bb.minLon) / origSpanLon;
+                var v = (c[1] - bb.minLat) / origSpanLat;
+                return [w + u * (ea - w), s + v * (n - s)];
+              })
+            ];
+          }
+          updateFeatureLayerRealtime(fRes);
+          return;
+        }
+      }
+
+      if (act.type === "create-shape") {
+        act.curPt = pt;
+        if (act.previewLayer) {
+          try { m.removeLayer(act.previewLayer); } catch (eP) {}
+        }
+        var tempFeat = createShapeFeatureFromScreenBox(act.shapeKind, act.startPt, act.curPt);
+        if (tempFeat) {
+          act.previewLayer = leafletFromFeature(tempFeat);
+          if (act.previewLayer) m.addLayer(act.previewLayer);
+        }
+        return;
+      }
+    }
+
+    // Hover feedback when no drag action is running
+    if (state.tool === "select" || state.tool === "shapes") {
+      var hoverHit = hitTestAllFeatures(pt);
+      if (hoverHit) {
+        setMapHoverCursor(hoverHit.cursor);
+      } else {
+        setMapHoverCursor("");
+      }
+    } else {
+      setMapHoverCursor("");
+    }
+  }
+
+  function onGlobalMouseUp() {
+    if (!state.action) return;
+    var m = map();
+    var act = state.action;
+    state.action = null;
+
+    if (act.type === "brush-draw") {
+      if (act.layer && m) {
+        try { m.removeLayer(act.layer); } catch (e0) {}
+      }
+      if (act.pts && act.pts.length >= 2) {
+        var idB = uid();
+        pushFeature({
+          type: "Feature",
+          id: idB,
+          geometry: { type: "LineString", coordinates: act.pts.map(latLngToCoord) },
+          properties: { id: idB, kind: "brush", color: state.color }
+        });
+      }
+    } else if (act.type === "move-feature" || act.type === "resize-feature") {
+      persist();
+      rebuildMapLayers();
+    } else if (act.type === "create-shape") {
+      if (act.previewLayer && m) {
+        try { m.removeLayer(act.previewLayer); } catch (e1) {}
+      }
+      var created = createShapeFeatureFromScreenBox(act.shapeKind, act.startPt, act.curPt);
+      if (created) {
+        pushFeature(created);
+      }
+    }
+
+    syncMapDragState();
   }
 
   function onMapClick(e) {
     if (!state.overlayOn) return;
+    if (state.suppressNextClick) {
+      state.suppressNextClick = false;
+      return;
+    }
+    var origTarget = e && e.originalEvent && e.originalEvent.target;
+    if (origTarget && origTarget.closest && origTarget.closest("#ssUcDrawRail, #ssUcShapesMenu, #ssUcPalettePopover, .ss-uc-textbox")) {
+      return;
+    }
+    closeFloatingMenus();
+
     var tool = state.tool;
-    if (tool === "select" || tool === "eraser") return;
     var m = map();
     if (!m || !global.L) return;
-    L.DomEvent.stopPropagation(e);
 
     if (tool === "text") {
-      var txt = window.prompt("Label text", "Note");
-      if (txt == null || !String(txt).trim()) return;
+      L.DomEvent.stopPropagation(e);
       var idT = uid();
-      pushFeature({
-        type: "Feature",
-        id: idT,
-        geometry: { type: "Point", coordinates: latLngToCoord(e.latlng) },
-        properties: { id: idT, kind: "text", text: String(txt).trim(), color: state.color }
-      });
+      pushFeature(
+        {
+          type: "Feature",
+          id: idT,
+          geometry: { type: "Point", coordinates: latLngToCoord(e.latlng) },
+          properties: {
+            id: idT,
+            kind: "text",
+            text: "Text",
+            color: state.color,
+            fontSize: 15,
+            widthPx: 148,
+            rows: 1
+          }
+        },
+        idT
+      );
       return;
     }
 
-    if (tool === "polyline" || tool === "polygon") {
+    if (tool === "shapes" && state.shapeKind === "polygon") {
+      L.DomEvent.stopPropagation(e);
+      if (state.draftPts.length >= 3) {
+        var firstPt = m.latLngToContainerPoint(state.draftPts[0]);
+        var curPt = m.latLngToContainerPoint(e.latlng);
+        if (Math.hypot(curPt.x - firstPt.x, curPt.y - firstPt.y) <= 14) {
+          finishFreePolygon();
+          return;
+        }
+      }
       state.draftPts.push(e.latlng);
       if (state.draftLayer) {
         try { m.removeLayer(state.draftLayer); } catch (e1) {}
       }
-      var style = featureStyle(state.color);
-      if (tool === "polygon" && state.draftPts.length >= 3) {
-        state.draftLayer = L.polygon(state.draftPts, Object.assign({}, style, { pane: PANE, dashArray: "4 4" }));
+      var style = featureStyle(state.color, false, "polygon");
+      if (state.draftPts.length >= 3) {
+        state.draftLayer = L.polygon(state.draftPts, Object.assign({}, style, { pane: PANE, dashArray: "5 4" }));
       } else {
-        state.draftLayer = L.polyline(state.draftPts, Object.assign({}, style, { pane: PANE, dashArray: "4 4", fillOpacity: 0 }));
+        state.draftLayer = L.polyline(state.draftPts, Object.assign({}, style, { pane: PANE, dashArray: "5 4", fillOpacity: 0 }));
       }
       m.addLayer(state.draftLayer);
-      return;
-    }
-
-    if (tool === "rect") {
-      state.draftPts.push(e.latlng);
-      if (state.draftPts.length === 1) return;
-      var a = state.draftPts[0];
-      var b = state.draftPts[1];
-      var south = Math.min(a.lat, b.lat);
-      var north = Math.max(a.lat, b.lat);
-      var west = Math.min(a.lng, b.lng);
-      var east = Math.max(a.lng, b.lng);
-      var idR = uid();
-      pushFeature({
-        type: "Feature",
-        id: idR,
-        geometry: {
-          type: "Polygon",
-          coordinates: [[
-            [west, south], [east, south], [east, north], [west, north], [west, south]
-          ]]
-        },
-        properties: { id: idR, kind: "rect", color: state.color }
-      });
-      clearDraft();
-      return;
-    }
-
-    if (tool === "circle") {
-      state.draftPts.push(e.latlng);
-      if (state.draftPts.length === 1) return;
-      var c0 = state.draftPts[0];
-      var c1 = state.draftPts[1];
-      var radiusM = c0.distanceTo(c1);
-      var idC = uid();
-      pushFeature({
-        type: "Feature",
-        id: idC,
-        geometry: { type: "Point", coordinates: latLngToCoord(c0) },
-        properties: { id: idC, kind: "circle", radiusM: radiusM, color: state.color }
-      });
-      clearDraft();
     }
   }
 
   function onMapDblClick(e) {
     if (!state.overlayOn) return;
-    if (state.tool === "polyline") {
+    if (state.tool === "shapes" && state.shapeKind === "polygon") {
       L.DomEvent.stop(e);
-      finishPolyline(false);
-    } else if (state.tool === "polygon") {
-      L.DomEvent.stop(e);
-      finishPolyline(true);
+      finishFreePolygon();
     }
   }
 
   function bindMapHandlers() {
     var m = map();
     if (!m || state.mapHandlersBound) return;
+    m.on("mousedown", onMapMouseDown);
+    m.on("mousemove", onMapMouseMove);
     m.on("click", onMapClick);
     m.on("dblclick", onMapDblClick);
+    window.addEventListener("mouseup", onGlobalMouseUp, true);
     state.mapHandlersBound = true;
+  }
+
+  function syncMapDragState() {
+    var m = map();
+    if (!m) return;
+    if (!state.overlayOn) {
+      try { m.dragging.enable(); } catch (e0) {}
+      try { m.doubleClickZoom.enable(); } catch (e1) {}
+      return;
+    }
+    if (state.tool === "brush") {
+      try { m.dragging.disable(); } catch (e2) {}
+    } else {
+      try { m.dragging.enable(); } catch (e3) {}
+    }
+    if (state.tool === "shapes" && state.shapeKind === "polygon") {
+      try { m.doubleClickZoom.disable(); } catch (e4) {}
+    } else {
+      try { m.doubleClickZoom.enable(); } catch (e5) {}
+    }
+  }
+
+  function syncMapCursorClasses() {
+    var mapEl = document.getElementById("ntmMap");
+    if (!mapEl) return;
+    if (state.overlayOn) {
+      mapEl.classList.remove("ecdis-cursor-map");
+      mapEl.classList.add("ss-uc-draw-active");
+      mapEl.setAttribute("data-uc-tool", state.tool || "select");
+    } else {
+      mapEl.classList.remove("ss-uc-draw-active");
+      mapEl.removeAttribute("data-uc-tool");
+      mapEl.removeAttribute("data-uc-hover-cursor");
+      mapEl.classList.add("ecdis-cursor-map");
+    }
+  }
+
+  function closeFloatingMenus() {
+    state.shapesMenuOpen = false;
+    state.paletteOpen = false;
+    var sm = document.getElementById("ssUcShapesMenu");
+    var pm = document.getElementById("ssUcPalettePopover");
+    if (sm) sm.hidden = true;
+    if (pm) pm.hidden = true;
+    syncToolbarUI();
+  }
+
+  function toggleShapesMenu() {
+    state.paletteOpen = false;
+    var pm = document.getElementById("ssUcPalettePopover");
+    if (pm) pm.hidden = true;
+    state.shapesMenuOpen = !state.shapesMenuOpen;
+    var sm = document.getElementById("ssUcShapesMenu");
+    if (sm) sm.hidden = !state.shapesMenuOpen;
+    syncToolbarUI();
+  }
+
+  function togglePalettePopover() {
+    state.shapesMenuOpen = false;
+    var sm = document.getElementById("ssUcShapesMenu");
+    if (sm) sm.hidden = true;
+    state.paletteOpen = !state.paletteOpen;
+    var pm = document.getElementById("ssUcPalettePopover");
+    if (pm) pm.hidden = !state.paletteOpen;
+    syncToolbarUI();
+  }
+
+  function setColor(newColor) {
+    if (!newColor) return;
+    state.color = newColor;
+    if (state.selectedFeatureId) {
+      var f = findFeatureById(state.selectedFeatureId);
+      if (f) {
+        f.properties = f.properties || {};
+        f.properties.color = state.color;
+        persist();
+        rebuildMapLayers();
+      }
+    }
+    syncToolbarUI();
   }
 
   function setTool(tool) {
     state.tool = tool || "select";
     clearDraft();
-    var m = map();
-    if (m) {
-      var pane = m.getPane(PANE);
-      if (pane) pane.style.pointerEvents = state.overlayOn && state.tool !== "select" ? "auto" : "none";
-      if (state.overlayOn && state.tool !== "select" && state.tool !== "eraser") {
-        try { m.doubleClickZoom.disable(); } catch (e) {}
-      } else {
-        try { m.doubleClickZoom.enable(); } catch (e2) {}
-      }
-    }
+    setMapHoverCursor("");
+    syncMapCursorClasses();
+    syncMapDragState();
     syncToolbarUI();
+    rebuildMapLayers();
   }
 
   function setOverlayActive(on) {
@@ -377,16 +1319,17 @@
       tab.classList.toggle("active", state.overlayOn);
       tab.setAttribute("aria-pressed", state.overlayOn ? "true" : "false");
     }
+    closeFloatingMenus();
     if (state.overlayOn) {
       bindMapHandlers();
-      setTool(state.tool === "select" ? "polyline" : state.tool);
+      // Default tool on activating Draw is ALWAYS Cursor-Arrow ("select")
+      setTool("select");
     } else {
       clearDraft();
+      state.selectedFeatureId = null;
       setTool("select");
-      var m = map();
-      if (m) {
-        try { m.doubleClickZoom.enable(); } catch (e) {}
-      }
+      syncMapCursorClasses();
+      syncMapDragState();
       closeLayerPanel();
     }
     rebuildMapLayers();
@@ -395,10 +1338,28 @@
 
   function syncToolbarUI() {
     document.querySelectorAll("#ssUcDrawRail [data-uc-tool]").forEach(function (btn) {
-      btn.classList.toggle("is-active", btn.getAttribute("data-uc-tool") === state.tool);
+      var t = btn.getAttribute("data-uc-tool");
+      if (t === "palette") {
+        btn.classList.toggle("is-active", !!state.paletteOpen);
+      } else {
+        btn.classList.toggle("is-active", t === state.tool);
+      }
     });
+    document.querySelectorAll("#ssUcShapesMenu [data-uc-shape]").forEach(function (btn) {
+      btn.classList.toggle("is-active", btn.getAttribute("data-uc-shape") === state.shapeKind);
+    });
+    document.querySelectorAll("#ssUcPalettePopover [data-uc-swatch]").forEach(function (sw) {
+      sw.classList.toggle(
+        "is-active",
+        (sw.getAttribute("data-uc-swatch") || "").toLowerCase() === (state.color || "").toLowerCase()
+      );
+    });
+    var colorDot = document.getElementById("ssUcColorSwatchDot");
+    if (colorDot) colorDot.style.background = state.color || "#f05a36";
     var colorInp = document.getElementById("ssUcColorInput");
-    if (colorInp && colorInp.value !== state.color) colorInp.value = state.color;
+    if (colorInp && colorInp.value.toLowerCase() !== (state.color || "").toLowerCase()) {
+      colorInp.value = state.color || "#f05a36";
+    }
   }
 
   function renderLayerList() {
@@ -498,7 +1459,7 @@
     }
   }
 
-  /* ── Warnings corridor filter panel (replaces info "i") ── */
+  /* ── Warnings corridor filter panel ── */
   function syncWarnFilterUI() {
     var enabled = !!global.ROUTE_CORRIDOR_FILTER_ENABLED;
     var nm = Number(global.ROUTE_CORRIDOR_BUFFER_NM);
@@ -554,6 +1515,51 @@
       btn.classList.toggle("is-open", open);
     }
     if (open) syncWarnFilterUI();
+  }
+
+  function ensureRailPopoversBuilt(rail) {
+    if (!rail) return;
+    if (!document.getElementById("ssUcShapesMenu")) {
+      var sm = document.createElement("div");
+      sm.id = "ssUcShapesMenu";
+      sm.className = "ss-uc-flyout-menu ss-uc-shapes-menu";
+      sm.hidden = true;
+      sm.innerHTML =
+        '<div class="ss-uc-menu-title">Shapes &amp; Polygons</div>' +
+        '<div class="ss-uc-shapes-grid">' +
+        SHAPE_CATALOG.map(function (s) {
+          return (
+            '<button type="button" class="ss-uc-shape-item" data-uc-shape="' + s.kind + '" title="' + escapeHtml(s.label) + '">' +
+              '<span class="ss-uc-shape-ico">' + s.icon + '</span>' +
+              '<span class="ss-uc-shape-lbl">' + escapeHtml(s.label) + '</span>' +
+            '</button>'
+          );
+        }).join("") +
+        '</div>' +
+        '<div class="ss-uc-menu-hint">Hold LMB on contour to resize · Hold LMB inside to move</div>';
+      rail.appendChild(sm);
+    }
+
+    if (!document.getElementById("ssUcPalettePopover")) {
+      var pm = document.createElement("div");
+      pm.id = "ssUcPalettePopover";
+      pm.className = "ss-uc-flyout-menu ss-uc-palette-menu";
+      pm.hidden = true;
+      pm.innerHTML =
+        '<div class="ss-uc-menu-title">Color Palette</div>' +
+        '<div class="ss-uc-swatches-grid">' +
+        PALETTE_COLORS.map(function (c) {
+          return (
+            '<button type="button" class="ss-uc-color-swatch" data-uc-swatch="' + c.hex + '" title="' + escapeHtml(c.name) + '" style="background:' + c.hex + ';"></button>'
+          );
+        }).join("") +
+        '</div>' +
+        '<label class="ss-uc-custom-color-row">' +
+          '<span>Custom color</span>' +
+          '<input type="color" id="ssUcColorInput" value="' + escapeHtml(state.color) + '" aria-label="Custom draw color" />' +
+        '</label>';
+      rail.appendChild(pm);
+    }
   }
 
   function wireDom() {
@@ -614,16 +1620,62 @@
     var rail = document.getElementById("ssUcDrawRail");
     if (rail && !rail.dataset.ssWired) {
       rail.dataset.ssWired = "1";
+      ensureRailPopoversBuilt(rail);
+
+      rail.addEventListener("mousedown", function (e) { e.stopPropagation(); });
+      rail.addEventListener("dblclick", function (e) { e.stopPropagation(); });
+
       rail.addEventListener("click", function (e) {
+        e.stopPropagation();
+
+        var shapeItem = e.target.closest("[data-uc-shape]");
+        if (shapeItem) {
+          state.shapeKind = shapeItem.getAttribute("data-uc-shape") || "rect";
+          state.shapesMenuOpen = false;
+          var sm = document.getElementById("ssUcShapesMenu");
+          if (sm) sm.hidden = true;
+          setTool("shapes");
+          return;
+        }
+
+        var swatch = e.target.closest("[data-uc-swatch]");
+        if (swatch) {
+          setColor(swatch.getAttribute("data-uc-swatch") || "#f05a36");
+          return;
+        }
+
         var btn = e.target.closest("[data-uc-tool]");
         if (!btn) return;
-        e.stopPropagation();
-        setTool(btn.getAttribute("data-uc-tool"));
+        var tool = btn.getAttribute("data-uc-tool");
+
+        if (tool === "palette") {
+          togglePalettePopover();
+          return;
+        }
+        if (tool === "shapes") {
+          if (state.tool !== "shapes") {
+            setTool("shapes");
+            state.shapesMenuOpen = true;
+            var sm2 = document.getElementById("ssUcShapesMenu");
+            if (sm2) sm2.hidden = false;
+            state.paletteOpen = false;
+            var pm2 = document.getElementById("ssUcPalettePopover");
+            if (pm2) pm2.hidden = true;
+            syncToolbarUI();
+          } else {
+            toggleShapesMenu();
+          }
+          return;
+        }
+
+        closeFloatingMenus();
+        setTool(tool);
       });
+
       var colorInp = document.getElementById("ssUcColorInput");
       if (colorInp) {
         colorInp.addEventListener("input", function () {
-          state.color = colorInp.value || "#f05a36";
+          setColor(colorInp.value || "#f05a36");
         });
         colorInp.addEventListener("click", function (e) { e.stopPropagation(); });
       }
@@ -631,11 +1683,17 @@
 
     document.addEventListener("keydown", function (ev) {
       if (!state.overlayOn) return;
+      if (ev.target && (ev.target.tagName === "TEXTAREA" || ev.target.tagName === "INPUT")) {
+        if (ev.key === "Escape") {
+          try { ev.target.blur(); } catch (eB) {}
+        }
+        return;
+      }
       if (ev.key === "Enter") {
-        if (state.tool === "polyline") finishPolyline(false);
-        else if (state.tool === "polygon") finishPolyline(true);
+        if (state.tool === "shapes" && state.shapeKind === "polygon") finishFreePolygon();
       } else if (ev.key === "Escape") {
         clearDraft();
+        closeFloatingMenus();
       }
     });
   }
@@ -687,6 +1745,8 @@
   global.SetSailUserChartDraw = {
     init: init,
     setOverlayActive: setOverlayActive,
+    setTool: setTool,
+    setColor: setColor,
     isActive: function () { return state.overlayOn; },
     getExportFeatures: getExportFeatures,
     getActiveExportFeatures: getActiveExportFeatures,
