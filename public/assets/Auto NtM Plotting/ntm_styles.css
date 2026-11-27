@@ -29384,3 +29384,87 @@ body.light-theme .ntm-wx-unified {
   color: #475569;
 }
 
+/* ── v5.271: route insert ghost, WP delete mini, shared WP slider, combo EBL/VRM ── */
+.ss-route-insert-ghost {
+  pointer-events: none !important;
+}
+.leaflet-interactive.ss-route-insert-ghost {
+  stroke-dasharray: 4 3;
+}
+.ss-wp-del-popup {
+  padding: 0;
+  min-width: 0;
+}
+.ss-wp-del-btn {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.ss-wp-del-popup-wrap .leaflet-popup-content-wrapper {
+  background: rgba(8, 14, 30, 0.96);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-radius: 8px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  padding: 4px;
+}
+.ss-wp-del-popup-wrap .leaflet-popup-content {
+  margin: 0;
+}
+.ss-wp-del-popup-wrap .leaflet-popup-tip {
+  background: rgba(8, 14, 30, 0.96);
+}
+
+.ss-vrm-handle--combo span {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: var(--vrm-col, #f97316);
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 2px var(--vrm-col, rgba(249, 115, 22, 0.55)), 0 2px 8px rgba(0, 0, 0, 0.65);
+  transition: transform 0.12s ease;
+}
+.ss-vrm-handle--combo:hover span {
+  transform: rotate(45deg) scale(1.18);
+}
+
+#ntmSidebar .ntm-nv-wp-mid-scroll {
+  scrollbar-width: none !important;
+}
+#ntmSidebar .ntm-nv-wp-mid-scroll::-webkit-scrollbar {
+  height: 0 !important;
+  display: none !important;
+}
+#ntmSidebar .ntm-nv-wp-shared-hscroll {
+  flex: 0 0 auto;
+  height: 10px;
+  margin: 2px 8px 4px 52px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+#ntmSidebar .ntm-nv-wp-shared-hscroll::-webkit-scrollbar {
+  height: 6px;
+}
+#ntmSidebar .ntm-nv-wp-shared-hscroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 999px;
+}
+#ntmSidebar .ntm-nv-wp-shared-track {
+  height: 1px;
+  min-width: 100%;
+}
+#ntmSidebar .ntm-nv-wp-chk-wrap,
+#ntmSidebar .ntm-user-route-chk-wrap {
+  user-select: none;
+}
+

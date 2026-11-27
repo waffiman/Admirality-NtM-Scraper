@@ -8571,6 +8571,20 @@ function renderRouteOnMap(route, shouldFly = true) {
     marker._setsailRouteWptPassed = false;
 
 
+    marker.on("contextmenu", function (e) {
+      if (e && e.originalEvent) {
+        try { L.DomEvent.stop(e.originalEvent); } catch (e0) {}
+        try { e.originalEvent.preventDefault(); } catch (e1) {}
+      }
+      const stNow = window._sidebarNavtorState;
+      if (!stNow || !stNow.editMode) return;
+      if (typeof window.openRouteWpDeletePopup === "function") {
+        window.openRouteWpDeletePopup(map, marker, idx);
+      }
+    });
+
+
+
 
     marker.on("dragstart", function (e) {
 
@@ -21289,6 +21303,9 @@ function initNtMMap() {
         }
       } catch (eClr) {}
     });
+    if (typeof window.wireRouteInsertGhostTracking === "function") {
+      try { window.wireRouteInsertGhostTracking(map); } catch (eGh) {}
+    }
 
 
       function updateLightSectors() {
@@ -23293,8 +23310,7 @@ function addVrmEblTool(map, centerLL) {
 
   let eblBrg = 45;
 
-  let vrmHandleBrg = 135;          // where the VRM handle sits on the ring
-
+    // Single handle at ring ∩ EBL — drag updates both range and bearing
   const group = L.layerGroup().addTo(map);
 
   const ring = L.circle(center, {
@@ -23327,25 +23343,15 @@ function addVrmEblTool(map, centerLL) {
 
   }).addTo(group);
 
-  const vrmMk = L.marker(center, {
+  const comboMk = L.marker(center, {
 
-    icon: mkIcon("ss-vrm-handle--vrm", 14, COLOR), draggable: true, keyboard: false,
-
-    pane: handlePane, zIndexOffset: 9001, autoPan: false
-
-  }).addTo(group);
-
-  const eblMk = L.marker(center, {
-
-    icon: mkIcon("ss-vrm-handle--ebl", 14, COLOR), draggable: true, keyboard: false,
+    icon: mkIcon("ss-vrm-handle--combo", 16, COLOR), draggable: true, keyboard: false,
 
     pane: handlePane, zIndexOffset: 9002, autoPan: false
 
   }).addTo(group);
 
-  vrmMk.bindTooltip("", { permanent: true, direction: "right", offset: [10, 0], className: "ss-vrm-label" });
-
-  eblMk.bindTooltip("", { permanent: true, direction: "right", offset: [10, 0], className: "ss-vrm-label ss-ebl-label" });
+  comboMk.bindTooltip("", { permanent: true, direction: "right", offset: [10, 0], className: "ss-vrm-label" });
 
   const fmtNm = (m) => {
 
@@ -23371,21 +23377,8 @@ function addVrmEblTool(map, centerLL) {
 
   }
 
-  function eblHandlePos() {
-
-    // Sit on the EBL just outside the ring (min 70 px from centre)
-    const p0 = map.latLngToLayerPoint(center);
-
-    const pr = map.latLngToLayerPoint(_vrmDestination(center.lat, center.lng, rangeM, 90));
-
-    const ringPx = Math.abs(pr.x - p0.x);
-
-    const dist = Math.max(70, ringPx + 46);
-
-    const r = eblBrg * Math.PI / 180;
-
-    return map.layerPointToLatLng(L.point(p0.x + Math.sin(r) * dist, p0.y - Math.cos(r) * dist));
-
+  function comboHandlePos() {
+    return _vrmDestination(center.lat, center.lng, rangeM, eblBrg);
   }
 
   function redraw(skip) {
@@ -23398,13 +23391,9 @@ function addVrmEblTool(map, centerLL) {
 
     if (skip !== "center") centerMk.setLatLng(center);
 
-    if (skip !== "vrm") vrmMk.setLatLng(_vrmDestination(center.lat, center.lng, rangeM, vrmHandleBrg));
+    if (skip !== "combo") comboMk.setLatLng(comboHandlePos());
 
-    if (skip !== "ebl") eblMk.setLatLng(eblHandlePos());
-
-    vrmMk.setTooltipContent("VRM " + fmtNm(rangeM));
-
-    eblMk.setTooltipContent("EBL " + fmtBrg(eblBrg));
+    comboMk.setTooltipContent(fmtNm(rangeM) + " · " + fmtBrg(eblBrg));
 
   }
 
@@ -23413,33 +23402,22 @@ function addVrmEblTool(map, centerLL) {
 
   centerMk.on("dragend", () => redraw());
 
-  // VRM drag → range (and remember the angle the user left the handle at)
-  vrmMk.on("drag", (e) => {
+  // Combo drag → both VRM range and EBL bearing
+  comboMk.on("drag", (e) => {
 
     const ll = e.target.getLatLng();
 
     rangeM = Math.max(18.52, map.distance(center, ll));
 
-    vrmHandleBrg = _vrmScreenBearing(map, center, ll);
+    eblBrg = _vrmScreenBearing(map, center, ll);
 
-    redraw("vrm");
-
-  });
-
-  vrmMk.on("dragend", () => redraw());
-
-  // EBL drag → bearing
-  eblMk.on("drag", (e) => {
-
-    eblBrg = _vrmScreenBearing(map, center, e.target.getLatLng());
-
-    redraw("ebl");
+    redraw("combo");
 
   });
 
-  eblMk.on("dragend", () => redraw());
+  comboMk.on("dragend", () => redraw());
 
-  const tool = { group, remove: null, color: COLOR };
+    const tool = { group, remove: null, color: COLOR };
 
   function removeTool() {
 
@@ -23461,23 +23439,14 @@ function addVrmEblTool(map, centerLL) {
   function showDeletePopup(atLatLng) {
     const box = document.createElement("div");
     box.className = "ss-vrm-popup";
-    const lat = center.lat, lon = ((center.lng + 540) % 360) - 180;
-    const pos = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : (lat.toFixed(4) + ", " + lon.toFixed(4));
     box.innerHTML =
-      '<div class="ss-vrm-popup-title" style="margin-bottom:6px;font-weight:700;color:' + COLOR + ';display:flex;align-items:center;gap:6px;">' +
-        '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + COLOR + ';box-shadow:0 0 6px ' + COLOR + ';"></span>' +
-        'VRM / EBL Tool' +
-      '</div>' +
-      '<div class="ss-vrm-popup-row"><span>Origin</span><b>' + pos + '</b></div>' +
-      '<div class="ss-vrm-popup-row"><span>VRM</span><b style="color:' + COLOR + ';">' + fmtNm(rangeM) + '</b></div>' +
-      '<div class="ss-vrm-popup-row"><span>EBL</span><b style="color:' + COLOR + ';">' + fmtBrg(eblBrg) + '</b></div>' +
-      '<button type="button" class="ss-vrm-del-btn" style="margin-top:6px;width:100%;padding:6px 12px;background:#ef4444;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:0.82rem;cursor:pointer;">Delete VRM / EBL</button>';
+      '<button type="button" class="ss-vrm-del-btn" style="width:100%;padding:7px 14px;background:#ef4444;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:0.82rem;cursor:pointer;">Delete</button>';
     L.DomEvent.disableClickPropagation(box);
     const del = box.querySelector(".ss-vrm-del-btn");
     const doDel = (ev) => { if (ev) { ev.preventDefault(); ev.stopPropagation(); } removeTool(); };
     del.addEventListener("click", doDel);
     del.addEventListener("pointerup", doDel);
-    L.popup({ className: "ss-map-ctx-popup ss-vrm-popup-wrap", closeButton: true, autoPan: true, offset: [0, -6] })
+    L.popup({ className: "ss-map-ctx-popup ss-vrm-popup-wrap", closeButton: false, autoPan: true, offset: [0, -6] })
       .setLatLng(atLatLng || center).setContent(box).openOn(map);
   }
 
@@ -23493,8 +23462,7 @@ function addVrmEblTool(map, centerLL) {
   ring.on("contextmenu", handleToolContextMenu);
   ebl.on("contextmenu", handleToolContextMenu);
   centerMk.on("contextmenu", handleToolContextMenu);
-  vrmMk.on("contextmenu", handleToolContextMenu);
-  eblMk.on("contextmenu", handleToolContextMenu);
+  comboMk.on("contextmenu", handleToolContextMenu);
 
   centerMk.on("dblclick", (e) => {
     if (e && e.originalEvent) L.DomEvent.stop(e.originalEvent);
@@ -47118,6 +47086,10 @@ function _renderSidebarRoutesListBase(opts) {
     });
   });
 
+  if (typeof window.enableCheckboxColumnPaint === "function") {
+    window.enableCheckboxColumnPaint(listContainer, ".ntm-user-route-chk-wrap", ".ntm-user-route-chk");
+  }
+
   listContainer.querySelectorAll("[data-user-route-card]").forEach((card) => {
     card.addEventListener("click", () => {
       const id = card.getAttribute("data-user-route-card");
@@ -47431,6 +47403,7 @@ if (document.readyState === "loading") {
     window._sidebarChartAddWpMode = isOn;
     if (!isOn) {
       st.destPickerOpen = false;
+      try { hideRouteInsertGhost(window.leafletMap); } catch (eHg) {}
     }
     const mapEl = document.getElementById("ntmMap");
     if (mapEl) {
@@ -47445,6 +47418,12 @@ if (document.readyState === "loading") {
       oldBanner.hidden = true;
     }
     syncChartWaypointsDraggableState();
+    if (isOn) {
+      const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+      if (map && typeof window.wireRouteInsertGhostTracking === "function") {
+        try { window.wireRouteInsertGhostTracking(map); } catch (eW) {}
+      }
+    }
   }
   window.setRouteEditMode = setRouteEditMode;
 
@@ -47680,19 +47659,227 @@ if (document.readyState === "loading") {
     syncChartWaypointsDraggableState();
   }
 
-  // Single LMB click on chart while route is in Edit mode creates the next waypoint
+
+  // ── v5.271: project cursor onto editable route & splice mid-leg WPs ──
+  function projectLatLonOntoRouteSegment(pLat, pLon, aLat, aLon, bLat, bLon) {
+    const midLatRad = ((aLat + bLat) * 0.5) * Math.PI / 180;
+    const cosLat = Math.max(0.15, Math.cos(midLatRad));
+    const bx = ((bLon - aLon) * 60) * cosLat;
+    const by = (bLat - aLat) * 60;
+    const px = ((pLon - aLon) * 60) * cosLat;
+    const py = (pLat - aLat) * 60;
+    const segLenSq = bx * bx + by * by;
+    if (segLenSq < 1e-8) {
+      return { t: 0, lat: aLat, lon: aLon, distNm: calculateHaversineDistanceNM(pLat, pLon, aLat, aLon) };
+    }
+    const t = Math.max(0, Math.min(1, (px * bx + py * by) / segLenSq));
+    const lat = aLat + t * (bLat - aLat);
+    const lon = aLon + t * (bLon - aLon);
+    return { t: t, lat: lat, lon: lon, distNm: calculateHaversineDistanceNM(pLat, pLon, lat, lon) };
+  }
+
+  function findRouteInsertProjection(rt, lat, lon) {
+    if (!rt || !Array.isArray(rt.waypoints) || rt.waypoints.length < 2) return null;
+    let best = null;
+    for (let i = 0; i < rt.waypoints.length - 1; i++) {
+      const a = rt.waypoints[i];
+      const b = rt.waypoints[i + 1];
+      const aLat = Number(a.lat), aLon = Number(a.lon);
+      const bLat = Number(b.lat), bLon = Number(b.lon);
+      if (![aLat, aLon, bLat, bLon].every(Number.isFinite)) continue;
+      const proj = projectLatLonOntoRouteSegment(lat, lon, aLat, aLon, bLat, bLon);
+      if (!best || proj.distNm < best.distNm) {
+        best = {
+          legIdx: i,
+          insertIdx: i + 1,
+          t: proj.t,
+          lat: proj.lat,
+          lon: proj.lon,
+          distNm: proj.distNm
+        };
+      }
+    }
+    return best;
+  }
+
+  function ensureRouteInsertGhost(map) {
+    if (!map || typeof L === "undefined") return null;
+    if (map._ssRouteInsertGhost) return map._ssRouteInsertGhost;
+    const ghost = L.circleMarker([0, 0], {
+      radius: 9,
+      color: "#f05a36",
+      weight: 1.6,
+      opacity: 0.85,
+      fillColor: "#f05a36",
+      fillOpacity: 0.12,
+      dashArray: "4 3",
+      interactive: false,
+      pane: (map.getPane("routeWptPane") ? "routeWptPane" : "markerPane"),
+      className: "ss-route-insert-ghost"
+    });
+    map._ssRouteInsertGhost = ghost;
+    return ghost;
+  }
+
+  function hideRouteInsertGhost(map) {
+    const m = map || window.leafletMap;
+    if (!m || !m._ssRouteInsertGhost) return;
+    try {
+      if (m.hasLayer(m._ssRouteInsertGhost)) m.removeLayer(m._ssRouteInsertGhost);
+    } catch (e) {}
+    m._ssRouteInsertSnap = null;
+  }
+
+  function updateRouteInsertGhost(map, latlng) {
+    const st = window._sidebarNavtorState;
+    if (!st || !st.editMode || (st.view !== "route" && st.view !== "waypoint") || !latlng) {
+      hideRouteInsertGhost(map);
+      return null;
+    }
+    const rt = typeof getActiveNavtorRoute === "function" ? getActiveNavtorRoute() : null;
+    if (!rt || !Array.isArray(rt.waypoints) || rt.waypoints.length < 2) {
+      hideRouteInsertGhost(map);
+      return null;
+    }
+    const snap = findRouteInsertProjection(rt, Number(latlng.lat), Number(latlng.lng));
+    if (!snap) {
+      hideRouteInsertGhost(map);
+      return null;
+    }
+    // Pixel threshold ~18px OR geographic 0.35 NM — whichever is larger in practice
+    let maxNm = 0.35;
+    try {
+      const p0 = map.latLngToContainerPoint(latlng);
+      const p1 = L.point(p0.x + 18, p0.y);
+      const ll1 = map.containerPointToLatLng(p1);
+      const pxNm = calculateHaversineDistanceNM(latlng.lat, latlng.lng, ll1.lat, ll1.lng);
+      if (Number.isFinite(pxNm) && pxNm > maxNm) maxNm = pxNm;
+    } catch (ePx) {}
+    // Don't snap near existing WPs (avoid duplicate)
+    if (snap.t < 0.04 || snap.t > 0.96) {
+      hideRouteInsertGhost(map);
+      return null;
+    }
+    if (snap.distNm > maxNm) {
+      hideRouteInsertGhost(map);
+      return null;
+    }
+    const ghost = ensureRouteInsertGhost(map);
+    ghost.setLatLng([snap.lat, snap.lon]);
+    if (!map.hasLayer(ghost)) ghost.addTo(map);
+    map._ssRouteInsertSnap = snap;
+    return snap;
+  }
+
+  function wireRouteInsertGhostTracking(map) {
+    if (!map || map._ssRouteInsertGhostWired) return;
+    map._ssRouteInsertGhostWired = true;
+    map.on("mousemove", (e) => {
+      try { updateRouteInsertGhost(map, e.latlng); } catch (eM) {}
+    });
+    map.on("mouseout", () => { try { hideRouteInsertGhost(map); } catch (eO) {} });
+  }
+  window.wireRouteInsertGhostTracking = wireRouteInsertGhostTracking;
+  window.updateRouteInsertGhost = updateRouteInsertGhost;
+  window.hideRouteInsertGhost = hideRouteInsertGhost;
+
+  function openRouteWpDeletePopup(map, marker, idx) {
+    if (!map || !marker || typeof L === "undefined") return;
+    const st = window._sidebarNavtorState;
+    if (!st || !st.editMode) return;
+    const ll = marker.getLatLng();
+    const box = document.createElement("div");
+    box.className = "ss-wp-del-popup";
+    box.innerHTML = '<button type="button" class="ss-wp-del-btn">Delete WP</button>';
+    L.DomEvent.disableClickPropagation(box);
+    const btn = box.querySelector(".ss-wp-del-btn");
+    const doDel = (ev) => {
+      if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+      const rt = typeof getActiveNavtorRoute === "function" ? getActiveNavtorRoute() : null;
+      if (!rt || !Array.isArray(rt.waypoints) || !rt.waypoints[idx]) return;
+      rt.waypoints.splice(idx, 1);
+      if (st.checkedWpIdxs) st.checkedWpIdxs.clear();
+      if (typeof persistCurrentNavtorRoute === "function") persistCurrentNavtorRoute(true);
+      if (rt.waypoints.length === 0) {
+        st.wptIdx = 0;
+        st.view = "route";
+      } else {
+        st.wptIdx = Math.min(idx, rt.waypoints.length - 1);
+      }
+      try { map.closePopup(); } catch (eC) {}
+      if (typeof renderNavtorSidebar === "function") renderNavtorSidebar();
+      if (typeof showSetSailToast === "function") showSetSailToast("Deleted WP" + (idx + 1), "info");
+    };
+    btn.addEventListener("click", doDel);
+    btn.addEventListener("pointerup", doDel);
+    L.popup({ className: "ss-wp-del-popup-wrap", closeButton: false, autoPan: true, offset: [0, -8] })
+      .setLatLng(ll)
+      .setContent(box)
+      .openOn(map);
+  }
+  window.openRouteWpDeletePopup = openRouteWpDeletePopup;
+
+  function enableCheckboxColumnPaint(root, wrapSelector, inputSelector) {
+    if (!root || root.dataset.ssChkPaint === "1") return;
+    root.dataset.ssChkPaint = "1";
+    let active = false;
+    let value = false;
+    const apply = (wrap) => {
+      const chk = wrap.querySelector(inputSelector);
+      if (!chk || chk.disabled) return;
+      if (chk.checked === value) return;
+      chk.checked = value;
+      chk.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+    root.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      const wrap = e.target.closest(wrapSelector);
+      if (!wrap || !root.contains(wrap)) return;
+      const chk = wrap.querySelector(inputSelector);
+      if (!chk) return;
+      e.preventDefault();
+      e.stopPropagation();
+      active = true;
+      value = !chk.checked;
+      apply(wrap);
+    });
+    root.addEventListener("mouseover", (e) => {
+      if (!active) return;
+      const wrap = e.target.closest(wrapSelector);
+      if (wrap && root.contains(wrap)) apply(wrap);
+    });
+    const stop = () => { active = false; };
+    window.addEventListener("mouseup", stop);
+    window.addEventListener("blur", stop);
+  }
+  window.enableCheckboxColumnPaint = enableCheckboxColumnPaint;
+
+
+  // LMB in Edit mode: splice WP onto snapped leg, otherwise append at end
   window.handleSidebarChartAddWaypointClick = function (latlng) {
     const st = window._sidebarNavtorState;
     if (!st || !st.editMode || (st.view !== "route" && st.view !== "waypoint") || !latlng) return false;
     const rt = getActiveNavtorRoute();
     if (!rt) return false;
     if (!Array.isArray(rt.waypoints)) rt.waypoints = [];
-    const lat = Number(Number(latlng.lat).toFixed(5));
-    const lon = Number(((((Number(latlng.lng) + 180) % 360) + 360) % 360 - 180).toFixed(5));
-    const idx = rt.waypoints.length;
-    const pType = idx === 0 ? "Pilotage/fairway/channel" : "Coastal";
+    const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+    let snap = map && map._ssRouteInsertSnap ? map._ssRouteInsertSnap : null;
+    if (!snap && map) {
+      try { snap = updateRouteInsertGhost(map, latlng); } catch (eS) { snap = null; }
+    }
+    let lat, lon, insertAt;
+    if (snap && Number.isFinite(snap.lat) && Number.isFinite(snap.lon) && Number.isFinite(snap.insertIdx)) {
+      lat = Number(Number(snap.lat).toFixed(5));
+      lon = Number(((((Number(snap.lon) + 180) % 360) + 360) % 360 - 180).toFixed(5));
+      insertAt = Math.max(1, Math.min(rt.waypoints.length, snap.insertIdx));
+    } else {
+      lat = Number(Number(latlng.lat).toFixed(5));
+      lon = Number(((((Number(latlng.lng) + 180) % 360) + 360) % 360 - 180).toFixed(5));
+      insertAt = rt.waypoints.length;
+    }
+    const pType = insertAt === 0 ? "Pilotage/fairway/channel" : "Coastal";
     const defs = NAVTOR_PASSAGE_DEFAULTS[pType];
-    rt.waypoints.push({
+    const wpObj = {
       name: "",
       lat: lat,
       lon: lon,
@@ -47700,19 +47887,33 @@ if (document.readyState === "loading") {
       passageEvent: "Undefined",
       portsideXTD: defs.portsideXTD,
       starboardXTD: defs.starboardXTD,
-      turnRadius: idx === 0 ? 0.000 : defs.turnRadius,
+      turnRadius: insertAt === 0 ? 0.000 : defs.turnRadius,
       sail: defs.sail,
       speedKnots: defs.speedKnots,
       minSpeedKnots: defs.minSpeedKnots,
       maxSpeedKnots: defs.maxSpeedKnots,
       remarks: ""
-    });
+    };
+    rt.waypoints.splice(insertAt, 0, wpObj);
+    if (st.checkedWpIdxs && st.checkedWpIdxs.size) {
+      const next = new Set();
+      st.checkedWpIdxs.forEach((i) => {
+        next.add(i >= insertAt ? i + 1 : i);
+      });
+      st.checkedWpIdxs = next;
+    }
     if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
     if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
     persistCurrentNavtorRoute(true);
+    hideRouteInsertGhost(map);
     renderNavtorSidebar();
     if (typeof showSetSailToast === "function") {
-      showSetSailToast("Added WP" + (idx + 1) + " (" + formatNavtorLatDms(lat) + " " + formatNavtorLonDms(lon) + ")", "success");
+      const label = "WP" + (insertAt + 1);
+      showSetSailToast(
+        (insertAt < rt.waypoints.length - 1 ? "Inserted " : "Added ") + label +
+          " (" + formatNavtorLatDms(lat) + " " + formatNavtorLonDms(lon) + ")",
+        "success"
+      );
     }
     return true;
   };
@@ -50280,7 +50481,12 @@ if (document.readyState === "loading") {
         wptListHtml =
           '<div class="ntm-nv-wp-scroll" id="ntmNavtorWpScroll">' +
             (rows.length ? rows.join("") : '<div class="ntm-nv-empty-filter">No waypoints match "' + escHtml(st.wptSearch) + '"</div>') +
-          '</div>';
+          '</div>' +
+          (rows.length
+            ? '<div class="ntm-nv-wp-shared-hscroll" id="ntmNvWpSharedHScroll" title="Scroll waypoint parameters">' +
+                '<div class="ntm-nv-wp-shared-track" id="ntmNvWpSharedTrack"></div>' +
+              '</div>'
+            : '');
       }
 
       const checkedCount = st.checkedWpIdxs.size;
@@ -50444,24 +50650,43 @@ if (document.readyState === "loading") {
       return;
     }
 
-    // Restore & sync horizontal scroll across waypoint tiles' middle containers
+    // One shared horizontal slider drives all WP param tracks
     const midScrollEls = Array.from(routePanel.querySelectorAll(".ntm-nv-wp-mid-scroll"));
-    if (st.midScrollLeft > 0) {
-      midScrollEls.forEach((el) => { el.scrollLeft = st.midScrollLeft; });
+    const sharedH = routePanel.querySelector("#ntmNvWpSharedHScroll");
+    const sharedTrack = routePanel.querySelector("#ntmNvWpSharedTrack");
+    const applyMidScroll = (sl) => {
+      st.midScrollLeft = sl;
+      midScrollEls.forEach((el) => { el.scrollLeft = sl; });
+      if (sharedH) sharedH.scrollLeft = sl;
+    };
+    if (midScrollEls.length) {
+      const sample = midScrollEls[0];
+      const track = sample.querySelector(".ntm-nv-wp-params-track");
+      if (sharedTrack && track) {
+        sharedTrack.style.width = Math.max(sample.clientWidth + 1, track.scrollWidth) + "px";
+      }
+      applyMidScroll(st.midScrollLeft || 0);
+      let syncingScroll = false;
+      midScrollEls.forEach((el) => {
+        el.addEventListener("scroll", () => {
+          if (syncingScroll) return;
+          syncingScroll = true;
+          applyMidScroll(el.scrollLeft);
+          syncingScroll = false;
+        }, { passive: true });
+      });
+      if (sharedH) {
+        sharedH.addEventListener("scroll", () => {
+          if (syncingScroll) return;
+          syncingScroll = true;
+          applyMidScroll(sharedH.scrollLeft);
+          syncingScroll = false;
+        }, { passive: true });
+      }
     }
-    let syncingScroll = false;
-    midScrollEls.forEach((el) => {
-      el.addEventListener("scroll", () => {
-        if (syncingScroll) return;
-        syncingScroll = true;
-        const sl = el.scrollLeft;
-        st.midScrollLeft = sl;
-        for (let k = 0; k < midScrollEls.length; k++) {
-          if (midScrollEls[k] !== el) midScrollEls[k].scrollLeft = sl;
-        }
-        syncingScroll = false;
-      }, { passive: true });
-    });
+    if (typeof window.enableCheckboxColumnPaint === "function") {
+      window.enableCheckboxColumnPaint(routePanel, ".ntm-nv-wp-chk-wrap", ".ntm-nv-wp-chk");
+    }
 
     // Left WP1/WP2 button -> opens full single-waypoint view and centers on chart
     routePanel.querySelectorAll("[data-nv-wp-open]").forEach((btn) => {
