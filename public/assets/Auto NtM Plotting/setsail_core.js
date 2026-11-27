@@ -2393,19 +2393,22 @@ function evaluateRouteCurrentEligibility(route) {
   }
 
   const v = window.userVessel || (typeof userVessel !== "undefined" ? userVessel : null);
-  const hasLiveCoords = Boolean(v && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.lat, v.lon));
-  const hasAisCoords = Boolean(v && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.aisFixLat, v.aisFixLon));
-  if (!v || (!hasLiveCoords && !hasAisCoords)) {
+  const isDrState = Boolean(v && (v.deadReckoned || /ais-dr/i.test(String(v.source || ""))));
+  const hasAisFixCoords = Boolean(v && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.aisFixLat, v.aisFixLon));
+  const hasNonDrCoords = Boolean(v && !isDrState && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.lat, v.lon));
+  if (!v || (!hasAisFixCoords && !hasNonDrCoords)) {
     return {
       eligible: false,
-      reason: "Cannot mark as Current: select your vessel in 'My Vessel' first."
+      reason: "Cannot mark as Current: select your vessel with a valid AIS fix in 'My Vessel' first."
     };
   }
 
-  const vLat = Number(hasLiveCoords ? v.lat : v.aisFixLat);
-  const vLon = Number(hasLiveCoords ? v.lon : v.aisFixLon);
+  // v5.273: Strictly evaluate Current route eligibility from the LAST KNOWN AIS fix
+  // (never from Dead Reckoning coasted coordinates or DR-locked leg courses).
+  const vLat = Number(hasAisFixCoords ? v.aisFixLat : v.lat);
+  const vLon = Number(hasAisFixCoords ? v.aisFixLon : v.lon);
 
-  // Step 1: Check if the vessel is ALREADY within the route bounds (any leg's XTD corridor)
+  // Step 1: Check if the vessel's last known AIS position is ALREADY within the route bounds (any leg's XTD corridor)
   let minDistNm = Infinity;
   for (let i = 0; i < rawWps.length - 1; i++) {
     const wpA = rawWps[i];
@@ -2428,14 +2431,17 @@ function evaluateRouteCurrentEligibility(route) {
     }
   }
 
-  // Step 2: Vessel is outside the route corridor. Check if its current course & speed can reach the route.
-  const rawSog = Number.isFinite(Number(v.sog)) ? Number(v.sog) : Number(v.aisFixSog);
+  // Step 2: Last known AIS position is outside the route corridor.
+  // Check if the vessel's last known AIS course & speed (not DR course/speed) can reach the route.
+  const rawSog = Number.isFinite(Number(v.aisFixSog))
+    ? Number(v.aisFixSog)
+    : (!isDrState && Number.isFinite(Number(v.sog)) ? Number(v.sog) : Number(v.sog));
   const sogKn = Number.isFinite(rawSog) ? rawSog : 0;
   if (sogKn < 0.3) {
     return {
       eligible: false,
       reason:
-        "Cannot mark as Current: vessel is stationary (" +
+        "Cannot mark as Current: vessel's last AIS speed is stationary (" +
         sogKn.toFixed(1) +
         " kn) and " +
         (Number.isFinite(minDistNm) ? minDistNm.toFixed(2) : "—") +
@@ -2443,13 +2449,17 @@ function evaluateRouteCurrentEligibility(route) {
     };
   }
 
-  const rawCog = Number.isFinite(Number(v.cog))
-    ? Number(v.cog)
-    : (Number.isFinite(Number(v.aisFixCog)) ? Number(v.aisFixCog) : Number(v.heading));
+  const rawCog = Number.isFinite(Number(v.aisFixCog))
+    ? Number(v.aisFixCog)
+    : (Number.isFinite(Number(v.aisFixHeading)) && Number(v.aisFixHeading) < 360
+      ? Number(v.aisFixHeading)
+      : (!isDrState && Number.isFinite(Number(v.cog))
+        ? Number(v.cog)
+        : (!isDrState && Number.isFinite(Number(v.heading)) && Number(v.heading) < 360 ? Number(v.heading) : NaN)));
   if (!Number.isFinite(rawCog)) {
     return {
       eligible: false,
-      reason: "Cannot mark as Current: vessel is outside the route and has no course (COG / Heading) set."
+      reason: "Cannot mark as Current: vessel is outside the route and has no last known AIS course (COG / Heading)."
     };
   }
 
@@ -3380,7 +3390,13 @@ function applyOwnVesselDeadReckoning(opts) {
 
     aisFixLat: Number.isFinite(Number(v.aisFixLat)) ? Number(v.aisFixLat) : fixLat,
 
-    aisFixLon: Number.isFinite(Number(v.aisFixLon)) ? Number(v.aisFixLon) : fixLon
+    aisFixLon: Number.isFinite(Number(v.aisFixLon)) ? Number(v.aisFixLon) : fixLon,
+
+    aisFixSog: Number.isFinite(Number(v.aisFixSog)) ? Number(v.aisFixSog) : (!v.deadReckoned && Number.isFinite(Number(v.sog)) ? Number(v.sog) : null),
+
+    aisFixCog: Number.isFinite(Number(v.aisFixCog)) ? Number(v.aisFixCog) : (!v.deadReckoned && Number.isFinite(Number(v.cog)) ? Number(v.cog) : null),
+
+    aisFixHeading: Number.isFinite(Number(v.aisFixHeading)) ? Number(v.aisFixHeading) : (!v.deadReckoned && Number.isFinite(Number(v.heading)) && Number(v.heading) < 360 ? Number(v.heading) : null)
 
   });
 
@@ -3937,9 +3953,18 @@ async function applyAisHitToVessel(t, toastMsg) {
     partial.aisFixLat = Number(t.lat);
     partial.aisFixLon = Number(t.lon);
     partial.aisLastFixAt = t.aisSeenAt || new Date().toISOString();
-    if (t.sog != null) partial.sog = Number(t.sog);
-    if (t.cog != null) partial.cog = Number(t.cog);
-    if (t.heading != null && Number(t.heading) < 360) partial.heading = Number(t.heading);
+    if (t.sog != null && Number.isFinite(Number(t.sog))) {
+      partial.sog = Number(t.sog);
+      partial.aisFixSog = Number(t.sog);
+    }
+    if (t.cog != null && Number.isFinite(Number(t.cog))) {
+      partial.cog = Number(t.cog);
+      partial.aisFixCog = Number(t.cog);
+    }
+    if (t.heading != null && Number.isFinite(Number(t.heading)) && Number(t.heading) < 360) {
+      partial.heading = Number(t.heading);
+      partial.aisFixHeading = Number(t.heading);
+    }
   }
 
   ["home", "chart"].forEach((which) => {
@@ -3993,6 +4018,9 @@ async function applyAisHitToVessel(t, toastMsg) {
           aisLastFixAt: live.aisSeenAt || partial.aisLastFixAt || null,
           aisFixLat: Number(live.lat),
           aisFixLon: Number(live.lon),
+          aisFixSog: live.sog != null && Number.isFinite(Number(live.sog)) ? Number(live.sog) : (partial.aisFixSog != null ? partial.aisFixSog : null),
+          aisFixCog: live.cog != null && Number.isFinite(Number(live.cog)) ? Number(live.cog) : (partial.aisFixCog != null ? partial.aisFixCog : null),
+          aisFixHeading: live.heading != null && Number.isFinite(Number(live.heading)) && Number(live.heading) < 360 ? Number(live.heading) : (partial.aisFixHeading != null ? partial.aisFixHeading : null),
           aisRefreshedAt: getSetSailUtcNowIso ? getSetSailUtcNowIso() : new Date().toISOString()
         });
       } else if (live) {
@@ -14247,226 +14275,128 @@ function initVesselTracking() {
 
 
   if (uploadRouteBtn && routeFileInput) {
+    routeFileInput.setAttribute("multiple", "multiple");
 
     uploadRouteBtn.addEventListener("click", () => {
-
       routeFileInput.click();
-
     });
 
+    const parseSingleUploadedRouteFile = (file, seqIdx) => {
+      return new Promise((resolve) => {
+        if (!file) return resolve({ ok: false, fileName: "" });
+        const ext = String(file.name || "").split(".").pop().toLowerCase();
+        const reader = new FileReader();
+        reader.onerror = () => resolve({ ok: false, fileName: file.name, error: "Read failed" });
+        reader.onload = (evt) => {
+          try {
+            let parsed = null;
+            if (ext === "rtm") parsed = parseRtmRoute(evt.target.result, file.name);
+            else if (ext === "rtz") parsed = parseRtzRoute(evt.target.result, file.name);
+            else if (ext === "csv") parsed = parseCsvRoute(evt.target.result, file.name);
+            else return resolve({ ok: false, fileName: file.name, error: "Unsupported format (." + ext + ")" });
 
+            if (!parsed || !Array.isArray(parsed.waypoints) || parsed.waypoints.length === 0) {
+              return resolve({ ok: false, fileName: file.name, error: "No valid waypoints found" });
+            }
+            const cleanFileName = String(file.name || "")
+              .replace(/^.*[/\\]/, "")
+              .replace(/\.(rtz|csv|rtm)$/i, "")
+              .trim();
+            if (cleanFileName) {
+              if (parsed.name && parsed.name !== cleanFileName) {
+                parsed.internalName = parsed.name;
+              }
+              parsed.name = cleanFileName;
+              parsed.fileName = String(file.name || "").replace(/^.*[/\\]/, "").trim();
+            }
+            const nowMs = Date.now() + seqIdx;
+            parsed.id = "route_" + nowMs.toString(36) + "_" + seqIdx + "_" + Math.random().toString(36).slice(2, 7);
+            parsed.createdAt = new Date(nowMs).toISOString();
+            parsed.updatedAt = new Date(nowMs).toISOString();
+            parsed.savedAt = nowMs;
+            parsed._isFreshFileUpload = true;
+            try {
+              if (typeof enrichRouteWithLegsTelemetry === "function") enrichRouteWithLegsTelemetry(parsed);
+            } catch (eEn) {}
+            resolve({ ok: true, route: parsed, fileName: file.name });
+          } catch (err) {
+            console.error("Route import error (" + file.name + "):", err);
+            resolve({ ok: false, fileName: file.name, error: err && err.message ? err.message : "Parse error" });
+          }
+        };
+        if (ext === "rtm") reader.readAsArrayBuffer(file);
+        else reader.readAsText(file);
+      });
+    };
 
-    const finishRouteUpload = (parsed, uploadedFileName) => {
-
-      if (!parsed || !parsed.waypoints || parsed.waypoints.length === 0) return;
-
-      const cleanFileName = String(uploadedFileName || "")
-
-        .replace(/^.*[/\\]/, "")
-
-        .replace(/\.(rtz|csv|rtm)$/i, "")
-
-        .trim();
-
-      if (cleanFileName) {
-
-        if (parsed.name && parsed.name !== cleanFileName) {
-
-          parsed.internalName = parsed.name;
-
-        }
-
-        parsed.name = cleanFileName;
-
-        parsed.fileName = String(uploadedFileName || "").replace(/^.*[/\\]/, "").trim();
-
+    routeFileInput.addEventListener("change", async (e) => {
+      const files = Array.from((e.target && e.target.files) || []);
+      routeFileInput.value = "";
+      if (!files.length) {
+        window._setsailRouteUploadAsCurrent = false;
+        return;
       }
 
-      parsed.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+      const results = [];
+      for (let i = 0; i < files.length; i++) {
+        const res = await parseSingleUploadedRouteFile(files[i], i);
+        results.push(res);
+      }
 
-      parsed._isFreshFileUpload = true;
+      const imported = results.filter((r) => r && r.ok && r.route).map((r) => r.route);
+      const failed = results.filter((r) => !r || !r.ok);
 
-      try {
+      if (!imported.length) {
+        window._setsailRouteUploadAsCurrent = false;
+        const errMsg = failed.length === 1
+          ? ("Error importing " + failed[0].fileName + ": " + (failed[0].error || "Invalid file"))
+          : ("Failed to import " + failed.length + " route files.");
+        if (typeof showSetSailToast === "function") showSetSailToast(errMsg, "warning");
+        else alert(errMsg);
+        return;
+      }
 
-        if (typeof enrichRouteWithLegsTelemetry === "function") enrichRouteWithLegsTelemetry(parsed);
+      // Save all imported routes in reverse order so the first selected file sits at the top of the library
+      for (let i = imported.length - 1; i >= 0; i--) {
+        try {
+          if (typeof saveRouteToLibrary === "function") {
+            saveRouteToLibrary(imported[i]);
+          }
+        } catch (eLib) {}
+      }
 
-      } catch (eEn) {}
-
+      // Keep the user in the Routes list view so all imported routes are immediately visible in the sidebar list
       if (window._sidebarNavtorState) {
-        window._sidebarNavtorState.routeId = parsed.id;
-        window._sidebarNavtorState.view = "route";
+        window._sidebarNavtorState.view = "list";
+        window._sidebarNavtorState.routeId = null;
       }
-
-      try {
-
-        if (typeof saveRouteToLibrary === "function") saveRouteToLibrary(parsed);
-
-      } catch (eLib) {}
-
-      renderRouteOnMap(parsed, true);
-
-      if (typeof window.openNavtorRouteInSidebar === "function") {
-        try { window.openNavtorRouteInSidebar(parsed.id, { skipPlot: true }); } catch (eOpenImp) {}
+      if (typeof window.renderNavtorSidebar === "function") {
+        try { window.renderNavtorSidebar(); } catch (eNv) {}
+      }
+      if (typeof window.renderSidebarUserRoutesList === "function") {
+        try { window.renderSidebarUserRoutesList(); } catch (eSb) {}
+      }
+      if (typeof window.syncChartRoutesDisplay === "function") {
+        try { window.syncChartRoutesDisplay({ force: true }); } catch (eCh) {}
       }
 
       const asCurrent = !!window._setsailRouteUploadAsCurrent;
-
       window._setsailRouteUploadAsCurrent = false;
-
-      if (asCurrent && typeof setDrActiveRouteId === "function") {
-
+      if (asCurrent && imported.length === 1 && typeof setDrActiveRouteId === "function") {
         try {
-
-          setDrActiveRouteId(parsed.id || parsed.name);
-
-          if (typeof showSetSailToast === "function") {
-
-            showSetSailToast("Route loaded as Current — DR rails active", "success");
-
-          }
-
+          setDrActiveRouteId(imported[0].id || imported[0].name);
         } catch (eDr) {}
-
       }
 
-    };
-
-
-
-    routeFileInput.addEventListener("change", (e) => {
-
-      const file = (e.target.files && e.target.files[0]);
-
-      if (!file) {
-
-        window._setsailRouteUploadAsCurrent = false;
-
-        return;
-
+      if (typeof showSetSailToast === "function") {
+        if (imported.length === 1 && failed.length === 0) {
+          showSetSailToast('Imported route "' + (imported[0].name || "Route") + '"', "success");
+        } else if (failed.length === 0) {
+          showSetSailToast("Imported " + imported.length + " routes into library", "success");
+        } else {
+          showSetSailToast("Imported " + imported.length + " route(s), " + failed.length + " failed", "warning");
+        }
       }
-
-      const ext = file.name.split(".").pop().toLowerCase();
-
-
-
-      if (ext === "rtm") {
-
-        const reader = new FileReader();
-
-        reader.onload = (evt) => {
-
-          try {
-
-            const parsed = parseRtmRoute(evt.target.result, file.name);
-
-            if (!parsed.waypoints || parsed.waypoints.length === 0) {
-
-              alert("No valid waypoints found in .rtm route file.");
-
-              window._setsailRouteUploadAsCurrent = false;
-
-              return;
-
-            }
-
-            finishRouteUpload(parsed, file.name);
-
-          } catch (err) {
-
-            console.error("RTM error:", err);
-
-            window._setsailRouteUploadAsCurrent = false;
-
-            alert("Error parsing .rtm file: " + err.message);
-
-          }
-
-        };
-
-        reader.readAsArrayBuffer(file);
-
-      } else if (ext === "rtz") {
-
-        const reader = new FileReader();
-
-        reader.onload = (evt) => {
-
-          try {
-
-            const parsed = parseRtzRoute(evt.target.result, file.name);
-
-            if (!parsed.waypoints || parsed.waypoints.length === 0) {
-
-              alert("No valid waypoints found in .rtz route file.");
-
-              window._setsailRouteUploadAsCurrent = false;
-
-              return;
-
-            }
-
-            finishRouteUpload(parsed, file.name);
-
-          } catch (err) {
-
-            console.error("RTZ error:", err);
-
-            window._setsailRouteUploadAsCurrent = false;
-
-            alert("Error parsing .rtz file: " + err.message);
-
-          }
-
-        };
-
-        reader.readAsText(file);
-
-      } else if (ext === "csv") {
-
-        const reader = new FileReader();
-
-        reader.onload = (evt) => {
-
-          try {
-
-            const parsed = parseCsvRoute(evt.target.result, file.name);
-
-            if (!parsed.waypoints || parsed.waypoints.length === 0) {
-
-              alert("No valid waypoints found in .csv route file.");
-
-              window._setsailRouteUploadAsCurrent = false;
-
-              return;
-
-            }
-
-            finishRouteUpload(parsed, file.name);
-
-          } catch (err) {
-
-            console.error("CSV error:", err);
-
-            window._setsailRouteUploadAsCurrent = false;
-
-            alert("Error parsing .csv file: " + err.message);
-
-          }
-
-        };
-
-        reader.readAsText(file);
-
-      } else {
-
-        window._setsailRouteUploadAsCurrent = false;
-
-        alert("Unsupported format. Please select .rtz, .csv, or .rtm file.");
-
-      }
-
-      routeFileInput.value = "";
-
     });
 
   }
@@ -45764,53 +45694,42 @@ window.enrichRouteWithLegsTelemetry = enrichRouteWithLegsTelemetry;
 
 
 function getSavedRoutesLibrary() {
-
-  // Guests: ephemeral in-memory chats/routes only (gone when the tab closes).
-
   if (!isSetSailSignedIn()) {
-
-    return Array.isArray(__setsailGuestRoutesLib) ? __setsailGuestRoutesLib.slice() : [];
-
+    if (Array.isArray(__setsailGuestRoutesLib) && __setsailGuestRoutesLib.length > 0) {
+      return __setsailGuestRoutesLib.slice();
+    }
+    try {
+      const sRaw = sessionStorage.getItem(SETSAIL_GUEST_ROUTES_SESSION_KEY);
+      if (sRaw) {
+        const sList = JSON.parse(sRaw);
+        if (Array.isArray(sList) && sList.length > 0) {
+          __setsailGuestRoutesLib = sList.slice(0, 35);
+          return __setsailGuestRoutesLib.slice();
+        }
+      }
+    } catch (eGs) {}
   }
-
   try {
-
     const raw = localStorage.getItem(SETSAIL_ROUTES_LIBRARY_KEY);
-
-    const list = raw ? JSON.parse(raw) : [];
-
-    return Array.isArray(list) ? list : [];
-
-  } catch (e) {
-
-    return [];
-
-  }
-
+    if (raw) {
+      const list = JSON.parse(raw);
+      if (Array.isArray(list) && list.length > 0) {
+        __setsailGuestRoutesLib = list.slice(0, 35);
+        return list;
+      }
+    }
+  } catch (e) {}
+  return Array.isArray(__setsailGuestRoutesLib) ? __setsailGuestRoutesLib.slice() : [];
 }
 
-
-
 function writeSavedRoutesLibrary(lib) {
-
   const capped = Array.isArray(lib) ? lib.slice(0, 35) : [];
-
-  if (!isSetSailSignedIn()) {
-
-    __setsailGuestRoutesLib = capped;
-
-    try { sessionStorage.setItem(SETSAIL_GUEST_ROUTES_SESSION_KEY, JSON.stringify(capped)); } catch (eGuestWrite) {}
-
-    return;
-
-  }
-
+  __setsailGuestRoutesLib = capped;
+  try { sessionStorage.setItem(SETSAIL_GUEST_ROUTES_SESSION_KEY, JSON.stringify(capped)); } catch (eGuestWrite) {}
   try {
-
     localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(capped));
-
+    localStorage.setItem("setsail_routes_library_updated_at_v1", String(Date.now()));
   } catch (e) {}
-
 }
 
 
@@ -45967,6 +45886,19 @@ function saveRouteToLibrary(route) {
   }
 
   route.updatedAt = new Date().toISOString();
+  route.savedAt = Date.now();
+  try {
+    const rawDel = localStorage.getItem("setsail_deleted_route_ids_v1");
+    if (rawDel) {
+      const delMap = JSON.parse(rawDel);
+      if (delMap && typeof delMap === "object") {
+        let mod = false;
+        if (route.id && delMap[String(route.id)]) { delete delMap[String(route.id)]; mod = true; }
+        if (route.name && delMap[String(route.name)]) { delete delMap[String(route.name)]; mod = true; }
+        if (mod) localStorage.setItem("setsail_deleted_route_ids_v1", JSON.stringify(delMap));
+      }
+    }
+  } catch (eClrDel) {}
 
   writeSavedRoutesLibrary(lib);
 
@@ -47858,20 +47790,36 @@ if (document.readyState === "loading") {
     return best;
   }
 
+  function buildRouteInsertFrameIcon(map) {
+    const z = map && typeof map.getZoom === "function" ? map.getZoom() : 8;
+    const box = typeof getRouteWptPixelSize === "function" ? getRouteWptPixelSize(z) : 14;
+    const half = box / 2;
+    const html =
+      '<div class="ss-route-insert-frame" style="width:' + box + 'px;height:' + box + 'px;">' +
+        '<svg width="' + box + '" height="' + box + '" viewBox="0 0 ' + box + ' ' + box + '" style="display:block;overflow:visible;" aria-hidden="true">' +
+          '<rect x="1" y="1" width="' + (box - 2) + '" height="' + (box - 2) + '" rx="2" fill="rgba(240,90,54,0.18)" stroke="#f05a36" stroke-width="2" vector-effect="non-scaling-stroke"/>' +
+        '</svg>' +
+      '</div>';
+    return L.divIcon({
+      className: "ss-route-insert-ghost",
+      html: html,
+      iconSize: [box, box],
+      iconAnchor: [half, half]
+    });
+  }
+
   function ensureRouteInsertGhost(map) {
     if (!map || typeof L === "undefined") return null;
-    if (map._ssRouteInsertGhost) return map._ssRouteInsertGhost;
-    const ghost = L.circleMarker([0, 0], {
-      radius: 9,
-      color: "#f05a36",
-      weight: 1.6,
-      opacity: 0.85,
-      fillColor: "#f05a36",
-      fillOpacity: 0.12,
-      dashArray: "4 3",
+    const icon = buildRouteInsertFrameIcon(map);
+    if (map._ssRouteInsertGhost) {
+      try { map._ssRouteInsertGhost.setIcon(icon); } catch (eIc) {}
+      return map._ssRouteInsertGhost;
+    }
+    const ghost = L.marker([0, 0], {
+      icon: icon,
       interactive: false,
-      pane: (map.getPane("routeWptPane") ? "routeWptPane" : "markerPane"),
-      className: "ss-route-insert-ghost"
+      keyboard: false,
+      pane: (map.getPane("routeWptPane") ? "routeWptPane" : "markerPane")
     });
     map._ssRouteInsertGhost = ghost;
     return ghost;
@@ -47946,11 +47894,44 @@ if (document.readyState === "loading") {
     const ll = marker.getLatLng();
     const box = document.createElement("div");
     box.className = "ss-wp-del-popup";
-    box.innerHTML = '<button type="button" class="ss-wp-del-btn">Delete WP</button>';
+    box.innerHTML =
+      '<button type="button" class="ss-wp-open-btn">WP' + (idx + 1) + ' Details</button>' +
+      '<button type="button" class="ss-wp-del-btn">Delete WP</button>';
     L.DomEvent.disableClickPropagation(box);
+
+    const openBtn = box.querySelector(".ss-wp-open-btn");
+    let openedOnce = false;
+    const doOpen = (ev) => {
+      if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+      if (openedOnce) return;
+      openedOnce = true;
+      const rt = typeof getActiveNavtorRoute === "function" ? getActiveNavtorRoute() : null;
+      if (!rt || !Array.isArray(rt.waypoints) || !rt.waypoints[idx]) return;
+      st.wptIdx = idx;
+      st.view = "waypoint";
+      try {
+        if (typeof window.toggleNtmSidebar === "function") {
+          const sb = document.getElementById("ntmSidebar");
+          const ws = document.getElementById("ntmWorkspace");
+          if ((sb && sb.getAttribute("data-collapsed") === "1") || (ws && ws.classList.contains("sidebar-collapsed"))) {
+            window.toggleNtmSidebar(true);
+          }
+        }
+      } catch (eSbOpen) {}
+      try { map.closePopup(); } catch (eC0) {}
+      if (typeof renderNavtorSidebar === "function") renderNavtorSidebar();
+    };
+    if (openBtn) {
+      openBtn.addEventListener("click", doOpen);
+      openBtn.addEventListener("pointerup", doOpen);
+    }
+
     const btn = box.querySelector(".ss-wp-del-btn");
+    let deletedOnce = false;
     const doDel = (ev) => {
       if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+      if (deletedOnce) return;
+      deletedOnce = true;
       const rt = typeof getActiveNavtorRoute === "function" ? getActiveNavtorRoute() : null;
       if (!rt || !Array.isArray(rt.waypoints) || !rt.waypoints[idx]) return;
       rt.waypoints.splice(idx, 1);
@@ -47980,6 +47961,7 @@ if (document.readyState === "loading") {
     root.dataset.ssChkPaint = "1";
     let active = false;
     let value = false;
+    let suppressNextClick = false;
     const apply = (wrap) => {
       const chk = wrap.querySelector(inputSelector);
       if (!chk || chk.disabled) return;
@@ -47992,19 +47974,37 @@ if (document.readyState === "loading") {
       const wrap = e.target.closest(wrapSelector);
       if (!wrap || !root.contains(wrap)) return;
       const chk = wrap.querySelector(inputSelector);
-      if (!chk) return;
+      if (!chk || chk.disabled) return;
       e.preventDefault();
       e.stopPropagation();
       active = true;
+      suppressNextClick = true;
       value = !chk.checked;
       apply(wrap);
-    });
+    }, true);
     root.addEventListener("mouseover", (e) => {
       if (!active) return;
+      if (typeof e.buttons === "number" && (e.buttons & 1) === 0) {
+        active = false;
+        return;
+      }
       const wrap = e.target.closest(wrapSelector);
       if (wrap && root.contains(wrap)) apply(wrap);
     });
-    const stop = () => { active = false; };
+    // Prevent native <label>/<input type="checkbox"> click on mouseup from undoing mousedown toggle!
+    root.addEventListener("click", (e) => {
+      const wrap = e.target.closest(wrapSelector);
+      if (!wrap || !root.contains(wrap)) return;
+      e.stopPropagation();
+      if (suppressNextClick) {
+        e.preventDefault();
+        suppressNextClick = false;
+      }
+    }, true);
+    const stop = () => {
+      active = false;
+      setTimeout(() => { suppressNextClick = false; }, 0);
+    };
     window.addEventListener("mouseup", stop);
     window.addEventListener("blur", stop);
   }

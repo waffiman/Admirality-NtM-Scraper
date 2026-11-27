@@ -29489,3 +29489,60 @@ body.light-theme .ntm-wx-unified {
   background: rgba(56, 189, 248, 0.14) !important;
   color: #38bdf8 !important;
 }
+
+/* ── v5.273: Remove empty top-left SetChart toolbar tile, WP-sized insert frame icon & WP Details RMB button ── */
+#tab-ntm .ntm-toolbar-left {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+@media (min-width: 769px) {
+  #tab-ntm .ntm-toolbar-left {
+    display: none !important;
+  }
+  #tab-ntm .ntm-toolbar {
+    justify-content: flex-end !important;
+  }
+}
+
+.ss-route-insert-ghost {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+.ss-route-insert-frame {
+  display: block;
+  box-sizing: border-box;
+  pointer-events: none !important;
+  filter: drop-shadow(0 0 4px rgba(240, 90, 54, 0.55));
+}
+
+.ss-wp-del-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 112px;
+}
+.ss-wp-open-btn {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 6px;
+  background: rgba(2, 132, 199, 0.25);
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 0.76rem;
+  cursor: pointer;
+  text-align: center;
+  margin: 0 !important;
+}
+.ss-wp-open-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+.ss-wp-del-btn {
+  margin: 0 !important;
+}

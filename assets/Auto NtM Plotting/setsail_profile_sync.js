@@ -15,6 +15,7 @@
 
   var initialPullDone = false;
   var syncInFlight = 0;
+  var pushInFlight = 0;
   var applyingRemote = false;
 
   function getAuthUser() {
@@ -271,34 +272,63 @@
 
   function applyRemoteRoutesLibrary(profile) {
     if (!profile || !Array.isArray(profile.routesLibrary)) return;
+    if (pushTimer || pushInFlight > 0) return;
     try {
       var curDel = readDeletedRouteIds();
       if (profile.deletedRouteIds && typeof profile.deletedRouteIds === "object") {
         Object.assign(curDel, profile.deletedRouteIds);
         localStorage.setItem("setsail_deleted_route_ids_v1", JSON.stringify(curDel));
       }
-      var localLib = readLocalRoutesLibrary();
-      var remoteLib = profile.routesLibrary.filter(function (r) {
-        if (!r || !r.id) return Boolean(r);
-        var delTs = Number(curDel[String(r.id)]) || 0;
+      var isNotDeleted = function (r) {
+        if (!r || !Array.isArray(r.waypoints) || !r.waypoints.length) return false;
+        var keyId = r.id ? String(r.id) : "";
+        var keyNm = r.name ? String(r.name) : "";
+        var delTs = Math.max(keyId ? (Number(curDel[keyId]) || 0) : 0, keyNm ? (Number(curDel[keyNm]) || 0) : 0);
         if (!delTs) return true;
-        return routeStampMs(r) > delTs + 5000;
-      });
+        return routeStampMs(r) > delTs + 2000;
+      };
+      var localLib = readLocalRoutesLibrary().filter(isNotDeleted);
+      var remoteLib = profile.routesLibrary.filter(isNotDeleted);
       var remoteStamp = Number(profile.routesLibraryUpdatedAt) || 0;
       var localStamp = getLocalStamp("setsail_routes_library_updated_at_v1");
-      // v5.272: never wipe a non-empty local library with an empty/stale remote
-      if (remoteLib.length === 0 && localLib.length > 0 && remoteStamp <= localStamp) {
-        return;
-      }
 
-      var localIds = localLib.map(function (r) { return (r && r.id) + ":" + routeStampMs(r); }).join("|");
-      var remoteIds = remoteLib.map(function (r) { return (r && r.id) + ":" + routeStampMs(r); }).join("|");
-      if (localIds === remoteIds && localLib.length === remoteLib.length) return;
+      // v5.273: Union-merge local + remote routes so newly imported local routes
+      // never disappear when a periodic pull() returns an older server snapshot.
+      var primaryList = localStamp >= remoteStamp ? localLib : remoteLib;
+      var secondaryList = localStamp >= remoteStamp ? remoteLib : localLib;
+      var byKey = Object.create(null);
+      var mergedLib = [];
 
-      localStorage.setItem("setsail_routes_library_v1", JSON.stringify(remoteLib.slice(0, 35)));
-      if (profile.routesLibraryUpdatedAt) {
-        setLocalStamp("setsail_routes_library_updated_at_v1", profile.routesLibraryUpdatedAt);
-      }
+      var ingestList = function (list) {
+        for (var i = 0; i < list.length; i++) {
+          var r = list[i];
+          if (!r) continue;
+          var k = String(r.id || r.name || "").trim();
+          if (!k) continue;
+          if (!byKey[k]) {
+            byKey[k] = r;
+            mergedLib.push(r);
+          } else {
+            var prev = byKey[k];
+            if (routeStampMs(r) > routeStampMs(prev)) {
+              var idx = mergedLib.indexOf(prev);
+              if (idx >= 0) mergedLib[idx] = r;
+              byKey[k] = r;
+            }
+          }
+        }
+      };
+      ingestList(primaryList);
+      ingestList(secondaryList);
+      mergedLib = mergedLib.slice(0, 35);
+
+      var localIds = localLib.map(function (r) { return (r && (r.id || r.name)) + ":" + routeStampMs(r); }).join("|");
+      var mergedIds = mergedLib.map(function (r) { return (r && (r.id || r.name)) + ":" + routeStampMs(r); }).join("|");
+      if (localIds === mergedIds && localLib.length === mergedLib.length) return;
+
+      localStorage.setItem("setsail_routes_library_v1", JSON.stringify(mergedLib));
+      var maxStamp = Math.max(localStamp, remoteStamp, Date.now());
+      setLocalStamp("setsail_routes_library_updated_at_v1", maxStamp);
       if (typeof global.renderNavSavedRoutesTree === "function") {
         try { global.renderNavSavedRoutesTree(); } catch (e1) {}
       }
@@ -675,13 +705,19 @@
     } catch (eHud) {}
   }
 
+  var _pushSeq = 0;
   async function pull() {
+    if (pushTimer || pushInFlight > 0) {
+      return { ok: false, reason: "push_pending" };
+    }
     var user = getAuthUser();
     var token = getToken();
     if (!user || !token) {
       initialPullDone = true;
       return { ok: false, reason: "no_auth" };
     }
+    var pullStartSeq = _pushSeq;
+    var pullStartLibStamp = getLocalStamp("setsail_routes_library_updated_at_v1");
     setSyncing(true);
     try {
       var r = await fetch(API, {
@@ -692,6 +728,15 @@
       var j = await r.json().catch(function () {
         return {};
       });
+      if (
+        pullStartSeq !== _pushSeq ||
+        pushTimer ||
+        pushInFlight > 0 ||
+        getLocalStamp("setsail_routes_library_updated_at_v1") > pullStartLibStamp
+      ) {
+        initialPullDone = true;
+        return { ok: false, reason: "superseded_by_local_edit" };
+      }
       if (r.ok && j && j.profile) {
         applyRemote(j.profile);
         initialPullDone = true;
@@ -711,7 +756,6 @@
     }
   }
 
-  var _pushSeq = 0;
   async function push() {
     if (applyingRemote) return { ok: false, reason: "applying_remote" };
     var user = getAuthUser();
@@ -719,7 +763,9 @@
     if (!user || !token) return { ok: false, reason: "no_auth" };
     var pushSeq = ++_pushSeq;
     var startVStamp = getLocalStamp("setsail_vessel_updated_at_v1");
+    var startLibStamp = getLocalStamp("setsail_routes_library_updated_at_v1");
     var body = { profile: collectLocal() };
+    pushInFlight += 1;
     try {
       var r = await fetch(API, {
         method: "PUT",
@@ -735,7 +781,8 @@
         j &&
         j.profile &&
         pushSeq === _pushSeq &&
-        getLocalStamp("setsail_vessel_updated_at_v1") <= startVStamp
+        getLocalStamp("setsail_vessel_updated_at_v1") <= startVStamp &&
+        getLocalStamp("setsail_routes_library_updated_at_v1") <= startLibStamp
       ) {
         // Apply merged profile back only if no newer local change/push superseded this request
         applyRemote(j.profile);
@@ -743,6 +790,8 @@
       return { ok: r.ok, status: r.status, j: j, durable: j && j.durable, backend: j && j.backend };
     } catch (e) {
       return { ok: false, error: String(e && e.message) };
+    } finally {
+      pushInFlight = Math.max(0, pushInFlight - 1);
     }
   }
 
