@@ -396,12 +396,78 @@ function parseAdmiraltyNtMText(fullText, defaultYear = "26") {
  * @returns {ArrayBuffer}
  */
 function buildJrcUchmBuffer(notices) {
-  // Only include notices that have coordinates
-  const valid = notices.filter(n => n.coords && n.coords.length > 0);
-  
+  // Expand notices & manual user chart items into valid JRC User Map v1.1 records (up to 25 vertices per 296-byte record)
+  const MAX_REC_PTS = 25;
+  const records = [];
+
+  (notices || []).forEach((n, idx) => {
+    if (!n || !Array.isArray(n.coords) || n.coords.length === 0) return;
+    const cleanCoords = n.coords
+      .map((c) => ({ lat: Number(c.lat), lon: Number(c.lon) }))
+      .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon));
+    if (cleanCoords.length === 0) return;
+
+    const rawTitle = [
+      n.noticeNumber || n.id || `OBJ-${idx + 1}`,
+      n.region || "",
+      n.subject || n.title || ""
+    ]
+      .filter((part) => part && String(part).trim() && String(part).trim() !== "undefined")
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const isPoly = Boolean(n.isPolygon && cleanCoords.length >= 3);
+    const isLine = Boolean(!isPoly && (n.isLine || cleanCoords.length >= 2));
+
+    if (isPoly) {
+      // Strip duplicate closing vertex if present, resample if > 24 unique vertices, then re-close
+      let ring = cleanCoords.slice();
+      if (
+        ring.length >= 2 &&
+        Math.abs(ring[0].lat - ring[ring.length - 1].lat) < 1e-7 &&
+        Math.abs(ring[0].lon - ring[ring.length - 1].lon) < 1e-7
+      ) {
+        ring.pop();
+      }
+      if (ring.length > MAX_REC_PTS - 1) {
+        const sampled = [];
+        const targetN = MAX_REC_PTS - 1;
+        for (let i = 0; i < targetN; i++) {
+          sampled.push(ring[Math.floor((i * ring.length) / targetN)]);
+        }
+        ring = sampled;
+      }
+      if (ring.length >= 3) {
+        ring.push({ lat: ring[0].lat, lon: ring[0].lon });
+        records.push({ title: rawTitle, objType: 2, pts: ring });
+      }
+    } else if (isLine) {
+      // Split polylines / brush strokes longer than MAX_REC_PTS into connected segments
+      if (cleanCoords.length <= MAX_REC_PTS) {
+        records.push({ title: rawTitle, objType: 1, pts: cleanCoords });
+      } else {
+        const step = MAX_REC_PTS - 1;
+        let part = 1;
+        for (let start = 0; start < cleanCoords.length - 1; start += step) {
+          const chunk = cleanCoords.slice(start, start + MAX_REC_PTS);
+          if (chunk.length >= 2) {
+            records.push({
+              title: `${rawTitle} #${part++}`,
+              objType: 1,
+              pts: chunk
+            });
+          }
+        }
+      }
+    } else {
+      records.push({ title: rawTitle, objType: 0, pts: [cleanCoords[0]] });
+    }
+  });
+
   const RECORD_SIZE = 296;
   const HEADER_SIZE = 220;
-  const totalSize = HEADER_SIZE + valid.length * RECORD_SIZE;
+  const totalSize = HEADER_SIZE + records.length * RECORD_SIZE;
   const buffer = new ArrayBuffer(totalSize);
   const view = new DataView(buffer);
   const bytes = new Uint8Array(buffer);
@@ -413,46 +479,34 @@ function buildJrcUchmBuffer(notices) {
   }
 
   // Record count at offset 24 (int32 little endian)
-  view.setInt32(24, valid.length, true);
+  view.setInt32(24, records.length, true);
 
   // 2. Write Records
   let offset = HEADER_SIZE;
-  for (let r = 0; r < valid.length; r++) {
-    const item = valid[r];
+  for (let r = 0; r < records.length; r++) {
+    const rec = records[r];
     const recStart = offset;
 
-    // Record Name (up to 63 chars + null terminator)
-    const title = `${item.id} ${item.region} ${item.subject}`.substring(0, 63);
+    // Record Name (up to 63 ASCII chars + null terminator)
+    const title = String(rec.title || `USERCHART-${r + 1}`).substring(0, 63);
     for (let i = 0; i < title.length; i++) {
-      bytes[recStart + i] = title.charCodeAt(i) & 0xff;
+      const code = title.charCodeAt(i);
+      bytes[recStart + i] = (code >= 32 && code <= 126) ? code : 32;
     }
 
-    // Points
-    const pts = item.coords.slice(0, 5);
-    if (item.isPolygon && pts.length >= 3) {
-      if (pts[0].lat !== pts[pts.length - 1].lat || pts[0].lon !== pts[pts.length - 1].lon) {
-        pts.push({ lat: pts[0].lat, lon: pts[0].lon });
-      }
-    }
+    const pts = rec.pts.slice(0, MAX_REC_PTS);
 
-    // Object type flags
-    view.setInt32(recStart + 68, item.isPolygon ? 2 : (item.isLine ? 1 : 0), true);
+    // Object type flags (0 = point, 1 = line, 2 = polygon)
+    view.setInt32(recStart + 68, rec.objType, true);
     view.setInt32(recStart + 72, pts.length, true);
 
     // Coordinates: deg * 600,000 (1/10000 minute)
-    for (let p = 0; p < Math.min(pts.length, 5); p++) {
+    for (let p = 0; p < pts.length; p++) {
       const ptOff = recStart + 84 + p * 8;
       const latScaled = Math.round(pts[p].lat * 600000);
       const lonScaled = Math.round(pts[p].lon * 600000);
       view.setInt32(ptOff, latScaled, true);
       view.setInt32(ptOff + 4, lonScaled, true);
-    }
-
-    if (pts.length === 1) {
-      const latScaled = Math.round(pts[0].lat * 600000);
-      const lonScaled = Math.round(pts[0].lon * 600000);
-      view.setInt32(recStart + 84, latScaled, true);
-      view.setInt32(recStart + 88, lonScaled, true);
     }
 
     offset += RECORD_SIZE;

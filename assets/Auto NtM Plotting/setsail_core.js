@@ -16783,34 +16783,178 @@ window.toggleNoticeCheck = function(noticeId, isChecked) {
 
  */
 
-function getExportSelectedNotices() {
+function convertManualUserChartFeaturesToNotices() {
+  const el = document.getElementById("expChkManualUc");
+  if (el && !el.checked) return [];
+  if (!window.SetSailUserChartDraw || typeof window.SetSailUserChartDraw.getExportFeatures !== "function") {
+    return [];
+  }
+  const features = window.SetSailUserChartDraw.getExportFeatures() || [];
+  const out = [];
+  const fmtDms = (lat, lon) => {
+    try {
+      if (typeof formatLatLonDMS === "function") return formatLatLonDMS(lat, lon);
+    } catch (e) {}
+    return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  };
 
-  const chkNavtex = (document.getElementById("expChkNavtex") ? document.getElementById("expChkNavtex").checked : true);
+  features.forEach((f, idx) => {
+    if (!f || !f.geometry) return;
+    const g = f.geometry;
+    const props = f.properties || {};
+    const kind = String(props.kind || "draw").toLowerCase();
+    const chartName = String(props.chartName || "Manual User Chart").trim();
+    const rawLabel = String(props.text || `${kind.toUpperCase()}-${idx + 1}`).replace(/\r?\n/g, " ").trim();
+    const idLabel = rawLabel.slice(0, 48) || `DRAW-${idx + 1}`;
 
-  const chkT = (document.getElementById("expChkT") ? document.getElementById("expChkT").checked : true);
+    if (g.type === "Polygon" && Array.isArray(g.coordinates) && Array.isArray(g.coordinates[0])) {
+      const coords = g.coordinates[0]
+        .map((c) => ({ lat: Number(c[1]), lon: Number(c[0]) }))
+        .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon))
+        .map((c) => ({ lat: c.lat, lon: c.lon, dms: fmtDms(c.lat, c.lon) }));
+      if (coords.length < 3) return;
+      out.push({
+        id: idLabel,
+        noticeNumber: idLabel,
+        type: "MANUAL",
+        category: kind.toUpperCase(),
+        country: "USER CHART",
+        region: chartName,
+        title: `${idLabel} (${chartName})`,
+        subject: rawLabel,
+        description: `${rawLabel} — ${chartName}`,
+        rawText: `${rawLabel} — ${chartName}`,
+        isPolygon: true,
+        isLine: false,
+        isManualUserChart: true,
+        lat: coords[0].lat,
+        lon: coords[0].lon,
+        coords: coords,
+        subPolygons: [{
+          name: idLabel,
+          category: kind,
+          coords: coords,
+          points: coords.map((c) => [c.lat, c.lon])
+        }]
+      });
+      return;
+    }
 
-  const chkP = (document.getElementById("expChkP") ? document.getElementById("expChkP").checked : true);
+    if (g.type === "LineString" && Array.isArray(g.coordinates)) {
+      const coords = g.coordinates
+        .map((c) => ({ lat: Number(c[1]), lon: Number(c[0]) }))
+        .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon))
+        .map((c) => ({ lat: c.lat, lon: c.lon, dms: fmtDms(c.lat, c.lon) }));
+      if (coords.length === 0) return;
+      out.push({
+        id: idLabel,
+        noticeNumber: idLabel,
+        type: "MANUAL",
+        category: kind.toUpperCase(),
+        country: "USER CHART",
+        region: chartName,
+        title: `${idLabel} (${chartName})`,
+        subject: rawLabel,
+        description: `${rawLabel} — ${chartName}`,
+        rawText: `${rawLabel} — ${chartName}`,
+        isPolygon: false,
+        isLine: coords.length >= 2,
+        isManualUserChart: true,
+        lat: coords[0].lat,
+        lon: coords[0].lon,
+        coords: coords
+      });
+      return;
+    }
 
-  const chkPerm = (document.getElementById("expChkPerm") ? document.getElementById("expChkPerm").checked : true);
+    if (g.type === "Point" && Array.isArray(g.coordinates)) {
+      const cLat = Number(g.coordinates[1]);
+      const cLon = Number(g.coordinates[0]);
+      if (!Number.isFinite(cLat) || !Number.isFinite(cLon)) return;
 
+      if (kind === "circle" && Number.isFinite(Number(props.radiusM))) {
+        const radM = Math.max(10, Number(props.radiusM) || 500);
+        const dLat = radM / 111320;
+        const dLon = radM / (111320 * Math.max(0.08, Math.cos((cLat * Math.PI) / 180)));
+        const steps = 16;
+        const ring = [];
+        for (let s = 0; s < steps; s++) {
+          const ang = (2 * Math.PI * s) / steps;
+          const la = cLat + dLat * Math.sin(ang);
+          const lo = cLon + dLon * Math.cos(ang);
+          ring.push({ lat: la, lon: lo, dms: fmtDms(la, lo) });
+        }
+        ring.push({ lat: ring[0].lat, lon: ring[0].lon, dms: ring[0].dms });
+        out.push({
+          id: idLabel,
+          noticeNumber: idLabel,
+          type: "MANUAL",
+          category: "CIRCLE",
+          country: "USER CHART",
+          region: chartName,
+          title: `${idLabel} R=${Math.round(radM)}m`,
+          subject: `${idLabel} (R=${Math.round(radM)}m)`,
+          description: `Circle R=${Math.round(radM)}m — ${chartName}`,
+          rawText: `Circle R=${Math.round(radM)}m — ${chartName}`,
+          isPolygon: true,
+          isLine: false,
+          isManualUserChart: true,
+          lat: cLat,
+          lon: cLon,
+          coords: ring,
+          subPolygons: [{
+            name: idLabel,
+            category: "circle",
+            coords: ring,
+            points: ring.map((c) => [c.lat, c.lon])
+          }]
+        });
+        return;
+      }
 
-
-  // Automatically export all notices currently active on the chart (filtered by search and active filters)
-
-  return getFilteredNotices().filter(item => {
-
-    if (item.type === "NAVTEX" && !chkNavtex) return false;
-
-    if (item.type === "T" && !chkT) return false;
-
-    if (item.type === "P" && !chkP) return false;
-
-    if (item.type === "PERM" && !chkPerm) return false;
-
-    return true;
-
+      out.push({
+        id: idLabel,
+        noticeNumber: idLabel,
+        type: "MANUAL",
+        category: kind === "text" ? "TEXT" : "POINT",
+        country: "USER CHART",
+        region: chartName,
+        title: rawLabel,
+        subject: rawLabel,
+        description: `${rawLabel} — ${chartName}`,
+        rawText: `${rawLabel} — ${chartName}`,
+        isPolygon: false,
+        isLine: false,
+        isManualUserChart: true,
+        lat: cLat,
+        lon: cLon,
+        coords: [{ lat: cLat, lon: cLon, dms: fmtDms(cLat, cLon) }]
+      });
+    }
   });
 
+  return out;
+}
+
+function getExportSelectedNotices(opts) {
+  const chkNavtex = (document.getElementById("expChkNavtex") ? document.getElementById("expChkNavtex").checked : true);
+  const chkT = (document.getElementById("expChkT") ? document.getElementById("expChkT").checked : true);
+  const chkP = (document.getElementById("expChkP") ? document.getElementById("expChkP").checked : true);
+  const chkPerm = (document.getElementById("expChkPerm") ? document.getElementById("expChkPerm").checked : true);
+
+  const notices = getFilteredNotices().filter(item => {
+    if (item.type === "NAVTEX" && !chkNavtex) return false;
+    if (item.type === "T" && !chkT) return false;
+    if (item.type === "P" && !chkP) return false;
+    if (item.type === "PERM" && !chkPerm) return false;
+    return true;
+  });
+
+  if (opts && opts.excludeManual) {
+    return notices;
+  }
+  const manualNotices = convertManualUserChartFeaturesToNotices();
+  return notices.concat(manualNotices);
 }
 
 
@@ -16860,7 +17004,7 @@ function updateExportModalCounts() {
       : 0;
   if (elManual) elManual.textContent = `${manualCount}`;
 
-  const selected = getExportSelectedNotices();
+  const selected = getExportSelectedNotices({ excludeManual: true });
   let totalPts = 0;
   selected.forEach(s => totalPts += (s.coords ? s.coords.length : 0));
   const includeManual = document.getElementById("expChkManualUc")
@@ -34220,7 +34364,20 @@ function appendManualUserChartToFurunoBuckets(areas, lines, points, labels, esc)
     } else if (g.type === "Point" && g.coordinates) {
       const lon = Number(g.coordinates[0]);
       const lat = Number(g.coordinates[1]);
-      if (props.kind === "text") {
+      if (props.kind === "circle" && Number.isFinite(Number(props.radiusM))) {
+        const radM = Math.max(10, Number(props.radiusM) || 500);
+        const dLat = radM / 111320;
+        const dLon = radM / (111320 * Math.max(0.08, Math.cos((lat * Math.PI) / 180)));
+        const steps = 16;
+        const ring = [];
+        for (let s = 0; s < steps; s++) {
+          const ang = (2 * Math.PI * s) / steps;
+          ring.push([lon + dLon * Math.cos(ang), lat + dLat * Math.sin(ang)]);
+        }
+        ring.push(ring[0].slice());
+        const vtxXml = ring.map((c, i) => `        <vertex id="${i + 1}" latitude="${Number(c[1]).toFixed(6)}" longitude="${Number(c[0]).toFixed(6)}"/>`).join("\n");
+        areas.push(`    <area name="${name}" description="${desc}">\n      <position>\n${vtxXml}\n      </position>\n      <type checkDanger="0" displayRadar="0" hasNotes="0" notesType="0"/>\n    </area>`);
+      } else if (props.kind === "text") {
         labels.push(`    <label name="${name}" description="${name}">\n      <position>\n        <vertex id="1" latitude="${lat.toFixed(6)}" longitude="${lon.toFixed(6)}"/>\n      </position>\n      <attribute labelStyle="2" labelText="${name}"/>\n      <type checkDanger="0" displayRadar="0"/>\n    </label>`);
       } else {
         points.push(`    <point name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${lat.toFixed(6)}" longitude="${lon.toFixed(6)}"/>\n      </position>\n      <type checkDanger="0" displayRadar="0" shape="1" hasNotes="0" notesType="0"/>\n    </point>`);
@@ -34231,7 +34388,7 @@ function appendManualUserChartToFurunoBuckets(areas, lines, points, labels, esc)
 
 function exportUserChartGeoJson() {
 
-  const selectedNotices = typeof getExportSelectedNotices === "function" ? getExportSelectedNotices() : [];
+  const selectedNotices = typeof getExportSelectedNotices === "function" ? getExportSelectedNotices({ excludeManual: true }) : [];
 
   const features = [];
 
@@ -35132,7 +35289,7 @@ function downloadFurunoUserChartXml(notices, filename) {
 
 
   (notices || []).forEach((n, idx) => {
-
+    if (n && n.isManualUserChart) return;
     const name = esc(n.noticeNumber || `NTM-${idx + 1}`);
 
     const desc = esc((n.title || n.category || "").slice(0, 120));
