@@ -49772,54 +49772,51 @@ if (document.readyState === "loading") {
     const visAlarms = (sevFilter === "warning" ? [] : report.alarms).filter(filterFn);
     const visWarnings = (sevFilter === "alarm" ? [] : report.warnings).filter(filterFn);
 
-    // 1. Top Mode & Summary Bar
     const modeSwitchHtml = report.isLiveEligible
       ? '<div class="ntm-mon-mode-seg" role="group" aria-label="Monitoring mode">' +
-          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "live" ? "is-live-on" : "") + '" data-mon-mode="live" title="Live ship-relative bridge monitoring">' +
+          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "live" ? "is-live-on" : "") + '" data-mon-mode="live" title="Live watch">' +
             '<span class="ntm-mon-pulse-dot"></span>Live' +
           '</button>' +
-          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "check" ? "is-check-on" : "") + '" data-mon-mode="check" title="Full static route check from WP1 to end">' +
+          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "check" ? "is-check-on" : "") + '" data-mon-mode="check" title="Static route check">' +
             'Check' +
           '</button>' +
         '</div>'
-      : '<div class="ntm-mon-mode-badge" title="' + escHtml(report.liveUnavailableReason) + '">' +
-          '<span class="ntm-mon-static-dot"></span>ROUTE CHECK' +
+      : '<div class="ntm-mon-mode-badge" title="' + escHtml(report.liveUnavailableReason || "Static route check") + '">' +
+          '<span class="ntm-mon-static-dot"></span>Check' +
         '</div>';
 
     const topBarHtml =
       '<div class="ntm-mon-topbar">' +
         modeSwitchHtml +
         '<div class="ntm-mon-top-actions">' +
-          '<button type="button" class="ntm-mon-sev-chip is-all ' + (sevFilter === "all" ? "active" : "") + '" data-mon-sev="all" title="Show all alerts">All</button>' +
-          '<button type="button" class="ntm-mon-sev-chip is-alarm ' + (sevFilter === "alarm" ? "active" : "") + (report.alarms.length === 0 ? " is-zero" : "") + '" data-mon-sev="alarm" title="Filter Red Alarms">' +
+          '<button type="button" class="ntm-mon-sev-chip is-all ' + (sevFilter === "all" ? "active" : "") + '" data-mon-sev="all" title="All">All</button>' +
+          '<button type="button" class="ntm-mon-sev-chip is-alarm ' + (sevFilter === "alarm" ? "active" : "") + (report.alarms.length === 0 ? " is-zero" : "") + '" data-mon-sev="alarm" title="Alarms">' +
             '<span class="ntm-mon-dot-red"></span>' + report.alarms.length +
           '</button>' +
-          '<button type="button" class="ntm-mon-sev-chip is-warn ' + (sevFilter === "warning" ? "active" : "") + (report.warnings.length === 0 ? " is-zero" : "") + '" data-mon-sev="warning" title="Filter Yellow Warnings">' +
+          '<button type="button" class="ntm-mon-sev-chip is-warn ' + (sevFilter === "warning" ? "active" : "") + (report.warnings.length === 0 ? " is-zero" : "") + '" data-mon-sev="warning" title="Warnings">' +
             '<span class="ntm-mon-dot-amber"></span>' + report.warnings.length +
           '</button>' +
-          '<button type="button" class="ntm-mon-icon-btn ' + (st.monEmailOpen ? "is-open" : "") + (prefs.enabled && userEmail ? " is-armed" : "") + '" id="btnNvMonEmailToggle" title="Email Alert Notifications (' + (userEmail || "Sign in") + ')">' +
+          '<button type="button" class="ntm-mon-icon-btn ' + (st.monEmailOpen ? "is-open" : "") + (prefs.enabled && userEmail ? " is-armed" : "") + '" id="btnNvMonEmailToggle" title="Email alerts">' +
             '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>' +
             (prefs.enabled && userEmail ? '<span class="ntm-mon-armed-dot"></span>' : '') +
           '</button>' +
-          '<button type="button" class="ntm-mon-icon-btn" id="btnNvMonRefresh" title="Re-scan route now">' +
+          '<button type="button" class="ntm-mon-icon-btn" id="btnNvMonRefresh" title="Refresh">' +
             '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
           '</button>' +
         '</div>' +
       '</div>';
 
-    // 2. Collapsible Email Alert Notification Drawer
     let emailDrawerHtml = "";
     if (st.monEmailOpen) {
       if (!userEmail) {
         emailDrawerHtml =
           '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
             '<div class="ntm-mon-email-head">' +
-              '<span>Email Bridge Alerts</span>' +
+              '<span>Email</span>' +
               '<button type="button" class="ntm-mon-email-close" id="btnNvMonEmailClose">×</button>' +
             '</div>' +
             '<div class="ntm-mon-email-guest">' +
-              'Sign in to your SetSail Google account to receive automatic Alarm &amp; Warning dispatches on your login email.' +
-              '<button type="button" class="ntm-mon-email-signin-btn" id="btnNvMonTriggerSignIn">Sign In with Google</button>' +
+              '<button type="button" class="ntm-mon-email-signin-btn" id="btnNvMonTriggerSignIn">Sign in</button>' +
             '</div>' +
           '</div>';
       } else {
@@ -49827,8 +49824,7 @@ if (document.readyState === "loading") {
         emailDrawerHtml =
           '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
             '<div class="ntm-mon-email-head">' +
-              '<div class="ntm-mon-email-acct" title="SetSail login email">' +
-                '<span class="ntm-mon-email-lbl">Account:</span> ' +
+              '<div class="ntm-mon-email-acct" title="' + escHtml(userEmail) + '">' +
                 '<strong>' + escHtml(userEmail) + '</strong>' +
               '</div>' +
               '<button type="button" class="ntm-mon-email-close" id="btnNvMonEmailClose" title="Close">×</button>' +
@@ -49836,9 +49832,9 @@ if (document.readyState === "loading") {
             '<div class="ntm-mon-email-row">' +
               '<label class="ntm-mon-email-switch">' +
                 '<input type="checkbox" id="chkNvMonEmailAuto" ' + (prefs.enabled ? "checked" : "") + ' />' +
-                '<span>Auto-notify on new alerts</span>' +
+                '<span>Auto</span>' +
               '</label>' +
-              '<select id="selNvMonEmailCooldown" class="ntm-mon-email-select" title="Minimum interval between automatic alert emails">' +
+              '<select id="selNvMonEmailCooldown" class="ntm-mon-email-select" title="Cooldown">' +
                 '<option value="15"' + (Number(prefs.cooldownMin) === 15 ? " selected" : "") + '>15m</option>' +
                 '<option value="30"' + (Number(prefs.cooldownMin) === 30 ? " selected" : "") + '>30m</option>' +
                 '<option value="60"' + (Number(prefs.cooldownMin) === 60 ? " selected" : "") + '>1h</option>' +
@@ -49847,50 +49843,48 @@ if (document.readyState === "loading") {
             '</div>' +
             '<div class="ntm-mon-email-row">' +
               '<div class="ntm-mon-lvl-seg">' +
-                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "alarms_only" ? "active" : "") + '" data-mon-email-lvl="alarms_only">Alarms Only</button>' +
-                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "all" ? "active" : "") + '" data-mon-email-lvl="all">Alarms + Warnings</button>' +
+                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "alarms_only" ? "active" : "") + '" data-mon-email-lvl="alarms_only">Alarms</button>' +
+                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "all" ? "active" : "") + '" data-mon-email-lvl="all">All</button>' +
               '</div>' +
             '</div>' +
             '<div class="ntm-mon-email-cats">' +
-              '<label><input type="checkbox" data-mon-email-cat="nav" ' + (cats.nav !== false ? "checked" : "") + ' />Nav/XTD</label>' +
-              '<label><input type="checkbox" data-mon-email-cat="traffic" ' + (cats.traffic !== false ? "checked" : "") + ' />Traffic</label>' +
-              '<label><input type="checkbox" data-mon-email-cat="weather" ' + (cats.weather !== false ? "checked" : "") + ' />Weather</label>' +
+              '<label><input type="checkbox" data-mon-email-cat="nav" ' + (cats.nav !== false ? "checked" : "") + ' />Nav</label>' +
+              '<label><input type="checkbox" data-mon-email-cat="traffic" ' + (cats.traffic !== false ? "checked" : "") + ' />AIS</label>' +
+              '<label><input type="checkbox" data-mon-email-cat="weather" ' + (cats.weather !== false ? "checked" : "") + ' />Wx</label>' +
               '<label><input type="checkbox" data-mon-email-cat="ntm" ' + (cats.ntm !== false ? "checked" : "") + ' />NtM</label>' +
             '</div>' +
             '<div class="ntm-mon-email-actions">' +
               '<button type="button" class="ntm-mon-send-btn" id="btnNvMonSendNow" ' + (st.monEmailSending ? "disabled" : "") + '>' +
-                (st.monEmailSending ? "Sending..." : "Send Report Now") +
+                (st.monEmailSending ? "…" : "Send") +
               '</button>' +
-              '<button type="button" class="ntm-mon-mailto-btn" id="btnNvMonOpenMail" title="Open pre-filled Watch Report in Gmail / Mail client">Gmail / Mail</button>' +
+              '<button type="button" class="ntm-mon-mailto-btn" id="btnNvMonOpenMail" title="Open mail client">Mail</button>' +
             '</div>' +
             ((st.monLastStatusMsg || prefs.lastSentIso)
               ? '<div class="ntm-mon-email-status">' +
-                  escHtml(st.monLastStatusMsg || ("Last sent: " + prefs.lastSentIso)) +
+                  escHtml(st.monLastStatusMsg || ("Sent " + prefs.lastSentIso)) +
                 '</div>'
               : '') +
           '</div>';
       }
     }
 
-    // 3. Blind-Bridge Live Conning HUD (shown when mode === "live") OR concise Static Info Strip
     let hudHtml = "";
     if (report.mode === "live" && report.telemetry) {
       const t = report.telemetry;
-      // Needle position 0..100% where 50% = centerline, 10% = Port XTD rail, 90% = Stbd XTD rail
       const clampedSigned = Math.max(-1.25, Math.min(1.25, t.signedRatio || 0));
       const needlePct = Math.round(50 + clampedSigned * 36);
       const xtdStateCls = Math.abs(t.signedRatio) > 1.0 ? "is-alarm" : (Math.abs(t.signedRatio) >= 0.75 ? "is-warn" : "is-ok");
 
       const turnBadge = t.nextCourseDeg != null && Math.abs(t.turnDegSigned) >= 2
-        ? ((t.turnDegSigned >= 0 ? "R " : "L ") + Math.abs(t.turnDegSigned) + "° → " + String(t.nextCourseDeg).padStart(3, "0") + "°")
-        : "Final leg";
+        ? ((t.turnDegSigned >= 0 ? "R " : "L ") + Math.abs(t.turnDegSigned) + "°")
+        : "—";
 
       hudHtml =
         '<div class="ntm-mon-hud">' +
           '<div class="ntm-mon-hud-xtd ' + xtdStateCls + '">' +
             '<div class="ntm-mon-xtd-top">' +
               '<span class="ntm-mon-xtd-lim">P ' + t.portXtdLimit.toFixed(2) + '</span>' +
-              '<span class="ntm-mon-xtd-val">XTD: <b>' + t.xtdNm.toFixed(2) + ' NM ' + escHtml(t.xtdSide) + '</b></span>' +
+              '<span class="ntm-mon-xtd-val"><b>' + t.xtdNm.toFixed(2) + ' ' + escHtml(t.xtdSide) + '</b></span>' +
               '<span class="ntm-mon-xtd-lim">S ' + t.stbdXtdLimit.toFixed(2) + '</span>' +
             '</div>' +
             '<div class="ntm-mon-xtd-bar">' +
@@ -49902,118 +49896,97 @@ if (document.readyState === "loading") {
           '</div>' +
           '<div class="ntm-mon-hud-grid">' +
             '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">COG / CTS</span>' +
-              '<span class="ntm-mon-hud-num">' + (t.cog != null ? String(t.cog).padStart(3, "0") + "°" : "—") + ' <small>/ ' + String(t.ctsDeg).padStart(3, "0") + '°</small></span>' +
+              '<span class="ntm-mon-hud-lbl">COG</span>' +
+              '<span class="ntm-mon-hud-num">' + (t.cog != null ? String(t.cog).padStart(3, "0") + "°" : "—") + ' <small>' + String(t.ctsDeg).padStart(3, "0") + '°</small></span>' +
             '</div>' +
             '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">SOG / PLAN</span>' +
-              '<span class="ntm-mon-hud-num">' + t.sog.toFixed(1) + ' <small>/ ' + t.plannedSpd.toFixed(1) + ' kn</small></span>' +
+              '<span class="ntm-mon-hud-lbl">SOG</span>' +
+              '<span class="ntm-mon-hud-num">' + t.sog.toFixed(1) + ' <small>' + t.plannedSpd.toFixed(1) + '</small></span>' +
             '</div>' +
             '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">NEXT ' + escHtml(t.nextWpCode) + '</span>' +
-              '<span class="ntm-mon-hud-num">' + t.distToNextWpNm.toFixed(1) + ' NM <small>' + Math.max(1, Math.round(t.ttgNextMin)) + 'm</small></span>' +
+              '<span class="ntm-mon-hud-lbl">' + escHtml(t.nextWpCode) + '</span>' +
+              '<span class="ntm-mon-hud-num">' + t.distToNextWpNm.toFixed(1) + ' <small>' + Math.max(1, Math.round(t.ttgNextMin)) + 'm</small></span>' +
             '</div>' +
             '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">TURN / WOP</span>' +
+              '<span class="ntm-mon-hud-lbl">TURN</span>' +
               '<span class="ntm-mon-hud-num">' + escHtml(turnBadge) + '</span>' +
             '</div>' +
             '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">WIND / SEA</span>' +
-              '<span class="ntm-mon-hud-num">' + escHtml(t.windLabel) + ' <small>' + escHtml(t.waveLabel) + '</small></span>' +
+              '<span class="ntm-mon-hud-lbl">WX</span>' +
+              '<span class="ntm-mon-hud-num">' + escHtml(t.windLabel) + '</span>' +
             '</div>' +
             '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">TRAFFIC CPA</span>' +
+              '<span class="ntm-mon-hud-lbl">CPA</span>' +
               '<span class="ntm-mon-hud-num">' + escHtml(t.aisSummary) + '</span>' +
             '</div>' +
           '</div>' +
           '<div class="ntm-mon-hud-foot">' +
-            '<span>Leg <b>' + t.legNo + '/' + t.totalLegs + '</b></span>' +
-            '<span>Rem <b>' + t.remVoyageNm.toFixed(1) + ' NM</b></span>' +
-            '<span>ETA <b>' + escHtml(t.etaUtcStr) + '</b></span>' +
+            '<span>' + t.legNo + '/' + t.totalLegs + '</span>' +
+            '<span>' + t.remVoyageNm.toFixed(1) + ' NM</span>' +
+            '<span>' + escHtml(t.etaUtcStr) + '</span>' +
           '</div>' +
-        '</div>';
-    } else if (!report.isLiveEligible && report.liveUnavailableReason) {
-      hudHtml =
-        '<div class="ntm-mon-static-hint">' +
-          '<span>' + escHtml(report.liveUnavailableReason) + '</span>' +
         '</div>';
     }
 
-    // 4. Render Scannable 2-Line Alert Cards (Alarms Red -> Warnings Yellow)
     const renderCard = (item) => {
       const isExp = st.monExpandedIds && st.monExpandedIds.has(item.id);
       const sevCls = item.severity === "alarm" ? "is-alarm" : "is-warning";
       const hasCoords = Number.isFinite(item.lat) && Number.isFinite(item.lon);
+      const expandBody = [];
+      if (item.summary) expandBody.push(escHtml(item.summary));
+      if (item.detail) expandBody.push(escHtml(item.detail));
       return (
         '<div class="ntm-mon-card ' + sevCls + (isExp ? " is-expanded" : "") + '" data-mon-card-id="' + escHtml(item.id) + '" ' +
           (hasCoords ? ('data-mon-lat="' + item.lat + '" data-mon-lon="' + item.lon + '" data-mon-zoom="' + (item.zoom || 10) + '" data-mon-sev-kind="' + item.severity + '"') : '') +
-          ' title="Click to locate on chart &amp; view bridge action">' +
+          ' title="Locate on chart">' +
           '<div class="ntm-mon-card-row1">' +
             '<span class="ntm-mon-tag ' + sevCls + '">' + escHtml(item.tag) + '</span>' +
             '<span class="ntm-mon-card-title">' + escHtml(item.title) + '</span>' +
             (item.badge ? '<span class="ntm-mon-card-badge">' + escHtml(item.badge) + '</span>' : '') +
           '</div>' +
-          '<div class="ntm-mon-card-row2">' + escHtml(item.summary) + '</div>' +
-          (isExp && item.detail
-            ? '<div class="ntm-mon-card-detail">' + escHtml(item.detail) + '</div>'
+          (isExp && expandBody.length
+            ? '<div class="ntm-mon-card-detail">' + expandBody.join("<br>") + '</div>'
             : '') +
         '</div>'
       );
     };
 
     let listInnerHtml = "";
-    if (visAlarms.length > 0) {
-      listInnerHtml +=
-        '<div class="ntm-mon-sec-hdr is-alarm">ALARMS (' + visAlarms.length + ')</div>' +
-        visAlarms.map(renderCard).join("");
-    }
-    if (visWarnings.length > 0) {
-      listInnerHtml +=
-        '<div class="ntm-mon-sec-hdr is-warning">WARNINGS (' + visWarnings.length + ')</div>' +
-        visWarnings.map(renderCard).join("");
-    }
-    if (visAlarms.length === 0 && visWarnings.length === 0) {
+    if (visAlarms.length || visWarnings.length) {
+      listInnerHtml += visAlarms.map(renderCard).join("") + visWarnings.map(renderCard).join("");
+    } else {
       listInnerHtml +=
         '<div class="ntm-mon-all-clear">' +
           '<span class="ntm-mon-clear-check">✓</span>' +
-          '<div>' +
-            '<div class="ntm-mon-clear-title">' +
-              (sevFilter !== "all" || catFilter !== "all" ? "No alerts match current filter" : "All Monitored Checks Clear") +
-            '</div>' +
-            '<div class="ntm-mon-clear-sub">' +
-              (report.mode === "live"
-                ? "Track corridor, UKC, TSS, weather, NtM &amp; AIS CPA nominal."
-                : "No land crossings, shoals, TSS violations, storms or NtM hazards on route.") +
-            '</div>' +
+          '<div class="ntm-mon-clear-title">' +
+            (sevFilter !== "all" || catFilter !== "all" ? "No matches" : "Clear") +
           '</div>' +
         '</div>';
     }
 
-    // 5. Collapsible Nominal / Passed Systems Accordion
     if (report.passed.length > 0 && sevFilter === "all") {
       listInnerHtml +=
         '<div class="ntm-mon-passed-wrap">' +
           '<button type="button" class="ntm-mon-passed-toggle" id="btnNvMonPassedToggle" aria-expanded="' + (st.monPassedOpen ? "true" : "false") + '">' +
-            '<span>✓ ' + report.passed.length + ' Nominal Checks Passed</span>' +
+            '<span>' + report.passed.length + ' ok</span>' +
             '<span class="ntm-mon-passed-chev">' + (st.monPassedOpen ? "▴" : "▾") + '</span>' +
           '</button>' +
           (st.monPassedOpen
             ? '<div class="ntm-mon-passed-list">' +
-                report.passed.map((p) => '<div class="ntm-mon-passed-item"><span>✓</span>' + escHtml(p) + '</div>').join("") +
+                report.passed.map((p) => '<div class="ntm-mon-passed-item">' + escHtml(p) + '</div>').join("") +
               '</div>'
             : '') +
         '</div>';
     }
 
-    // 6. Bottom Category Bar + Live Timestamp
-    const nowUtc = new Date().toISOString().slice(11, 19) + " UTC";
+    const nowUtc = new Date().toISOString().slice(11, 16) + "Z";
     const bottomBarHtml =
       '<div class="ntm-mon-bottom-bar">' +
         '<div class="ntm-mon-cat-pills">' +
           '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "all" ? "active" : "") + '" data-mon-cat="all">All</button>' +
           '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "nav" ? "active" : "") + '" data-mon-cat="nav">Nav</button>' +
-          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "traffic" ? "active" : "") + '" data-mon-cat="traffic">Traffic</button>' +
-          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "weather" ? "active" : "") + '" data-mon-cat="weather">Weather</button>' +
+          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "traffic" ? "active" : "") + '" data-mon-cat="traffic">AIS</button>' +
+          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "weather" ? "active" : "") + '" data-mon-cat="weather">Wx</button>' +
           '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "ntm" ? "active" : "") + '" data-mon-cat="ntm">NtM</button>' +
         '</div>' +
         '<span class="ntm-mon-utc-stamp">' + nowUtc + '</span>' +
