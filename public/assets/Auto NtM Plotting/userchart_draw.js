@@ -1,5 +1,5 @@
 /**
- * SetSail — Manual User Chart Draw Suite + Warnings Corridor Filter Panel (v5.275)
+ * SetSail — Manual User Chart Draw Suite + Warnings Corridor Filter Panel (v5.276)
  * --------------------------------------------------------------------------------
  * 6-tool floating eyebrow toolbar (#ssUcDrawRail):
  *   1. Cursor (select)  — Default on Draw activation; normal arrow cursor; pan map;
@@ -8,8 +8,12 @@
  *   2. Brush (brush)    — Brush cursor; map panning disabled; freehand draw with LMB.
  *   3. Shapes (shapes)  — Opens visual block/shape/polygon picker (Rectangle, Circle,
  *                         Ellipse, Triangle, Diamond, Hexagon, Arrow, Polygon);
- *                         hold LMB on contour to resize, hold LMB on interior to move.
- *   4. Text (text)      — Places interactive text field on chart:
+ *                         remembers last chosen shape; auto-resets to Cursor-Arrow
+ *                         immediately after placing a simple shape (polygon stays active
+ *                         while clicking vertices until completed).
+ *   4. Text (text)      — Places interactive text field on chart and immediately resets
+ *                         the tool/cursor back to neutral Cursor-Arrow while focusing
+ *                         the new text box:
  *                         - Drag corner to scale font size up/down;
  *                         - Drag vertical (left/right) borders to widen/narrow 1 line;
  *                         - Drag horizontal (top/bottom) borders to add/remove lines;
@@ -18,6 +22,10 @@
  *                         object deletes it immediately.
  *   6. Color (palette)  — Opens color palette popover (12 marine/ECDIS swatches +
  *                         custom color picker); colors brush, shapes/blocks, and text.
+ *
+ * Also manages #ssUcLayerPanel ("^" popup on the Draw tile):
+ *   - Select active user chart, inline-rename any user chart, add new user charts,
+ *     and delete user charts.
  */
 (function (global) {
   "use strict";
@@ -66,7 +74,7 @@
     overlayOn: false,
     shapesMenuOpen: false,
     paletteOpen: false,
-    action: null, // active drag/resize/brush/erase/create session
+    action: null,
     suppressNextClick: false
   };
 
@@ -86,6 +94,12 @@
       if (raw && Array.isArray(raw.charts) && raw.charts.length) {
         state.charts = raw.charts;
         state.activeId = raw.activeId || raw.charts[0].id;
+        if (raw.lastShapeKind && SHAPE_CATALOG.some(function (s) { return s.kind === raw.lastShapeKind; })) {
+          state.shapeKind = raw.lastShapeKind;
+        }
+        if (raw.lastColor) {
+          state.color = raw.lastColor;
+        }
         return;
       }
     } catch (e) {}
@@ -99,7 +113,13 @@
     try {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ charts: state.charts, activeId: state.activeId, v: 1 })
+        JSON.stringify({
+          charts: state.charts,
+          activeId: state.activeId,
+          lastShapeKind: state.shapeKind,
+          lastColor: state.color,
+          v: 2
+        })
       );
     } catch (e) {}
   }
@@ -286,8 +306,6 @@
         state.selectedFeatureId = fId;
         box.classList.add("is-selected");
         if (state.tool === "select") {
-          // In Cursor-Arrow mode: holding LMB on the interior moves the text box;
-          // double-click or simple click without drag focuses to edit text.
           startTextBoxInteriorDragOrFocus(ev, f, marker, box, ta);
           return;
         }
@@ -416,7 +434,6 @@
       }
 
       if (handle === "edge-r" || handle === "edge-l") {
-        // Vertical borders: expand/shrink single-line width
         var signW = handle === "edge-r" ? 1 : -1;
         f.properties.widthPx = Math.round(Math.max(64, Math.min(680, origWidth + signW * dx)));
         applyBoxDom();
@@ -424,7 +441,6 @@
       }
 
       if (handle === "edge-b" || handle === "edge-t") {
-        // Horizontal borders: add/remove new lines (rows)
         var signH = handle === "edge-b" ? 1 : -1;
         var lh = Math.max(14, Math.round(origFontSize * 1.32));
         var deltaRows = Math.round((signH * dy) / lh);
@@ -450,7 +466,6 @@
       }
 
       if (handle && handle.indexOf("corner-") === 0) {
-        // Corner handles: increase/decrease text font size
         var sx = (handle === "corner-tr" || handle === "corner-br") ? 1 : -1;
         var sy = (handle === "corner-bl" || handle === "corner-br") ? 1 : -1;
         var diagDelta = (sx * dx + sy * dy) * 0.5;
@@ -507,7 +522,7 @@
                 ta.select();
               }
             } catch (eF) {}
-          }, 20);
+          }, 25);
         }
       }
 
@@ -633,7 +648,6 @@
     var dy = Math.abs(ptB.y - ptA.y);
     var p1, p2;
     if (dx < 8 && dy < 8) {
-      // Single click: place a well-proportioned block centered at ptA
       p1 = m.containerPointToLatLng([ptA.x - 56, ptA.y + 42]);
       p2 = m.containerPointToLatLng([ptA.x + 56, ptA.y - 42]);
     } else {
@@ -878,7 +892,7 @@
     if (!state.overlayOn) return;
     if (!e || !e.originalEvent || e.originalEvent.button !== 0) return;
     var origTarget = e.originalEvent.target;
-    if (origTarget && origTarget.closest && origTarget.closest("#ssUcDrawRail, #ssUcShapesMenu, #ssUcPalettePopover, .ss-uc-textbox")) {
+    if (origTarget && origTarget.closest && origTarget.closest("#ssUcDrawRail, #ssUcShapesMenu, #ssUcPalettePopover, #ssUcLayerPanel, .ss-uc-textbox")) {
       return;
     }
     var m = map();
@@ -967,7 +981,8 @@
       }
     }
 
-    // 4. SHAPES TOOL on empty chart space: place or drag-create a new block/shape
+    // 4. SHAPES TOOL on empty chart space (for simple shapes, i.e. shapeKind !== "polygon"):
+    //    place or drag-create the shape, then auto-reset to Cursor-Arrow ("select") on mouseup!
     if (tool === "shapes" && state.shapeKind !== "polygon") {
       closeFloatingMenus();
       L.DomEvent.stop(e);
@@ -1090,7 +1105,6 @@
       }
     }
 
-    // Hover feedback when no drag action is running
     if (state.tool === "select" || state.tool === "shapes") {
       var hoverHit = hitTestAllFeatures(pt);
       if (hoverHit) {
@@ -1132,6 +1146,10 @@
       var created = createShapeFeatureFromScreenBox(act.shapeKind, act.startPt, act.curPt);
       if (created) {
         pushFeature(created);
+        // Auto-reset cursor back to neutral Cursor-Arrow ("select") after placing a simple shape,
+        // while keeping state.shapeKind remembered for the next time the user clicks Shapes!
+        setTool("select");
+        return;
       }
     }
 
@@ -1145,7 +1163,7 @@
       return;
     }
     var origTarget = e && e.originalEvent && e.originalEvent.target;
-    if (origTarget && origTarget.closest && origTarget.closest("#ssUcDrawRail, #ssUcShapesMenu, #ssUcPalettePopover, .ss-uc-textbox")) {
+    if (origTarget && origTarget.closest && origTarget.closest("#ssUcDrawRail, #ssUcShapesMenu, #ssUcPalettePopover, #ssUcLayerPanel, .ss-uc-textbox")) {
       return;
     }
     closeFloatingMenus();
@@ -1174,9 +1192,12 @@
         },
         idT
       );
+      // Auto-reset tool & cursor back to neutral Cursor-Arrow ("select") as soon as the text box is placed on the chart
+      setTool("select", { focusTextId: idT });
       return;
     }
 
+    // Free Polygon exception: keeps adding new lines/vertices on each click without resetting to select
     if (tool === "shapes" && state.shapeKind === "polygon") {
       L.DomEvent.stopPropagation(e);
       if (state.draftPts.length >= 3) {
@@ -1288,6 +1309,7 @@
   function setColor(newColor) {
     if (!newColor) return;
     state.color = newColor;
+    persist();
     if (state.selectedFeatureId) {
       var f = findFeatureById(state.selectedFeatureId);
       if (f) {
@@ -1300,17 +1322,17 @@
     syncToolbarUI();
   }
 
-  function setTool(tool) {
+  function setTool(tool, opts) {
     state.tool = tool || "select";
     clearDraft();
     setMapHoverCursor("");
     syncMapCursorClasses();
     syncMapDragState();
     syncToolbarUI();
-    rebuildMapLayers();
+    rebuildMapLayers(opts && opts.focusTextId ? opts.focusTextId : null);
   }
 
-  function setOverlayActive(on) {
+  function setOverlayActive(on, opts) {
     state.overlayOn = !!on;
     var rail = document.getElementById("ssUcDrawRail");
     if (rail) rail.hidden = !state.overlayOn;
@@ -1322,7 +1344,6 @@
     closeFloatingMenus();
     if (state.overlayOn) {
       bindMapHandlers();
-      // Default tool on activating Draw is ALWAYS Cursor-Arrow ("select")
       setTool("select");
     } else {
       clearDraft();
@@ -1330,7 +1351,9 @@
       setTool("select");
       syncMapCursorClasses();
       syncMapDragState();
-      closeLayerPanel();
+      if (!(opts && opts.keepLayerPanelOpen)) {
+        closeLayerPanel();
+      }
     }
     rebuildMapLayers();
     if (global.OVERLAY_STATES) global.OVERLAY_STATES.userchart = state.overlayOn;
@@ -1362,26 +1385,38 @@
     }
   }
 
-  function renderLayerList() {
+  /* ── Manual User Charts "^" Flyout Popup (#ssUcLayerPanel) ── */
+  function renderLayerList(focusNameId) {
     var list = document.getElementById("ssUcLayerList");
     if (!list) return;
     list.innerHTML = "";
     state.charts.forEach(function (c) {
+      var isAct = c.id === state.activeId;
       var row = document.createElement("div");
-      row.className = "ss-uc-layer-row" + (c.id === state.activeId ? " is-active" : "");
+      row.className = "ss-uc-layer-row" + (isAct ? " is-active" : "");
+      row.setAttribute("data-id", c.id);
       var nFeat = (c.features || []).length;
       row.innerHTML =
-        '<button type="button" class="ss-uc-layer-pick" data-id="' +
-        c.id +
-        '"><span class="ss-uc-layer-name"></span><span class="ss-uc-layer-meta">' +
-        nFeat +
-        " obj</span></button>" +
-        '<button type="button" class="ss-uc-layer-del" data-id="' +
-        c.id +
-        '" title="Delete chart" aria-label="Delete">×</button>';
-      row.querySelector(".ss-uc-layer-name").textContent = c.name || "Untitled";
+        '<button type="button" class="ss-uc-layer-pick" data-id="' + escapeHtml(c.id) + '" title="Activate this user chart" aria-label="Activate user chart">' +
+          '<span class="ss-uc-layer-radio' + (isAct ? " is-on" : "") + '"></span>' +
+        '</button>' +
+        '<input type="text" class="ss-uc-layer-name-input" data-id="' + escapeHtml(c.id) + '" value="' + escapeHtml(c.name || "Untitled") + '" spellcheck="false" title="Click to edit user chart name" aria-label="User chart name" />' +
+        '<span class="ss-uc-layer-meta" data-meta-id="' + escapeHtml(c.id) + '">' + nFeat + ' obj</span>' +
+        '<button type="button" class="ss-uc-layer-del" data-id="' + escapeHtml(c.id) + '" title="Delete user chart" aria-label="Delete">×</button>';
       list.appendChild(row);
     });
+
+    if (focusNameId) {
+      setTimeout(function () {
+        try {
+          var inp = list.querySelector('.ss-uc-layer-name-input[data-id="' + focusNameId + '"]');
+          if (inp) {
+            inp.focus();
+            inp.select();
+          }
+        } catch (eF) {}
+      }, 20);
+    }
   }
 
   function openLayerPanel() {
@@ -1391,7 +1426,10 @@
       panel.hidden = false;
       panel.classList.add("is-open");
     }
-    if (btn) btn.setAttribute("aria-expanded", "true");
+    if (btn) {
+      btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-open");
+    }
     renderLayerList();
   }
 
@@ -1402,35 +1440,56 @@
       panel.hidden = true;
       panel.classList.remove("is-open");
     }
-    if (btn) btn.setAttribute("aria-expanded", "false");
+    if (btn) {
+      btn.setAttribute("aria-expanded", "false");
+      btn.classList.remove("is-open");
+    }
   }
 
   function toggleLayerPanel(e) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
     }
     var panel = document.getElementById("ssUcLayerPanel");
     if (panel && !panel.hidden) closeLayerPanel();
     else openLayerPanel();
   }
 
+  function nextChartName() {
+    var used = Object.create(null);
+    state.charts.forEach(function (c) {
+      used[String(c.name || "").trim().toLowerCase()] = true;
+    });
+    var idx = state.charts.length + 1;
+    while (used[("user chart " + idx).toLowerCase()]) {
+      idx++;
+    }
+    return "User Chart " + idx;
+  }
+
   function createChart() {
-    var n = state.charts.length + 1;
-    var blank = { id: uid(), name: "User Chart " + n, features: [] };
+    var blank = { id: uid(), name: nextChartName(), features: [] };
     state.charts.push(blank);
     state.activeId = blank.id;
+    state.selectedFeatureId = null;
     persist();
-    renderLayerList();
-    rebuildMapLayers();
-    if (!state.overlayOn && typeof global.setOverlayActive === "function") {
-      global.setOverlayActive("userchart", true, map());
+    if (!state.overlayOn) {
+      if (typeof global.setOverlayActive === "function") {
+        global.setOverlayActive("userchart", true, map());
+      } else {
+        setOverlayActive(true);
+      }
     } else {
-      setOverlayActive(true);
+      rebuildMapLayers();
     }
+    openLayerPanel();
+    renderLayerList(blank.id);
   }
 
   function deleteChart(id) {
+    if (!id) return;
     if (state.charts.length <= 1) {
       var only = state.charts[0];
       if (only) {
@@ -1440,23 +1499,52 @@
       }
     } else {
       state.charts = state.charts.filter(function (c) { return c.id !== id; });
-      if (state.activeId === id) state.activeId = state.charts[0].id;
+      if (state.activeId === id) {
+        state.activeId = state.charts[0].id;
+      }
     }
+    state.selectedFeatureId = null;
     persist();
     renderLayerList();
     rebuildMapLayers();
   }
 
-  function selectChart(id) {
+  function selectChart(id, skipRerenderList) {
+    if (!id) return;
     state.activeId = id;
+    state.selectedFeatureId = null;
     persist();
-    renderLayerList();
-    rebuildMapLayers();
-    if (!state.overlayOn && typeof global.setOverlayActive === "function") {
-      global.setOverlayActive("userchart", true, map());
+    if (!skipRerenderList) {
+      renderLayerList();
     } else {
-      setOverlayActive(true);
+      var list = document.getElementById("ssUcLayerList");
+      if (list) {
+        list.querySelectorAll(".ss-uc-layer-row").forEach(function (r) {
+          var isAct = r.getAttribute("data-id") === id;
+          r.classList.toggle("is-active", isAct);
+          var rad = r.querySelector(".ss-uc-layer-radio");
+          if (rad) rad.classList.toggle("is-on", isAct);
+        });
+      }
     }
+    if (!state.overlayOn) {
+      if (typeof global.setOverlayActive === "function") {
+        global.setOverlayActive("userchart", true, map());
+      } else {
+        setOverlayActive(true);
+      }
+    } else {
+      rebuildMapLayers();
+    }
+  }
+
+  function renameChart(id, newName) {
+    if (!id) return;
+    var c = state.charts.find(function (item) { return item.id === id; });
+    if (!c) return;
+    var trimmed = String(newName != null ? newName : "").trim();
+    c.name = trimmed || "Untitled Chart";
+    persist();
   }
 
   /* ── Warnings corridor filter panel ── */
@@ -1503,6 +1591,7 @@
     if (e) {
       e.preventDefault();
       e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
     }
     var panel = document.getElementById("ssWarnFilterPanel");
     var btn = document.getElementById("btnNtmWarnFilterToggle");
@@ -1566,7 +1655,13 @@
     function bindChevron(el, handler) {
       if (!el || el.dataset.ssWired) return;
       el.dataset.ssWired = "1";
-      el.addEventListener("click", handler);
+      el.addEventListener("pointerdown", function (ev) {
+        ev.stopPropagation();
+      }, true);
+      el.addEventListener("mousedown", function (ev) {
+        ev.stopPropagation();
+      }, true);
+      el.addEventListener("click", handler, true);
       el.addEventListener("keydown", function (ev) {
         if (ev.key === "Enter" || ev.key === " ") {
           ev.preventDefault();
@@ -1574,11 +1669,14 @@
         }
       });
     }
+
     bindChevron(document.getElementById("btnNtmWarnFilterToggle"), toggleWarnFilterPanel);
     var warnPanel = document.getElementById("ssWarnFilterPanel");
     if (warnPanel && !warnPanel.dataset.ssWired) {
       warnPanel.dataset.ssWired = "1";
-      warnPanel.addEventListener("click", function (e) { e.stopPropagation(); });
+      ["pointerdown", "mousedown", "click", "dblclick"].forEach(function (evName) {
+        warnPanel.addEventListener(evName, function (e) { e.stopPropagation(); });
+      });
       var chk = document.getElementById("ssWarnCorrEnable");
       var rng = document.getElementById("ssWarnCorrNm");
       if (chk) chk.addEventListener("change", applyWarnFilterFromPanel);
@@ -1596,26 +1694,101 @@
     var layerPanel = document.getElementById("ssUcLayerPanel");
     if (layerPanel && !layerPanel.dataset.ssWired) {
       layerPanel.dataset.ssWired = "1";
-      layerPanel.addEventListener("click", function (e) { e.stopPropagation(); });
-      var addBtn = document.getElementById("ssUcLayerAdd");
-      if (addBtn) addBtn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        createChart();
+      ["pointerdown", "mousedown", "dblclick"].forEach(function (evName) {
+        layerPanel.addEventListener(evName, function (e) { e.stopPropagation(); });
       });
+
       layerPanel.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var addBtn = e.target.closest("#ssUcLayerAdd, .ss-uc-layer-add");
+        if (addBtn) {
+          e.preventDefault();
+          createChart();
+          return;
+        }
         var del = e.target.closest(".ss-uc-layer-del");
         if (del) {
-          e.stopPropagation();
+          e.preventDefault();
           deleteChart(del.getAttribute("data-id"));
           return;
         }
         var pick = e.target.closest(".ss-uc-layer-pick");
         if (pick) {
-          e.stopPropagation();
-          selectChart(pick.getAttribute("data-id"));
+          e.preventDefault();
+          selectChart(pick.getAttribute("data-id"), false);
+          return;
+        }
+        var nameInp = e.target.closest(".ss-uc-layer-name-input");
+        if (nameInp) {
+          var cid = nameInp.getAttribute("data-id");
+          if (cid && cid !== state.activeId) {
+            selectChart(cid, true);
+          }
+          return;
+        }
+        var row = e.target.closest(".ss-uc-layer-row");
+        if (row && row.getAttribute("data-id")) {
+          selectChart(row.getAttribute("data-id"), false);
+        }
+      });
+
+      layerPanel.addEventListener("input", function (e) {
+        var inp = e.target.closest(".ss-uc-layer-name-input");
+        if (!inp) return;
+        e.stopPropagation();
+        var cid = inp.getAttribute("data-id");
+        if (cid) {
+          var c = state.charts.find(function (item) { return item.id === cid; });
+          if (c) {
+            c.name = inp.value;
+            persist();
+          }
+        }
+      });
+
+      layerPanel.addEventListener("change", function (e) {
+        var inp = e.target.closest(".ss-uc-layer-name-input");
+        if (!inp) return;
+        e.stopPropagation();
+        var cid = inp.getAttribute("data-id");
+        renameChart(cid, inp.value);
+        var c = state.charts.find(function (item) { return item.id === cid; });
+        if (c) inp.value = c.name;
+      });
+
+      layerPanel.addEventListener("keydown", function (e) {
+        e.stopPropagation();
+        var inp = e.target.closest(".ss-uc-layer-name-input");
+        if (!inp) return;
+        if (e.key === "Enter" || e.key === "Escape") {
+          e.preventDefault();
+          renameChart(inp.getAttribute("data-id"), inp.value);
+          try { inp.blur(); } catch (eB) {}
         }
       });
     }
+
+    // Close #ssUcLayerPanel or #ssWarnFilterPanel when clicking outside their stacks
+    document.addEventListener("mousedown", function (e) {
+      var ucPanel = document.getElementById("ssUcLayerPanel");
+      if (ucPanel && !ucPanel.hidden) {
+        if (!e.target.closest("#userChartTabStack")) {
+          closeLayerPanel();
+        }
+      }
+      var wPanel = document.getElementById("ssWarnFilterPanel");
+      if (wPanel && !wPanel.hidden) {
+        if (!e.target.closest("#warningsTabStack")) {
+          wPanel.hidden = true;
+          wPanel.classList.remove("is-open");
+          var wBtn = document.getElementById("btnNtmWarnFilterToggle");
+          if (wBtn) {
+            wBtn.setAttribute("aria-expanded", "false");
+            wBtn.classList.remove("is-open");
+          }
+        }
+      }
+    });
 
     var rail = document.getElementById("ssUcDrawRail");
     if (rail && !rail.dataset.ssWired) {
@@ -1631,6 +1804,7 @@
         var shapeItem = e.target.closest("[data-uc-shape]");
         if (shapeItem) {
           state.shapeKind = shapeItem.getAttribute("data-uc-shape") || "rect";
+          persist();
           state.shapesMenuOpen = false;
           var sm = document.getElementById("ssUcShapesMenu");
           if (sm) sm.hidden = true;
@@ -1654,6 +1828,7 @@
         }
         if (tool === "shapes") {
           if (state.tool !== "shapes") {
+            // Re-activate Shapes mode with the last remembered state.shapeKind
             setTool("shapes");
             state.shapesMenuOpen = true;
             var sm2 = document.getElementById("ssUcShapesMenu");
