@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-27T23:15:25Z",
-  "generatedAt": "2026-11-27T23:15:25Z",
+  "updatedAt": "2026-11-28T06:34:32Z",
+  "generatedAt": "2026-11-28T06:34:32Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -13,6 +13,176 @@
   ],
   "totalArticles": 60,
   "articles": [
+    {
+      "id": "SN-219752A6CB",
+      "title": "CU Lines adds Thailand–Malaysia link as Zhonggu launches Dongguan service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cu-lines-adds-thailand-malaysia-link-as-zhonggu-launches-dongguan-service/",
+      "publishedAt": "2026-11-28T06:00:28Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/images-16-1-300x204.jpg",
+      "summary": "CU Lines will begin taking slots between Laem Chabang and Port Klang in December, according to DynaLiners. The carrier will market the connection as Malaysia–Thailand (MT1). The arrangement covers the Laem Chabang–Port Klang leg of the AGI service, which COSCO Shipping Lines, DP World Shipping Solutions and Evergreen...",
+      "body": "Services Top Right CU Lines adds Thailand–Malaysia link as Zhonggu launches Dongguan service November 28, 2026 Facebook Twitter WhatsApp Linkedin Email CU Lines will begin taking slots between Laem Chabang and Port Klang in December, according to DynaLiners. The carrier will market the connection as Malaysia–Thailand (MT1). The arrangement covers the Laem Chabang–Port Klang leg of the AGI service, which COSCO Shipping Lines, DP World Shipping Solutions and Evergreen operate between Southeast Asia and the Indian Subcontinent. Separately, Zhonggu Logistics launched a direct service between Dongguan, China, and Laem Chabang, Thailand, in October. The service runs approximately every two weeks with a single vessel of about 950 TEU. TAGS AGI CU Lines Dongguan Dynaliners LAEM CHABANG MT1 Port Klang Zhonggu Logistics Facebook Twitter WhatsApp Linkedin Email Previous article CMA CGM adds feeder link from Mombasa to Afungi Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier will market the connection as Malaysia–Thailand (MT1).",
+        "The arrangement covers the Laem Chabang–Port Klang leg of the AGI service, which COSCO Shipping Lines, DP World Shipping Solutions and Evergreen operate between Southeast Asia and the Indian Subcontinent.",
+        "Separately, Zhonggu Logistics launched a direct service between Dongguan, China, and Laem Chabang, Thailand, in October."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-4FD4E56255",
+      "title": "CMA CGM adds feeder link from Mombasa to Afungi",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cma-cgm-adds-feeder-link-from-mombasa-to-afungi/",
+      "publishedAt": "2026-11-28T04:00:27Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/cma-cgm-and-dsv-press-release-october2026-300x225.webp",
+      "summary": "CMA CGM has introduced a container feeder link between Mombasa, Kenya, and Afungi, near Palma in northern Mozambique, according to DynaLiners. The carrier markets the connection as the Mombasa Afungi Feeder Service (MOMAF1), with sailings approximately every two weeks. CMA CGM takes slots on a 220 TEU multipurpose...",
+      "body": "Services Top Right CMA CGM adds feeder link from Mombasa to Afungi November 28, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM has introduced a container feeder link between Mombasa, Kenya, and Afungi, near Palma in northern Mozambique, according to DynaLiners. The carrier markets the connection as the Mombasa Afungi Feeder Service (MOMAF1), with sailings approximately every two weeks. CMA CGM takes slots on a 220 TEU multipurpose vessel deployed by Kenya’s Alpha Logistics Services. The vessel also regularly calls at other East African ports. Afungi serves as a gateway to the Mozambique LNG construction site near Palma. Work on the project resumed in January after a suspension of almost five years, DynaLiners reported TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article Wan Hai announces order for more than 110,000 containers Next article CU Lines adds Thailand–Malaysia link as Zhonggu launches Dongguan service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier markets the connection as the Mombasa Afungi Feeder Service (MOMAF1), with sailings approximately every two weeks.",
+        "CMA CGM takes slots on a 220 TEU multipurpose vessel deployed by Kenya’s Alpha Logistics Services.",
+        "The vessel also regularly calls at other East African ports."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-E81BA6222F",
+      "title": "Wan Hai announces order for more than 110,000 containers",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/wan-hai-announces-order-for-more-than-110000-containers/",
+      "publishedAt": "2026-11-28T02:10:23Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "china"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2021/09/Wan-Hai-container-300x225.jpg",
+      "summary": "Wan Hai Lines has announced a programme to build 110,050 shipping containers across four manufacturers. CIMC will build the largest share, with 45,800 units under a US$145 million contract. Manufacturer Containers Contract value CIMC 45,800 US$145 million Dong Fang International Containers 23,050 US$65 million Pan...",
+      "body": "News Top Right Wan Hai announces order for more than 110,000 containers November 28, 2026 Facebook Twitter WhatsApp Linkedin Email Wan Hai Lines has announced a programme to build 110,050 shipping containers across four manufacturers. CIMC will build the largest share, with 45,800 units under a US$145 million contract. Manufacturer Containers Contract value CIMC 45,800 US$145 million Dong Fang International Containers 23,050 US$65 million Pan Ocean Container Supplies 24,200 US$69 million Singamas 17,000 US$47 million Total 110,050 US$326 million TAGS WAN HAI Facebook Twitter WhatsApp Linkedin Email Previous article GT Lines joins CU Lines’ China–Gulf Express as service goes weekly Next article CMA CGM adds feeder link from Mombasa to Afungi Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "CIMC will build the largest share, with 45,800 units under a US$145 million contract.",
+        "Operational Area: China & East Asia.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-F05A7EE8A7",
+      "title": "GT Lines joins CU Lines’ China–Gulf Express as service goes weekly",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/gt-lines-joins-cu-lines-china-gulf-express-as-service-goes-weekly/",
+      "publishedAt": "2026-11-28T00:20:16Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/images-13-300x168.jpg",
+      "summary": "GT Lines, the container shipping arm of Gulftainer, has joined CU Lines’ China–Gulf Express (CGX), according to DynaLiners. GT Lines will market the service under the KCX5 code. The service is set to move to weekly sailings from one sailing every 23 days. It previously operated with two vessels of 8,600 TEU and...",
+      "body": "Services Top Right GT Lines joins CU Lines’ China–Gulf Express as service goes weekly November 28, 2026 Facebook Twitter WhatsApp Linkedin Email GT Lines, the container shipping arm of Gulftainer, has joined CU Lines’ China–Gulf Express (CGX), according to DynaLiners. GT Lines will market the service under the KCX5 code. The service is set to move to weekly sailings from one sailing every 23 days. It previously operated with two vessels of 8,600 TEU and 10,100 TEU. The revised rotation will drop Duqm, reversing the addition of the Omani port reported earlier in November. TAGS CGX China–Gulf Express CU Lines Duqm Dynaliners GT Lines GULFTAINER KCX5 Facebook Twitter WhatsApp Linkedin Email Previous article ZIM restarts Levant Black Sea Express without Alexandria call Next article Wan Hai announces order for more than 110,000 containers Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "GT Lines will market the service under the KCX5 code.",
+        "The service is set to move to weekly sailings from one sailing every 23 days.",
+        "It previously operated with two vessels of 8,600 TEU and 10,100 TEU."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-DB91BCFDC9",
+      "title": "Container fleet correction set for 2028",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/containers/container-fleet-correction-set-for-2028",
+      "publishedAt": "2026-11-27T23:45:34Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "container"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltb99c4b85b0fd7500/6aed84eb26a072e623316a27/Containers_stacked_at_Port_of_Oakland_credit_Port_of_Oakland.jpg?width=720&quality=80&disable=upscale",
+      "summary": "Shipbroker Braemar believes that the fleet correction is coming, but the major influx of capacity will be in 2028, the immediate future is less certain.",
+      "body": "Shipbroker Braemar believes that the fleet correction is coming, but the major influx of capacity will be in 2028, the immediate future is less certain.",
+      "takeaways": [
+        "Shipbroker Braemar believes that the fleet correction is coming, but the major influx of capacity will be in 2028, the immediate future is less certain.",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-CBB339C177",
       "title": "ZIM restarts Levant Black Sea Express without Alexandria call",
@@ -30,7 +200,8 @@
       ],
       "tags": [
         "container",
-        "port"
+        "port",
+        "china"
       ],
       "coords": [
         13.5,
@@ -39,7 +210,7 @@
       "navarea": "IX",
       "image": "https://container-news.com/wp-content/uploads/2026/11/ZIM-Photo-Credit-Wellington-Luck-300x169.jpg",
       "summary": "ZIM has resumed its Levant Black Sea Express (LBX), restoring feeder links between Israel and the Black Sea ports of Constanta and Varna. The revised rotation no longer includes Alexandria. According to DynaLiners, the fortnightly service had been suspended after the loss of its vessel off Bulgaria in late October....",
-      "body": "Services Sticky News ZIM restarts Levant Black Sea Express without Alexandria call November 28, 2026 Facebook Twitter WhatsApp Linkedin Email ZIM Vessel Photo Credit: Wellington Luck ZIM has resumed its Levant Black Sea Express (LBX), restoring feeder links between Israel and the Black Sea ports of Constanta and Varna. The revised rotation no longer includes Alexandria. According to DynaLiners, the fortnightly service had been suspended after the loss of its vessel off Bulgaria in late October. The replacement ship can carry 800 TEU, compared with 1,300 TEU for its predecessor. The revised rotation is: Ashdod – Haifa – Constanta – Varna – Ashdod. ZIM said Black Sea-bound cargo already in transit on its network will be discharged at Haifa and transferred to LBX for onward shipment to Constanta or Varna. TAGS Zim Integrated Shipping Services Facebook Twitter WhatsApp Linkedin Email Previous article Global Feeder Shipping restructures Djibouti JSA feeder service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Services Sticky News ZIM restarts Levant Black Sea Express without Alexandria call November 28, 2026 Facebook Twitter WhatsApp Linkedin Email ZIM Vessel Photo Credit: Wellington Luck ZIM has resumed its Levant Black Sea Express (LBX), restoring feeder links between Israel and the Black Sea ports of Constanta and Varna. The revised rotation no longer includes Alexandria. According to DynaLiners, the fortnightly service had been suspended after the loss of its vessel off Bulgaria in late October. The replacement ship can carry 800 TEU, compared with 1,300 TEU for its predecessor. The revised rotation is: Ashdod – Haifa – Constanta – Varna – Ashdod. ZIM said Black Sea-bound cargo already in transit on its network will be discharged at Haifa and transferred to LBX for onward shipment to Constanta or Varna. TAGS Zim Integrated Shipping Services Facebook Twitter WhatsApp Linkedin Email Previous article Global Feeder Shipping restructures Djibouti JSA feeder service Next article GT Lines joins CU Lines’ China–Gulf Express as service goes weekly Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "The revised rotation no longer includes Alexandria.",
         "According to DynaLiners, the fortnightly service had been suspended after the loss of its vessel off Bulgaria in late October.",
@@ -572,7 +743,7 @@
       "navarea": "XI",
       "image": "https://splash247.com/wp-content/uploads/2024/11/Khalid-Hashim-300x180.jpg",
       "summary": "Thailand’s Precious Shipping is lining up the acquisition of five more vessels through a fresh series of joint ventures with Malaysia’s Emstraits Navigation and Singapore-based Lianson Fleet. The Khalid Hashim-led dry bulk owner said its wholly owned Singapore subsidiary, PSL Energy, had signed five joint venture...",
-      "body": "Asia Dry Cargo Tankers Precious Shipping lines up five-ship buying spree Adis Ajdin November 28, 2026 0 0 1 minute read Thailand’s Precious Shipping is lining up the acquisition of five more vessels through a fresh series of joint ventures with Malaysia’s Emstraits Navigation and Singapore-based Lianson Fleet. The Khalid Hashim-led dry bulk owner said its wholly owned Singapore subsidiary, PSL Energy, had signed five joint venture agreements with the two companies, paving the way for five separate shipowning entities in Singapore. Each venture will acquire, own and operate one vessel, although ship types, acquisition prices and delivery schedules have yet to be disclosed. Precious and Lianson will each hold 49% of the new companies, with Emstraits taking the remaining 2%. The five ventures, provisionally named Nusantara Dahlia, Nusantara Hibiscus, Nusantara Iris, Nusantara Jasmines and Nusantara Lotus , are expected to be established within a month. The latest agreements build on an existing partnership between the three companies, which joined forces in March 2025 to establish Malaysia-based Nusantara Maritime, with Precious and Lianson each holding 45% and Emstraits controlling 10%. That venture has already taken Precious into the product tanker market. Earlier this year, the partners acquired the 2012-built, 51,758 dwt MR tanker High Tide for $28.45m. The vessel, since renamed Nusa Orchid , joined the Singapore-based Nusantara Orchid venture earlier this month. Precious has been widening its exposure beyond dry bulk while pressing ahead with the renewal of its core fleet. In September, the Bangkok-based owner ordered four 64,500 dwt ultramaxes at China’s Taizhou Sanfu Ship Engineering for a combined $141.8m, with deliveries stretching from 2030 into early 2031. Tags Thailand Adis Ajdin November 28, 2026 0 0 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Asia Dry Cargo Tankers Precious Shipping lines up five-ship buying spree Adis Ajdin November 28, 2026 0 178 1 minute read Thailand’s Precious Shipping is lining up the acquisition of five more vessels through a fresh series of joint ventures with Malaysia’s Emstraits Navigation and Singapore-based Lianson Fleet. The Khalid Hashim-led dry bulk owner said its wholly owned Singapore subsidiary, PSL Energy, had signed five joint venture agreements with the two companies, paving the way for five separate shipowning entities in Singapore. Each venture will acquire, own and operate one vessel, although ship types, acquisition prices and delivery schedules have yet to be disclosed. Precious and Lianson will each hold 49% of the new companies, with Emstraits taking the remaining 2%. The five ventures, provisionally named Nusantara Dahlia, Nusantara Hibiscus, Nusantara Iris, Nusantara Jasmines and Nusantara Lotus , are expected to be established within a month. The latest agreements build on an existing partnership between the three companies, which joined forces in March 2025 to establish Malaysia-based Nusantara Maritime, with Precious and Lianson each holding 45% and Emstraits controlling 10%. That venture has already taken Precious into the product tanker market. Earlier this year, the partners acquired the 2012-built, 51,758 dwt MR tanker High Tide for $28.45m. The vessel, since renamed Nusa Orchid , joined the Singapore-based Nusantara Orchid venture earlier this month. Precious has been widening its exposure beyond dry bulk while pressing ahead with the renewal of its core fleet. In September, the Bangkok-based owner ordered four 64,500 dwt ultramaxes at China’s Taizhou Sanfu Ship Engineering for a combined $141.8m, with deliveries stretching from 2030 into early 2031. Tags Thailand Adis Ajdin November 28, 2026 0 178 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Each venture will acquire, own and operate one vessel, although ship types, acquisition prices and delivery schedules have yet to be disclosed.",
         "Precious and Lianson will each hold 49% of the new companies, with Emstraits taking the remaining 2%.",
@@ -611,42 +782,6 @@
         "The vessels were originally ordered by Greece’s Cosmoship and are due for delivery in mid-2027.",
         "Separately, Greek shipowner Costamare has increased the capacity of five containerships built in 2016 from 14,400 TEU to at least 15,000 TEU each.",
         "Huarun Dadong Shipyard raised the height of 17 lashing bridges to increase container capacity and carried out other modifications unrelated to the capacity upgrade."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A42AFA5B5C",
-      "title": "Evergreen, OOCL and X-Press Feeders drop Port Klang from Kenya service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/evergreen-oocl-and-x-press-feeders-drop-port-klang-from-kenya-service/",
-      "publishedAt": "2026-11-27T16:00:22Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "singapore"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2024/12/Evergreen-container-300x169.png",
-      "summary": "Evergreen, OOCL and X-Press Feeders have removed the southbound Port Klang call from their joint Far East–Kenya service, according to DynaLiners. The service, marketed as AEF, EAX3 and MFX, will sail from Nansha to Singapore and then directly to Mombasa before returning to Qingdao. The revised rotation is: Qingdao –...",
-      "body": "Services Top Right Evergreen, OOCL and X-Press Feeders drop Port Klang from Kenya service November 27, 2026 Facebook Twitter WhatsApp Linkedin Email Evergreen, OOCL and X-Press Feeders have removed the southbound Port Klang call from their joint Far East–Kenya service, according to DynaLiners. The service, marketed as AEF, EAX3 and MFX, will sail from Nansha to Singapore and then directly to Mombasa before returning to Qingdao. The revised rotation is: Qingdao – Shanghai – Ningbo – Nansha – Singapore – Mombasa – Qingdao. TAGS AEF Dynaliners EAX3 EVERGREEN MFX MOMBASA OOCL Port Klang X-Press Feeders Facebook Twitter WhatsApp Linkedin Email Previous article DP World splits VELAG into Venezuela and Colombia shuttles Next article Okee Maritime buys two newbuilds as Costamare expands capacity on five ships Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The service, marketed as AEF, EAX3 and MFX, will sail from Nansha to Singapore and then directly to Mombasa before returning to Qingdao.",
-        "The revised rotation is: Qingdao – Shanghai – Ningbo – Nansha – Singapore – Mombasa – Qingdao.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -760,40 +895,6 @@
       "readMinutes": 7
     },
     {
-      "id": "SN-6189E78A93",
-      "title": "DP World splits VELAG into Venezuela and Colombia shuttles",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dp-world-splits-velag-into-venezuela-and-colombia-shuttles/",
-      "publishedAt": "2026-11-27T15:00:20Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "panama"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/images-17-300x225.jpg",
-      "summary": "DP World Shipping Solutions has split its VELAG service into two loops, giving La Guaira and Cartagena separate connections from Manzanillo in Colón, Panama, according to DynaLiners. The La Guaira Shuttle sails approximately every two weeks between Manzanillo and La Guaira, Venezuela. The Panama–Colombia Shuttle...",
-      "body": "Services Sticky News DP World splits VELAG into Venezuela and Colombia shuttles November 27, 2026 Facebook Twitter WhatsApp Linkedin Email DP World Shipping Solutions has split its VELAG service into two loops, giving La Guaira and Cartagena separate connections from Manzanillo in Colón, Panama, according to DynaLiners. The La Guaira Shuttle sails approximately every two weeks between Manzanillo and La Guaira, Venezuela. The Panama–Colombia Shuttle (PA/CO) connects Manzanillo with Cartagena approximately every four to five days. Each service uses one vessel of around 750 TEU. TAGS DP Wolrd Facebook Twitter WhatsApp Linkedin Email Previous article Universal Africa Lines to extend Caribbean network to Venezuela Next article Evergreen, OOCL and X-Press Feeders drop Port Klang from Kenya service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The La Guaira Shuttle sails approximately every two weeks between Manzanillo and La Guaira, Venezuela.",
-        "The Panama–Colombia Shuttle (PA/CO) connects Manzanillo with Cartagena approximately every four to five days.",
-        "Each service uses one vessel of around 750 TEU."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-CB89F2E1FD",
       "title": "MISC Profit Surges 78%, LNG Fleet Expansion Accelerates",
       "source": "MarineLink",
@@ -831,41 +932,6 @@
       "readMinutes": 3
     },
     {
-      "id": "SN-37AAF39135",
-      "title": "Universal Africa Lines to extend Caribbean network to Venezuela",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/universal-africa-lines-to-extend-caribbean-network-to-venezuela/",
-      "publishedAt": "2026-11-27T14:00:17Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb",
-        "Panama Canal & Caribbean"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "red sea"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/images-18-300x199.jpg",
-      "summary": "Universal Africa Lines (UAL) plans to extend its multipurpose shipping network to Venezuela. DynaLiners reports that the carrier is expected to add Venezuelan coverage to its UAL Caribbean Shuttle, although the Venezuelan port and start date have not been confirmed. The shuttle uses Point Lisas, Trinidad, as its hub...",
-      "body": "Services Top Right Universal Africa Lines to extend Caribbean network to Venezuela November 27, 2026 Facebook Twitter WhatsApp Linkedin Email Universal Africa Lines (UAL) plans to extend its multipurpose shipping network to Venezuela. DynaLiners reports that the carrier is expected to add Venezuelan coverage to its UAL Caribbean Shuttle, although the Venezuelan port and start date have not been confirmed. The shuttle uses Point Lisas, Trinidad, as its hub for calls at Georgetown in Guyana, Paramaribo in Suriname and Port of Spain in Trinidad. It connects at Point Lisas with UAL services to North America and Europe. The service uses one 387 TEU vessel and advertises a sailing every nine days, according to DynaLiners. TAGS Universal Africa Lines (UAL) Facebook Twitter WhatsApp Linkedin Email Previous article Explainer: How Red Sea task force open three contests Next article DP World splits VELAG into Venezuela and Colombia shuttles Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "DynaLiners reports that the carrier is expected to add Venezuelan coverage to its UAL Caribbean Shuttle, although the Venezuelan port and start date have not been confirmed.",
-        "The shuttle uses Point Lisas, Trinidad, as its hub for calls at Georgetown in Guyana, Paramaribo in Suriname and Port of Spain in Trinidad.",
-        "It connects at Point Lisas with UAL services to North America and Europe."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-C254365DDD",
       "title": "Marine Alliance snaps up German marine insurance broker Marincon",
       "source": "Splash247",
@@ -889,48 +955,11 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/11/Marincon-300x180.jpg",
       "summary": "Norwegian marine insurance group Marine Alliance has acquired Hamburg-based Marincon, adding a fourth specialist brokerage to its growing European network. The company has taken full ownership of Marincon GmbH & Co. KG, a marine and transport insurance broker established in 2004. Financial terms of the transaction...",
-      "body": "Europe Finance and Insurance Marine Alliance snaps up German marine insurance broker Marincon Adis Ajdin November 27, 2026 0 122 1 minute read Marincon Marincon Norwegian marine insurance group Marine Alliance has acquired Hamburg-based Marincon, adding a fourth specialist brokerage to its growing European network. The company has taken full ownership of Marincon GmbH & Co. KG, a marine and transport insurance broker established in 2004. Financial terms of the transaction were not disclosed. Marincon provides insurance services covering protection and indemnity (P&I), hull and machinery, marine liabilities, cargo and business interruption, serving shipowners, charterers, logistics companies and commodity traders. Founder and managing partner Frank Lehmann will remain in charge of the Hamburg business alongside his existing team, with plans for him to join the board of Marine Alliance. The brokerage will continue operating under the Marincon brand from its offices in Hamburg’s historic Speicherstadt district. The latest acquisition follows Marine Alliance’s purchase of a majority stake in London’s Speedwell Insurance Brokers in February 2025, expanding its presence in the Lloyd’s insurance market. The group now brings together four specialist brokers: Fram Insurance Brokers in Kristiansand, Marine Assekuranz and Marincon in Hamburg, and Speedwell in London. Marine Alliance was established in 2022 with backing from Söderberg & Partners and Martens & Prahl, bringing together independent marine insurance brokers under a common holding structure. Thomas Hackmann, chief operating officer of Marine Alliance, said Marincon would strengthen the group’s position in shipping, chartering, logistics and trade. He also signalled further acquisitions or partnerships. “Additional partnerships are planned, which will expand our portfolio of highly specialised offerings,” Hackmann said. Tags Germany Norway Adis Ajdin November 27, 2026 0 122 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Finance and Insurance Marine Alliance snaps up German marine insurance broker Marincon Adis Ajdin November 27, 2026 0 175 1 minute read Marincon Marincon Norwegian marine insurance group Marine Alliance has acquired Hamburg-based Marincon, adding a fourth specialist brokerage to its growing European network. The company has taken full ownership of Marincon GmbH & Co. KG, a marine and transport insurance broker established in 2004. Financial terms of the transaction were not disclosed. Marincon provides insurance services covering protection and indemnity (P&I), hull and machinery, marine liabilities, cargo and business interruption, serving shipowners, charterers, logistics companies and commodity traders. Founder and managing partner Frank Lehmann will remain in charge of the Hamburg business alongside his existing team, with plans for him to join the board of Marine Alliance. The brokerage will continue operating under the Marincon brand from its offices in Hamburg’s historic Speicherstadt district. The latest acquisition follows Marine Alliance’s purchase of a majority stake in London’s Speedwell Insurance Brokers in February 2025, expanding its presence in the Lloyd’s insurance market. The group now brings together four specialist brokers: Fram Insurance Brokers in Kristiansand, Marine Assekuranz and Marincon in Hamburg, and Speedwell in London. Marine Alliance was established in 2022 with backing from Söderberg & Partners and Martens & Prahl, bringing together independent marine insurance brokers under a common holding structure. Thomas Hackmann, chief operating officer of Marine Alliance, said Marincon would strengthen the group’s position in shipping, chartering, logistics and trade. He also signalled further acquisitions or partnerships. “Additional partnerships are planned, which will expand our portfolio of highly specialised offerings,” Hackmann said. Tags Germany Norway Adis Ajdin November 27, 2026 0 175 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The company has taken full ownership of Marincon GmbH & Co.",
         "KG, a marine and transport insurance broker established in 2004.",
         "Financial terms of the transaction were not disclosed."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-BC9ADAF292",
-      "title": "Explainer: How Red Sea task force open three contests",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/explainer-how-red-sea-task-force-open-three-contests/",
-      "publishedAt": "2026-11-27T13:00:46Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb",
-        "Panama Canal & Caribbean",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "red sea",
-        "china",
-        "imo"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/cleaned_Ναυτική-Δύναμη-στην-Ερυθρά-Θάλασσα-300x169.png",
-      "summary": "The states bordering the Red Sea and the Western Indian Ocean took a step that looks procedural but is not.",
-      "body": "CN Premium Articles Sticky News Explainer: How Red Sea task force open three contests November 27, 2026 Facebook Twitter WhatsApp Linkedin Email The states bordering the Red Sea and the Western Indian Ocean took a step that looks procedural but is not. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS Indian Ocean maritime task force Red Sea Facebook Twitter WhatsApp Linkedin Email Previous article X-Press Feeders launches new China–Indonesia service Next article Universal Africa Lines to extend Caribbean network to Venezuela Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
-      "takeaways": [
-        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
-        "Operational Area: Red Sea & Bab el-Mandeb, Panama Canal & Caribbean, Singapore & Malacca Strait.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -960,7 +989,7 @@
       "navarea": "IX",
       "image": "https://splash247.com/wp-content/uploads/2025/06/Seamec-III-Seamec-300x182.jpg",
       "summary": "Indian offshore vessel operator Seamec has secured a charter from compatriot oil and gas company Hindustan Oil Exploration Company (HOEC) for one of its diving support vessels (DSVs). The Mumbai-based company signed a BIMCO charterparty to deploy the 1983-built Seamec III at an oilfield off India’s western coast. The...",
-      "body": "Asia Offshore Seamec lands fresh DSV charter offshore India Bojan Lepic November 27, 2026 0 198 1 minute read Seamec Seamec Indian offshore vessel operator Seamec has secured a charter from compatriot oil and gas company Hindustan Oil Exploration Company (HOEC) for one of its diving support vessels (DSVs). The Mumbai-based company signed a BIMCO charterparty to deploy the 1983-built Seamec III at an oilfield off India’s western coast. The vessel will undertake saturation and air diving operations under a firm 13-day charter, with an option for additional employment on mutually agreed terms. The contract is worth approximately INR180.7m ($1.94m), excluding taxes, with operations expected to begin during the first week of December. The 43-year-old DSV has previously worked for Indian state-owned energy giant ONGC and other offshore contractors operating in the country. In June last year, Dubai-based Mubarak Bridge Maritime hired the vessel under a 20-day firm charter worth $2.16m, including mobilisation and demobilisation costs. That agreement covered offshore operations off India’s western coast, including saturation diving, remotely operated vehicle support, surveys, and subsea lifting work. Seamec has also been expanding its diving support vessel fleet. Earlier this year, the company agreed to acquire the Seamec Anant from parent company HAL Offshore for $70m as part of a transaction involving the vessel’s subsequent charter back to HAL Offshore. Tags India Bojan Lepic November 27, 2026 0 198 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Asia Offshore Seamec lands fresh DSV charter offshore India Bojan Lepic November 27, 2026 0 316 1 minute read Seamec Seamec Indian offshore vessel operator Seamec has secured a charter from compatriot oil and gas company Hindustan Oil Exploration Company (HOEC) for one of its diving support vessels (DSVs). The Mumbai-based company signed a BIMCO charterparty to deploy the 1983-built Seamec III at an oilfield off India’s western coast. The vessel will undertake saturation and air diving operations under a firm 13-day charter, with an option for additional employment on mutually agreed terms. The contract is worth approximately INR180.7m ($1.94m), excluding taxes, with operations expected to begin during the first week of December. The 43-year-old DSV has previously worked for Indian state-owned energy giant ONGC and other offshore contractors operating in the country. In June last year, Dubai-based Mubarak Bridge Maritime hired the vessel under a 20-day firm charter worth $2.16m, including mobilisation and demobilisation costs. That agreement covered offshore operations off India’s western coast, including saturation diving, remotely operated vehicle support, surveys, and subsea lifting work. Seamec has also been expanding its diving support vessel fleet. Earlier this year, the company agreed to acquire the Seamec Anant from parent company HAL Offshore for $70m as part of a transaction involving the vessel’s subsequent charter back to HAL Offshore. Tags India Bojan Lepic November 27, 2026 0 316 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Mumbai-based company signed a BIMCO charterparty to deploy the 1983-built Seamec III at an oilfield off India’s western coast.",
         "The vessel will undertake saturation and air diving operations under a firm 13-day charter, with an option for additional employment on mutually agreed terms.",
@@ -993,7 +1022,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2025/11/Alpha-Ventus-offshore-wind-300x180.jpg",
       "summary": "The Netherlands has launched tenders for two offshore wind farms with a combined generating capacity of 2GW, backed by a maximum subsidy budget of nearly €9.5bn ($10.43bn). The Netherlands Enterprise Agency (RVO) opened applications on Thursday for development permits for the IJmuiden Ver Gamma-A and Gamma-B offshore...",
-      "body": "Europe Offshore Renewables Netherlands opens 2GW offshore wind tender Bojan Lepic November 27, 2026 0 189 1 minute read Alpha Ventus Alpha Ventus The Netherlands has launched tenders for two offshore wind farms with a combined generating capacity of 2GW, backed by a maximum subsidy budget of nearly €9.5bn ($10.43bn). The Netherlands Enterprise Agency (RVO) opened applications on Thursday for development permits for the IJmuiden Ver Gamma-A and Gamma-B offshore wind sites. Each site can accommodate a 1GW offshore wind farm, with applications open until December 10. The maximum subsidy budget has been set at €4.758bn for Gamma-A and €4.698bn for Gamma-B, with maximum tender prices of €117 and €116 per MWh, respectively. Developers can submit bids under either a subsidy-free auction or a government-backed subsidy procedure. The two procedures will run simultaneously, with priority given to qualifying subsidy-free bids. If no such bids are received, applications seeking financial support will be ranked according to the lowest subsidy requested. The Dutch government increased the maximum combined subsidy budget from around €7.9bn earlier this year following concerns over rising offshore wind development costs and the planned introduction of charges for using the high-voltage electricity grid. The tender is being conducted under a temporary offshore wind support mechanism introduced ahead of the Netherlands’ planned adoption of a contract-for-difference system from mid-2027. The two wind farms will share offshore grid infrastructure developed by Dutch transmission system operator TenneT, including a 2GW direct current connection to the mainland. The Gamma sites form part of the wider IJmuiden Ver offshore wind zone, which is expected to accommodate around 6GW of generating capacity. RVO expects to award the development permits during the first quarter of 2027, with both wind farms scheduled to enter commercial operation in 2032. Tags Netherlands Offshore Wind Bojan Lepic November 27, 2026 0 189 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Netherlands opens 2GW offshore wind tender Bojan Lepic November 27, 2026 0 234 1 minute read Alpha Ventus Alpha Ventus The Netherlands has launched tenders for two offshore wind farms with a combined generating capacity of 2GW, backed by a maximum subsidy budget of nearly €9.5bn ($10.43bn). The Netherlands Enterprise Agency (RVO) opened applications on Thursday for development permits for the IJmuiden Ver Gamma-A and Gamma-B offshore wind sites. Each site can accommodate a 1GW offshore wind farm, with applications open until December 10. The maximum subsidy budget has been set at €4.758bn for Gamma-A and €4.698bn for Gamma-B, with maximum tender prices of €117 and €116 per MWh, respectively. Developers can submit bids under either a subsidy-free auction or a government-backed subsidy procedure. The two procedures will run simultaneously, with priority given to qualifying subsidy-free bids. If no such bids are received, applications seeking financial support will be ranked according to the lowest subsidy requested. The Dutch government increased the maximum combined subsidy budget from around €7.9bn earlier this year following concerns over rising offshore wind development costs and the planned introduction of charges for using the high-voltage electricity grid. The tender is being conducted under a temporary offshore wind support mechanism introduced ahead of the Netherlands’ planned adoption of a contract-for-difference system from mid-2027. The two wind farms will share offshore grid infrastructure developed by Dutch transmission system operator TenneT, including a 2GW direct current connection to the mainland. The Gamma sites form part of the wider IJmuiden Ver offshore wind zone, which is expected to accommodate around 6GW of generating capacity. RVO expects to award the development permits during the first quarter of 2027, with both wind farms scheduled to enter commercial operation in 2032. Tags Netherlands Offshore Wind Bojan Lepic November 27, 2026 0 234 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Netherlands Enterprise Agency (RVO) opened applications on Thursday for development permits for the IJmuiden Ver Gamma-A and Gamma-B offshore wind sites.",
         "Each site can accommodate a 1GW offshore wind farm, with applications open until December 10.",
@@ -1026,7 +1055,7 @@
       "navarea": "XI",
       "image": "https://splash247.com/wp-content/uploads/2021/02/navibulgar-yangzijiang-300x179.jpg",
       "summary": "Bulgarian dry bulk owner Navibulgar has returned to China’s Yangzijiang Shipbuilding for another pair of handymax bulk carriers, expanding its newbuilding programme to 13 vessels. The Varna-based company has signed up for two 47,000 dwt bulkers at Jiangsu New Yangzi Shipbuilding, with both scheduled for delivery in...",
-      "body": "Dry Cargo Europe Navibulgar adds handymax pair to growing China orderbook Adis Ajdin November 27, 2026 0 326 1 minute read Yangzijiang Shipbuilding Yangzijiang Shipbuilding Bulgarian dry bulk owner Navibulgar has returned to China’s Yangzijiang Shipbuilding for another pair of handymax bulk carriers, expanding its newbuilding programme to 13 vessels. The Varna-based company has signed up for two 47,000 dwt bulkers at Jiangsu New Yangzi Shipbuilding, with both scheduled for delivery in 2030. Financial terms have not been disclosed. Navibulgar’s own fleet register confirms the vessels, identifying them as Vihren , due in February 2030, and Botev , earmarked for April of the same year. The pair also matches two 47,000 dwt bulk carriers included in Yangzijiang’s latest stock exchange update, which showed the orders already on its books at the end of October. The latest additions extend Navibulgar’s long-running fleet renewal programme at the Chinese shipbuilding group. The owner has three 45,000 dwt handymaxes scheduled for delivery in 2027, followed by eight 71,000 dwt bulkers due between 2028 and 2029. The company has been steadily investing in larger and more efficient geared bulkers while maintaining a sizeable presence in the handysize and handymax markets. Its existing fleet includes several 47,000 dwt vessels built between 2019 and 2020, including Buzludja, Midjur, Malyovitsa and Milin Kamak . Tags Bulgaria Adis Ajdin November 27, 2026 0 326 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Dry Cargo Europe Navibulgar adds handymax pair to growing China orderbook Adis Ajdin November 27, 2026 0 426 1 minute read Yangzijiang Shipbuilding Yangzijiang Shipbuilding Bulgarian dry bulk owner Navibulgar has returned to China’s Yangzijiang Shipbuilding for another pair of handymax bulk carriers, expanding its newbuilding programme to 13 vessels. The Varna-based company has signed up for two 47,000 dwt bulkers at Jiangsu New Yangzi Shipbuilding, with both scheduled for delivery in 2030. Financial terms have not been disclosed. Navibulgar’s own fleet register confirms the vessels, identifying them as Vihren , due in February 2030, and Botev , earmarked for April of the same year. The pair also matches two 47,000 dwt bulk carriers included in Yangzijiang’s latest stock exchange update, which showed the orders already on its books at the end of October. The latest additions extend Navibulgar’s long-running fleet renewal programme at the Chinese shipbuilding group. The owner has three 45,000 dwt handymaxes scheduled for delivery in 2027, followed by eight 71,000 dwt bulkers due between 2028 and 2029. The company has been steadily investing in larger and more efficient geared bulkers while maintaining a sizeable presence in the handysize and handymax markets. Its existing fleet includes several 47,000 dwt vessels built between 2019 and 2020, including Buzludja, Midjur, Malyovitsa and Milin Kamak . Tags Bulgaria Adis Ajdin November 27, 2026 0 426 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Varna-based company has signed up for two 47,000 dwt bulkers at Jiangsu New Yangzi Shipbuilding, with both scheduled for delivery in 2030.",
         "Financial terms have not been disclosed.",
@@ -1063,7 +1092,7 @@
       "navarea": "III",
       "image": "https://splash247.com/wp-content/uploads/2026/11/EDT-Offshore-subsea-vessel-newbuild-300x180.jpg",
       "summary": "Cyprus-based EDT Offshore has ordered a subsea construction vessel at China’s ZPMC, with an option for a second unit, kicking off a newbuilding programme aimed at expanding its offshore capabilities. The Limassol-headquartered owner has signed a contract with the Shanghai-based shipbuilder for a Skipsteknisk-designed...",
-      "body": "Europe Greater China Offshore Shipyards EDT Offshore kicks off fleet renewal with subsea newbuild Adis Ajdin November 27, 2026 0 732 1 minute read EDT Offshore EDT Offshore Cyprus-based EDT Offshore has ordered a subsea construction vessel at China’s ZPMC, with an option for a second unit, kicking off a newbuilding programme aimed at expanding its offshore capabilities. The Limassol-headquartered owner has signed a contract with the Shanghai-based shipbuilder for a Skipsteknisk-designed energy subsea construction vessel (ESCV), with delivery scheduled for early 2029. The ST-245 design methanol-ready newbuilding will feature an integrated electric propulsion system, battery storage, DC switchboards, azimuth thrusters and dynamic positioning technology. Financial details of the shipbuilding contract have not been disclosed. “This order is a major commitment to EDT’s future,” said managing director Darios Melas. “It is the first step in our fleet invigoration programme,” he added. EDT has also brought in Schulte Marine Concept to supervise construction at the Chinese yard. The family-controlled company operates a fleet of offshore support and multipurpose vessels, with activities spanning subsea construction support, offshore energy operations, towage and salvage. Last year, EDT teamed up with Singapore’s Synergy Marine Group to establish EDT Synergy Shipmanagement, a Cyprus-based venture targeting the offshore vessel management market. Norwegian naval architect Skipsteknisk has seen growing demand for its ST-245 platform, which has also been selected by Rem Offshore and Sea1 Offshore for their subsea and offshore energy support newbuilding programmes. For ZPMC, the contract adds to its offshore vessel portfolio, which includes service operation vessels, heavylift ships and other specialised construction tonnage. Tags Cyprus Adis Ajdin November 27, 2026 0 732 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Greater China Offshore Shipyards EDT Offshore kicks off fleet renewal with subsea newbuild Adis Ajdin November 27, 2026 0 920 1 minute read EDT Offshore EDT Offshore Cyprus-based EDT Offshore has ordered a subsea construction vessel at China’s ZPMC, with an option for a second unit, kicking off a newbuilding programme aimed at expanding its offshore capabilities. The Limassol-headquartered owner has signed a contract with the Shanghai-based shipbuilder for a Skipsteknisk-designed energy subsea construction vessel (ESCV), with delivery scheduled for early 2029. The ST-245 design methanol-ready newbuilding will feature an integrated electric propulsion system, battery storage, DC switchboards, azimuth thrusters and dynamic positioning technology. Financial details of the shipbuilding contract have not been disclosed. “This order is a major commitment to EDT’s future,” said managing director Darios Melas. “It is the first step in our fleet invigoration programme,” he added. EDT has also brought in Schulte Marine Concept to supervise construction at the Chinese yard. The family-controlled company operates a fleet of offshore support and multipurpose vessels, with activities spanning subsea construction support, offshore energy operations, towage and salvage. Last year, EDT teamed up with Singapore’s Synergy Marine Group to establish EDT Synergy Shipmanagement, a Cyprus-based venture targeting the offshore vessel management market. Norwegian naval architect Skipsteknisk has seen growing demand for its ST-245 platform, which has also been selected by Rem Offshore and Sea1 Offshore for their subsea and offshore energy support newbuilding programmes. For ZPMC, the contract adds to its offshore vessel portfolio, which includes service operation vessels, heavylift ships and other specialised construction tonnage. Tags Cyprus Adis Ajdin November 27, 2026 0 920 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Limassol-headquartered owner has signed a contract with the Shanghai-based shipbuilder for a Skipsteknisk-designed energy subsea construction vessel (ESCV), with delivery scheduled for early 2029.",
         "The ST-245 design methanol-ready newbuilding will feature an integrated electric propulsion system, battery storage, DC switchboards, azimuth thrusters and dynamic positioning technology.",
@@ -1096,7 +1125,7 @@
       "navarea": "III",
       "image": "https://splash247.com/wp-content/uploads/2025/03/Leonardo-da-Vinci-Prysmian-300x180.jpg",
       "summary": "Italian cabling giant Prysmian has received the go-ahead from Greece’s Independent Power Transmission Operator (IPTO) to proceed with seven electricity interconnection projects worth up to €910m ($998.3m). The notice to proceed covers projects linking the Dodecanese and North Aegean islands to Greece’s national...",
-      "body": "Europe Offshore Prysmian gets green light for $1bn Greek cable programme Bojan Lepic November 27, 2026 0 151 1 minute read Prysmian Prysmian Italian cabling giant Prysmian has received the go-ahead from Greece’s Independent Power Transmission Operator (IPTO) to proceed with seven electricity interconnection projects worth up to €910m ($998.3m). The notice to proceed covers projects linking the Dodecanese and North Aegean islands to Greece’s national electricity grid under a framework agreement awarded earlier this year. The projects will now be added to Prysmian’s order backlog. As Splash reported in June , the agreement covers the engineering, manufacturing, and installation of more than 900 km of high-voltage alternating current (HVAC) cables across offshore and onshore sections. Final delivery of the infrastructure is scheduled for 2033. Part of the offshore installation work will take place in water depths exceeding 1,150 m, which Prysmian expects will set a world record for installing static three-core 150kV HVAC cables. Prysmian has previously worked with IPTO on the Cyclades islands interconnections, as well as the links connecting Crete with Attica and the Peloponnese. The company intends to deploy its specialist deepwater cable-installation assets for the latest programme, although it has not named the vessels involved. The new interconnectors will reduce the islands’ dependence on diesel and oil-fired electricity generation while allowing locally produced renewable energy to be exported to the mainland. Prysmian’s executive vice president for transmission, Raul Gil, said the company would draw on its cable technology, installation fleet, and offshore expertise to deliver the deepwater connections. The projects form part of Greece’s wider programme to strengthen electricity supply to its islands and integrate additional renewable generating capacity into the national grid. Tags Greece Italy Bojan Lepic November 27, 2026 0 151 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Prysmian gets green light for $1bn Greek cable programme Bojan Lepic November 27, 2026 0 181 1 minute read Prysmian Prysmian Italian cabling giant Prysmian has received the go-ahead from Greece’s Independent Power Transmission Operator (IPTO) to proceed with seven electricity interconnection projects worth up to €910m ($998.3m). The notice to proceed covers projects linking the Dodecanese and North Aegean islands to Greece’s national electricity grid under a framework agreement awarded earlier this year. The projects will now be added to Prysmian’s order backlog. As Splash reported in June , the agreement covers the engineering, manufacturing, and installation of more than 900 km of high-voltage alternating current (HVAC) cables across offshore and onshore sections. Final delivery of the infrastructure is scheduled for 2033. Part of the offshore installation work will take place in water depths exceeding 1,150 m, which Prysmian expects will set a world record for installing static three-core 150kV HVAC cables. Prysmian has previously worked with IPTO on the Cyclades islands interconnections, as well as the links connecting Crete with Attica and the Peloponnese. The company intends to deploy its specialist deepwater cable-installation assets for the latest programme, although it has not named the vessels involved. The new interconnectors will reduce the islands’ dependence on diesel and oil-fired electricity generation while allowing locally produced renewable energy to be exported to the mainland. Prysmian’s executive vice president for transmission, Raul Gil, said the company would draw on its cable technology, installation fleet, and offshore expertise to deliver the deepwater connections. The projects form part of Greece’s wider programme to strengthen electricity supply to its islands and integrate additional renewable generating capacity into the national grid. Tags Greece Italy Bojan Lepic November 27, 2026 0 181 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The notice to proceed covers projects linking the Dodecanese and North Aegean islands to Greece’s national electricity grid under a framework agreement awarded earlier this year.",
         "The projects will now be added to Prysmian’s order backlog.",
@@ -1133,7 +1162,7 @@
       "navarea": "III",
       "image": "https://splash247.com/wp-content/uploads/2026/01/Sallaum-Lines-Vessel-300x180.jpg",
       "summary": "Car carrier operator Sallaum Lines has secured a two-year extension to a shipping contract with an undisclosed American manufacturer in a deal worth $60m. The company said it would deploy vessels from its LNG dual-fuel Ocean Class series under the extended agreement. Neither the identity of the customer nor the trade...",
-      "body": "Europe Operations Sallaum Lines seals $60m US shipping deal Adis Ajdin November 27, 2026 0 165 1 minute read Sallaum Lines Sallaum Lines Car carrier operator Sallaum Lines has secured a two-year extension to a shipping contract with an undisclosed American manufacturer in a deal worth $60m. The company said it would deploy vessels from its LNG dual-fuel Ocean Class series under the extended agreement. Neither the identity of the customer nor the trade route has been disclosed. The deal provides further employment for the company’s modern car carrier fleet following a sizeable investment in new tonnage at Chinese shipyards. Sallaum’s Ocean Class series comprises vessels with capacities of around 7,400 to 7,500 ceu. The contract extension follows a busy year on the newbuilding front for Sallaum Lines. As previously reported by Splash , the company returned to China Merchants Shipyard in July for one firm 8,600 ceu car carrier with an option for a second, following an earlier deal for two firm and two optional vessels of the same capacity at Xiamen Shipbuilding Industry. The July order took Sallaum’s newbuilding programme to nine firm vessels, representing an investment of more than $850m. The larger ships are scheduled to join the fleet in 2029. Tags Cyprus Adis Ajdin November 27, 2026 0 165 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Operations Sallaum Lines seals $60m US shipping deal Adis Ajdin November 27, 2026 0 203 1 minute read Sallaum Lines Sallaum Lines Car carrier operator Sallaum Lines has secured a two-year extension to a shipping contract with an undisclosed American manufacturer in a deal worth $60m. The company said it would deploy vessels from its LNG dual-fuel Ocean Class series under the extended agreement. Neither the identity of the customer nor the trade route has been disclosed. The deal provides further employment for the company’s modern car carrier fleet following a sizeable investment in new tonnage at Chinese shipyards. Sallaum’s Ocean Class series comprises vessels with capacities of around 7,400 to 7,500 ceu. The contract extension follows a busy year on the newbuilding front for Sallaum Lines. As previously reported by Splash , the company returned to China Merchants Shipyard in July for one firm 8,600 ceu car carrier with an option for a second, following an earlier deal for two firm and two optional vessels of the same capacity at Xiamen Shipbuilding Industry. The July order took Sallaum’s newbuilding programme to nine firm vessels, representing an investment of more than $850m. The larger ships are scheduled to join the fleet in 2029. Tags Cyprus Adis Ajdin November 27, 2026 0 203 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The company said it would deploy vessels from its LNG dual-fuel Ocean Class series under the extended agreement.",
         "Neither the identity of the customer nor the trade route has been disclosed.",
@@ -1201,7 +1230,7 @@
       "navarea": "XI",
       "image": "https://splash247.com/wp-content/uploads/2023/08/Mitsubishi-300x201.jpg",
       "summary": "Japan is seeking technological assistance from South Korea as it looks to re-establish itself in the lucrative LNG carrier construction market, marking a significant shift in relations between two longstanding shipbuilding rivals. Motoharu Adachi, director-general of the maritime bureau at Japan’s Ministry of Land,...",
-      "body": "Asia Gas Shipyards Japan turns to South Korea to revive LNG carrier construction Sam Chambers November 27, 2026 0 676 1 minute read Mitsubishi Mitsubishi Japan is seeking technological assistance from South Korea as it looks to re-establish itself in the lucrative LNG carrier construction market, marking a significant shift in relations between two longstanding shipbuilding rivals. Motoharu Adachi, director-general of the maritime bureau at Japan’s Ministry of Land, Infrastructure, Transport and Tourism, revealed at a press conference yesterday that discussions were underway to secure South Korean cooperation. The Japanese government is examining a range of financial incentives to encourage domestic yards to resume LNG carrier construction, including subsidies for production facilities and potentially covering the difference between initial construction costs and prevailing international newbuilding prices. Japan was once a pioneer in LNG carrier construction, with Mitsubishi Heavy Industries, Kawasaki Heavy Industries and Mitsui Engineering & Shipbuilding among the leading builders of the specialised vessels. However, South Korea’s shipbuilding giants have come to dominate the sector over the past two decades, with China making considerable inroads more recently. Re-entering the market will require Japanese yards to rebuild specialist engineering expertise, secure access to modern cargo containment technology and re-establish supply chains for cryogenic equipment. The proposed cooperation comes as Tokyo looks to double Japan’s annual shipbuilding output to 18m gt by 2035, reversing decades of declining global market share. LNG carriers represent one of the highest-value segments of the commercial shipbuilding market, with newbuilding prices remaining above $200m. Japan is also one of the world’s largest LNG importers, providing a sizeable domestic customer base for any revived construction programme. Tags Japan South Korea Sam Chambers November 27, 2026 0 676 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Asia Gas Shipyards Japan turns to South Korea to revive LNG carrier construction Sam Chambers November 27, 2026 0 1,006 1 minute read Mitsubishi Mitsubishi Japan is seeking technological assistance from South Korea as it looks to re-establish itself in the lucrative LNG carrier construction market, marking a significant shift in relations between two longstanding shipbuilding rivals. Motoharu Adachi, director-general of the maritime bureau at Japan’s Ministry of Land, Infrastructure, Transport and Tourism, revealed at a press conference yesterday that discussions were underway to secure South Korean cooperation. The Japanese government is examining a range of financial incentives to encourage domestic yards to resume LNG carrier construction, including subsidies for production facilities and potentially covering the difference between initial construction costs and prevailing international newbuilding prices. Japan was once a pioneer in LNG carrier construction, with Mitsubishi Heavy Industries, Kawasaki Heavy Industries and Mitsui Engineering & Shipbuilding among the leading builders of the specialised vessels. However, South Korea’s shipbuilding giants have come to dominate the sector over the past two decades, with China making considerable inroads more recently. Re-entering the market will require Japanese yards to rebuild specialist engineering expertise, secure access to modern cargo containment technology and re-establish supply chains for cryogenic equipment. The proposed cooperation comes as Tokyo looks to double Japan’s annual shipbuilding output to 18m gt by 2035, reversing decades of declining global market share. LNG carriers represent one of the highest-value segments of the commercial shipbuilding market, with newbuilding prices remaining above $200m. Japan is also one of the world’s largest LNG importers, providing a sizeable domestic customer base for any revived construction programme. Tags Japan South Korea Sam Chambers November 27, 2026 0 1,006 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Japan was once a pioneer in LNG carrier construction, with Mitsubishi Heavy Industries, Kawasaki Heavy Industries and Mitsui Engineering & Shipbuilding among the leading builders of the specialised vessels.",
         "However, South Korea’s shipbuilding giants have come to dominate the sector over the past two decades, with China making considerable inroads more recently.",
@@ -1233,7 +1262,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2024/05/Wood-workers-300x187.jpg",
       "summary": "UK engineering and consulting firm Wood has secured a front-end engineering design (FEED) contract for the proposed BarMar subsea hydrogen pipeline connecting Spain and France. The BarMar consortium, comprising Spanish gas transmission operator Enagás and its French counterparts NaTran and Teréga, awarded the...",
-      "body": "Europe Offshore Wood scores FEED work on Spain-France offshore hydrogen link Bojan Lepic November 27, 2026 0 141 1 minute read Wood Wood UK engineering and consulting firm Wood has secured a front-end engineering design (FEED) contract for the proposed BarMar subsea hydrogen pipeline connecting Spain and France. The BarMar consortium, comprising Spanish gas transmission operator Enagás and its French counterparts NaTran and Teréga, awarded the contract. Wood will undertake engineering work for the approximately 380km offshore pipeline and associated compression facilities, both designed to handle pure hydrogen. The scope includes subsea pipeline design, route engineering, microtunnelling, and hydrogen infrastructure engineering. Wood’s teams in Spain and the UK will lead the work, with completion scheduled for April 2028. Wood has been involved since the project’s conceptual stages in 2022, previously carrying out pre-FEED engineering for the pipeline and compression facilities, alongside technical support for offshore route investigations. As Splash reported on Thursday, Italian offshore survey specialist Next Geosolutions secured a contract from BarMar to investigate a 366km offshore corridor between Barcelona and Fos-sur-Mer. The Italian firm will deploy two vessels for geophysical and geotechnical investigations, unexploded ordnance surveys, seabed sampling, and remotely operated vehicle inspections. Offshore work is expected to begin before the end of this year and wrap up around mid-2027. The BarMar pipeline, estimated to cost €2.4bn ($2.6bn), forms part of the wider €2.85bn ($3.12bn) H2med hydrogen transport corridor, which also includes the CelZa pipeline between Portugal and Spain. The developers are targeting commercial operations in 2032, with the infrastructure designed to transport up to 2m tonnes of green hydrogen annually from the Iberian Peninsula to industrial markets across Europe. Tags France Spain United Kingdom Bojan Lepic November 27, 2026 0 141 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Wood scores FEED work on Spain-France offshore hydrogen link Bojan Lepic November 27, 2026 0 176 1 minute read Wood Wood UK engineering and consulting firm Wood has secured a front-end engineering design (FEED) contract for the proposed BarMar subsea hydrogen pipeline connecting Spain and France. The BarMar consortium, comprising Spanish gas transmission operator Enagás and its French counterparts NaTran and Teréga, awarded the contract. Wood will undertake engineering work for the approximately 380km offshore pipeline and associated compression facilities, both designed to handle pure hydrogen. The scope includes subsea pipeline design, route engineering, microtunnelling, and hydrogen infrastructure engineering. Wood’s teams in Spain and the UK will lead the work, with completion scheduled for April 2028. Wood has been involved since the project’s conceptual stages in 2022, previously carrying out pre-FEED engineering for the pipeline and compression facilities, alongside technical support for offshore route investigations. As Splash reported on Thursday, Italian offshore survey specialist Next Geosolutions secured a contract from BarMar to investigate a 366km offshore corridor between Barcelona and Fos-sur-Mer. The Italian firm will deploy two vessels for geophysical and geotechnical investigations, unexploded ordnance surveys, seabed sampling, and remotely operated vehicle inspections. Offshore work is expected to begin before the end of this year and wrap up around mid-2027. The BarMar pipeline, estimated to cost €2.4bn ($2.6bn), forms part of the wider €2.85bn ($3.12bn) H2med hydrogen transport corridor, which also includes the CelZa pipeline between Portugal and Spain. The developers are targeting commercial operations in 2032, with the infrastructure designed to transport up to 2m tonnes of green hydrogen annually from the Iberian Peninsula to industrial markets across Europe. Tags France Spain United Kingdom Bojan Lepic November 27, 2026 0 176 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The BarMar consortium, comprising Spanish gas transmission operator Enagás and its French counterparts NaTran and Teréga, awarded the contract.",
         "Wood will undertake engineering work for the approximately 380km offshore pipeline and associated compression facilities, both designed to handle pure hydrogen.",
@@ -1575,40 +1604,6 @@
         "Colin Rawlins of ABS discusses how strong balance sheets collide with yard capacity limits, immature fuel choices and AI tools reshaping classification efforts.",
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-450C12784E",
-      "title": "Hormuz risks draw former Venezuelan oil tankers to Gulf",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/security/hormuz-risks-draw-former-venezuelan-oil-tankers-to-gulf",
-      "publishedAt": "2026-11-26T09:01:54Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Panama Canal & Caribbean"
-      ],
-      "tags": [
-        "tanker",
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt97a8f7ff67654249/6aa14ae86bf6950d897fb9a6/Strait-of-Hormuz-Credit-NASA.jpeg?width=720&quality=80&disable=upscale",
-      "summary": "Lucrative freight rates and deep discounts on Iraqi crude are attracting tankers previously associated with the Venezuelan oil trade.",
-      "body": "Lucrative freight rates and deep discounts on Iraqi crude are attracting tankers previously associated with the Venezuelan oil trade.",
-      "takeaways": [
-        "Lucrative freight rates and deep discounts on Iraqi crude are attracting tankers previously associated with the Venezuelan oil trade.",
-        "Operational Area: Strait of Hormuz & Persian Gulf, Panama Canal & Caribbean.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
