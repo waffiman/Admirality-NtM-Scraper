@@ -173,20 +173,53 @@
       .replace(/"/g, "&quot;");
   }
 
+  function getTextBoxZoomScale(props) {
+    var m = map();
+    var curZoom = (m && typeof m.getZoom === "function") ? Number(m.getZoom()) : 8;
+    if (!Number.isFinite(curZoom)) curZoom = 8;
+    if (props && !Number.isFinite(Number(props.baseZoom))) {
+      props.baseZoom = curZoom;
+    }
+    var baseZoom = (props && Number.isFinite(Number(props.baseZoom))) ? Number(props.baseZoom) : curZoom;
+    return Math.pow(2, curZoom - baseZoom);
+  }
+
+  function syncTextBoxesZoomScale() {
+    var m = map();
+    var chart = activeChart();
+    if (!m || !chart || !Array.isArray(chart.features)) return;
+    chart.features.forEach(function (f) {
+      if (!f || !f.properties || f.properties.kind !== "text") return;
+      var fId = f.properties.id || f.id;
+      var marker = layerById[fId];
+      var el = marker && marker.getElement && marker.getElement();
+      var box = el && el.querySelector(".ss-uc-textbox");
+      if (!box) return;
+      var zScale = getTextBoxZoomScale(f.properties);
+      var invScale = Math.min(4.0, Math.max(0.25, 1 / zScale));
+      box.style.transform = "scale(" + zScale.toFixed(5) + ")";
+      box.style.transformOrigin = "0 0";
+      box.style.setProperty("--uc-tb-inv-scale", invScale.toFixed(4));
+    });
+  }
+
   function buildTextBoxHtml(f) {
     var props = (f && f.properties) || {};
     var id = props.id || (f && f.id) || "";
     var color = props.color || state.color || "#f05a36";
-    var fontSize = Math.max(10, Math.min(64, Number(props.fontSize) || 15));
-    var widthPx = Math.max(64, Math.min(680, Number(props.widthPx) || 148));
+    var fontSize = Math.max(8, Math.min(120, Number(props.fontSize) || 15));
+    var widthPx = Math.max(48, Math.min(1200, Number(props.widthPx) || 148));
     var rows = Math.max(1, Math.min(20, Number(props.rows) || 1));
     var lineH = Math.round(fontSize * 1.32);
     var heightPx = Math.max(lineH + 10, rows * lineH + 10);
     var isSel = state.selectedFeatureId === id;
     var textVal = String(props.text != null ? props.text : "Text");
+    var zScale = getTextBoxZoomScale(props);
+    var invScale = Math.min(4.0, Math.max(0.25, 1 / zScale));
 
     return (
-      '<div class="ss-uc-textbox' + (isSel ? " is-selected" : "") + '" data-uc-id="' + escapeHtml(id) + '" style="--uc-tb-color:' + escapeHtml(color) + ';width:' + widthPx + 'px;">' +
+      '<div class="ss-uc-textbox' + (isSel ? " is-selected" : "") + '" data-uc-id="' + escapeHtml(id) + '" ' +
+        'style="--uc-tb-color:' + escapeHtml(color) + ';--uc-tb-inv-scale:' + invScale.toFixed(4) + ';width:' + widthPx + 'px;transform:scale(' + zScale.toFixed(5) + ');transform-origin:0 0;">' +
         '<div class="ss-uc-tb-movebar" data-tb-handle="move" title="Hold LMB to move text box"><span>⠿</span></div>' +
         '<textarea class="ss-uc-tb-input" data-uc-id="' + escapeHtml(id) + '" rows="' + rows + '" spellcheck="false" placeholder="Type text…" ' +
           'style="color:' + escapeHtml(color) + ';font-size:' + fontSize + 'px;line-height:' + lineH + 'px;width:' + widthPx + 'px;height:' + heightPx + 'px;">' +
@@ -400,8 +433,19 @@
     f.properties = f.properties || {};
     var startX = ev.clientX;
     var startY = ev.clientY;
-    var origFontSize = Math.max(10, Math.min(64, Number(f.properties.fontSize) || 15));
-    var origWidth = Math.max(64, Math.min(680, Number(f.properties.widthPx) || 148));
+    // Normalize baseZoom to current map zoom on intentional resize drag so 1px drag = 1px at current zoom
+    // and the new geographic size in NM is locked to the chart from this zoom level onwards!
+    var curZoom = (typeof m.getZoom === "function") ? Number(m.getZoom()) : 8;
+    var zScale0 = getTextBoxZoomScale(f.properties);
+    if (handle !== "move" && Math.abs(zScale0 - 1) > 1e-4) {
+      f.properties.fontSize = Math.max(8, Math.min(120, Math.round((Number(f.properties.fontSize) || 15) * zScale0)));
+      f.properties.widthPx = Math.max(48, Math.min(1200, Math.round((Number(f.properties.widthPx) || 148) * zScale0)));
+      f.properties.baseZoom = curZoom;
+    } else if (!Number.isFinite(Number(f.properties.baseZoom))) {
+      f.properties.baseZoom = curZoom;
+    }
+    var origFontSize = Math.max(8, Math.min(120, Number(f.properties.fontSize) || 15));
+    var origWidth = Math.max(48, Math.min(1200, Number(f.properties.widthPx) || 148));
     var origRows = Math.max(1, Math.min(20, Number(f.properties.rows) || 1));
     var origLat = f.geometry.coordinates[1];
     var origLon = f.geometry.coordinates[0];
@@ -410,12 +454,17 @@
     try { m.dragging.disable(); } catch (e0) {}
 
     function applyBoxDom() {
-      var fs = Math.max(10, Math.min(64, Number(f.properties.fontSize) || 15));
-      var wp = Math.max(64, Math.min(680, Number(f.properties.widthPx) || 148));
+      var fs = Math.max(8, Math.min(120, Number(f.properties.fontSize) || 15));
+      var wp = Math.max(48, Math.min(1200, Number(f.properties.widthPx) || 148));
       var rw = Math.max(1, Math.min(20, Number(f.properties.rows) || 1));
       var lh = Math.round(fs * 1.32);
       var hp = Math.max(lh + 10, rw * lh + 10);
+      var zScale = getTextBoxZoomScale(f.properties);
+      var invScale = Math.min(4.0, Math.max(0.25, 1 / zScale));
       box.style.width = wp + "px";
+      box.style.transform = "scale(" + zScale.toFixed(5) + ")";
+      box.style.transformOrigin = "0 0";
+      box.style.setProperty("--uc-tb-inv-scale", invScale.toFixed(4));
       if (ta) {
         ta.rows = rw;
         ta.style.fontSize = fs + "px";
@@ -423,6 +472,16 @@
         ta.style.width = wp + "px";
         ta.style.height = hp + "px";
       }
+      // Show live geographic NM dimensions while resizing Text Box
+      try {
+        var topLeftPt = m.latLngToContainerPoint([f.geometry.coordinates[1], f.geometry.coordinates[0]]);
+        var rightLl = m.containerPointToLatLng([topLeftPt.x + wp * zScale, topLeftPt.y]);
+        var botLl = m.containerPointToLatLng([topLeftPt.x, topLeftPt.y + hp * zScale]);
+        var wNm = m.distance([f.geometry.coordinates[1], f.geometry.coordinates[0]], rightLl) / 1852;
+        var hNm = m.distance([f.geometry.coordinates[1], f.geometry.coordinates[0]], botLl) / 1852;
+        var centerLl = m.containerPointToLatLng([topLeftPt.x + (wp * zScale) * 0.5, topLeftPt.y - 12]);
+        showResizeHudAtLatLng(centerLl, fmtNmVal(wNm) + " × " + fmtNmVal(hNm) + " NM");
+      } catch (eHud) {}
     }
 
     function onMove(mv) {
@@ -483,6 +542,7 @@
     function onUp() {
       window.removeEventListener("mousemove", onMove, true);
       window.removeEventListener("mouseup", onUp, true);
+      hideResizeHud();
       syncMapDragState();
       persist();
     }
@@ -503,18 +563,18 @@
     var labelText = String(props.label != null ? props.label : "");
     var charCount = Math.max(4, labelText.trim().length || 6);
 
-    // 1. Circle -> Fit inside circle
+    // 1. Circle -> Fit inside circle (strictly proportional to geographic radius on chart)
     if (g.type === "Point" && kind === "circle" && Number.isFinite(props.radiusM)) {
       var cLl = L.latLng(g.coordinates[1], g.coordinates[0]);
       var cPt = m.latLngToContainerPoint(cLl);
       var edgeLl = L.latLng(cLl.lat, cLl.lng + (props.radiusM / (111320 * Math.max(0.1, Math.cos(cLl.lat * Math.PI / 180)))));
       var edgePt = m.latLngToContainerPoint(edgeLl);
-      var radPx = Math.max(12, Math.hypot(edgePt.x - cPt.x, edgePt.y - cPt.y));
-      var boxW = Math.max(36, Math.round(radPx * 1.48));
-      var boxH = Math.max(18, Math.round(radPx * 1.25));
+      var radPx = Math.max(2, Math.hypot(edgePt.x - cPt.x, edgePt.y - cPt.y));
+      var boxW = Math.max(4, Math.round(radPx * 1.48));
+      var boxH = Math.max(4, Math.round(radPx * 1.25));
       var fsByBox = Math.min(boxW * 0.22, boxH * 0.38);
       var fsByChars = (boxW * 1.35) / Math.max(4, Math.sqrt(charCount) * 1.85);
-      var fontSize = Math.round(Math.max(8, Math.min(34, Math.min(fsByBox, fsByChars))));
+      var fontSize = Math.max(1, Number(Math.min(fsByBox, fsByChars).toFixed(2)));
       return {
         latlng: cLl,
         placement: "inside",
@@ -525,7 +585,7 @@
       };
     }
 
-    // 2. Closed Polygon / Shape -> Fit inside shape area
+    // 2. Closed Polygon / Shape -> Fit inside shape area (strictly proportional to geographic shape bounds)
     if (g.type === "Polygon" && Array.isArray(g.coordinates) && Array.isArray(g.coordinates[0])) {
       var ring = g.coordinates[0];
       if (ring.length < 3) return null;
@@ -548,15 +608,15 @@
         // Shift centroid slightly toward base so text sits inside the wider lower part of the triangle
         cLat = minLat + (maxLat - minLat) * 0.38;
       }
-      var wPx = Math.max(24, maxX - minX);
-      var hPx = Math.max(18, maxY - minY);
+      var wPx = Math.max(4, maxX - minX);
+      var hPx = Math.max(4, maxY - minY);
       var factorW = (kind === "triangle" || kind === "diamond") ? 0.62 : (kind === "arrow" ? 0.72 : 0.84);
       var factorH = (kind === "triangle" || kind === "diamond") ? 0.58 : 0.78;
-      var pBoxW = Math.max(34, Math.round(wPx * factorW));
-      var pBoxH = Math.max(16, Math.round(hPx * factorH));
+      var pBoxW = Math.max(4, Math.round(wPx * factorW));
+      var pBoxH = Math.max(4, Math.round(hPx * factorH));
       var pFsByBox = Math.min(pBoxW * 0.22, pBoxH * 0.42);
       var pFsByChars = (pBoxW * 1.35) / Math.max(4, Math.sqrt(charCount) * 1.85);
-      var pFontSize = Math.round(Math.max(8, Math.min(34, Math.min(pFsByBox, pFsByChars))));
+      var pFontSize = Math.max(1, Number(Math.min(pFsByBox, pFsByChars).toFixed(2)));
       return {
         latlng: L.latLng(cLat, cLon),
         placement: "inside",
@@ -567,7 +627,7 @@
       };
     }
 
-    // 3. LineString -> Place above the line, sized to line length
+    // 3. LineString -> Place above the line, strictly proportional to geographic line length on chart
     if (g.type === "LineString" && Array.isArray(g.coordinates) && g.coordinates.length >= 2) {
       var coords = g.coordinates;
       var pts = coords.map(function (c) { return m.latLngToContainerPoint([c[1], c[0]]); });
@@ -599,10 +659,10 @@
       var ang = Math.atan2(dy, dx) * (180 / Math.PI);
       if (ang > 90) ang -= 180;
       if (ang < -90) ang += 180;
-      var lBoxW = Math.max(48, Math.round(Math.min(340, Math.max(60, totalPx * 0.86))));
+      var lBoxW = Math.max(4, Math.round(totalPx * 0.86));
       var lFsByLen = totalPx * 0.12;
       var lFsByChars = (lBoxW * 1.15) / Math.max(5, charCount * 0.62);
-      var lFontSize = Math.round(Math.max(9, Math.min(26, Math.min(lFsByLen, lFsByChars))));
+      var lFontSize = Math.max(1, Number(Math.min(lFsByLen, lFsByChars).toFixed(2)));
       return {
         latlng: midLl,
         placement: "above-line",
@@ -1261,15 +1321,13 @@
     return null;
   }
 
-  function showResizeHudForFeature(f) {
+  function showResizeHudAtLatLng(latlng, labelStr) {
     var m = map();
-    if (!m || !global.L) return;
-    var info = computeFeatureResizeMeasurement(f);
-    if (!info || !info.latlng || !info.label) return;
+    if (!m || !global.L || !latlng || !labelStr) return;
     ensurePane(m);
-    var html = '<div class="ss-uc-resize-hud-pill">' + escapeHtml(info.label) + '</div>';
+    var html = '<div class="ss-uc-resize-hud-pill">' + escapeHtml(labelStr) + '</div>';
     if (!resizeHudMarker) {
-      resizeHudMarker = L.marker(info.latlng, {
+      resizeHudMarker = L.marker(latlng, {
         pane: PANE,
         interactive: false,
         keyboard: false,
@@ -1281,7 +1339,7 @@
       });
       m.addLayer(resizeHudMarker);
     } else {
-      resizeHudMarker.setLatLng(info.latlng);
+      resizeHudMarker.setLatLng(latlng);
       var el = resizeHudMarker.getElement && resizeHudMarker.getElement();
       if (el) {
         el.innerHTML = html;
@@ -1294,6 +1352,14 @@
       }
       if (!m.hasLayer(resizeHudMarker)) m.addLayer(resizeHudMarker);
     }
+  }
+
+  function showResizeHudForFeature(f) {
+    var m = map();
+    if (!m || !global.L) return;
+    var info = computeFeatureResizeMeasurement(f);
+    if (!info || !info.latlng || !info.label) return;
+    showResizeHudAtLatLng(info.latlng, info.label);
   }
 
   function hideResizeHud() {
@@ -1661,6 +1727,7 @@
     if (tool === "text") {
       L.DomEvent.stopPropagation(e);
       var idT = uid();
+      var curZ = (typeof m.getZoom === "function" && Number.isFinite(Number(m.getZoom()))) ? Number(m.getZoom()) : 8;
       pushFeature(
         {
           type: "Feature",
@@ -1673,7 +1740,8 @@
             color: state.color,
             fontSize: 15,
             widthPx: 148,
-            rows: 1
+            rows: 1,
+            baseZoom: curZ
           }
         },
         idT
@@ -1767,6 +1835,9 @@
     m.on("mousemove", onMapMouseMove);
     m.on("click", onMapClick);
     m.on("dblclick", onMapDblClick);
+    m.on("zoom", function () {
+      if (state.overlayOn) syncTextBoxesZoomScale();
+    });
     m.on("zoomend", function () {
       if (state.overlayOn) rebuildMapLayers();
     });

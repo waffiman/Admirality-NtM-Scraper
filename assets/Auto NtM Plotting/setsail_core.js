@@ -22755,10 +22755,99 @@ window.fetchCivilSunTimes = fetchCivilSunTimes;
 
 
 let mapContextMenuPopup = null;
+window._ssActiveRmbPopup = null;
+window._ssActiveRmbMap = null;
+window._ssRmbSwallowUntilUp = 0;
 
+function isSetChartRmbPopupOpen() {
+  const p = window._ssActiveRmbPopup;
+  const m = window._ssActiveRmbMap || window.leafletMap;
+  if (p && m && typeof m.hasLayer === "function" && m.hasLayer(p)) {
+    return true;
+  }
+  const domPop = document.querySelector(
+    "#ntmMap .ss-map-ctx-popup, #ntmMap .ss-wp-del-popup-wrap, #ntmMap .ss-vrm-popup-wrap"
+  );
+  return Boolean(domPop);
+}
 
+function closeActiveSetChartRmbPopup() {
+  const p = window._ssActiveRmbPopup;
+  const m = window._ssActiveRmbMap || window.leafletMap;
+  window._ssActiveRmbPopup = null;
+  if (m && typeof m.closePopup === "function") {
+    try {
+      if (p) m.closePopup(p);
+      else m.closePopup();
+    } catch (e0) {}
+  }
+}
+
+function ensureSetChartRmbOutsideClickBlocker() {
+  if (window._ssRmbOutsideBlockerInstalled) return;
+  window._ssRmbOutsideBlockerInstalled = true;
+
+  const isInsideOpenPopup = (target) => {
+    if (!target || typeof target.closest !== "function") return false;
+    return Boolean(
+      target.closest(".ss-map-ctx-popup, .ss-wp-del-popup-wrap, .ss-vrm-popup-wrap, .ss-wp-del-popup, .ss-ctx-menu, .ss-vrm-popup")
+    );
+  };
+
+  const onCaptureDown = (ev) => {
+    if (!isSetChartRmbPopupOpen()) return;
+    if (isInsideOpenPopup(ev.target)) return;
+    // Outside click (LMB or RMB) while an RMB popup is open:
+    // Close the popup and block this click from activating ANYTHING else!
+    window._ssRmbSwallowUntilUp = Date.now() + 700;
+    try { ev.preventDefault(); } catch (e1) {}
+    try { ev.stopPropagation(); } catch (e2) {}
+    try { if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation(); } catch (e3) {}
+    closeActiveSetChartRmbPopup();
+  };
+
+  const onCaptureFollowUp = (ev) => {
+    if (window._ssRmbSwallowUntilUp > Date.now()) {
+      if (isInsideOpenPopup(ev.target)) return;
+      try { ev.preventDefault(); } catch (e1) {}
+      try { ev.stopPropagation(); } catch (e2) {}
+      try { if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation(); } catch (e3) {}
+      if (ev.type === "click" || ev.type === "contextmenu") {
+        window._ssRmbSwallowUntilUp = 0;
+      }
+      return;
+    }
+    if (ev.type === "contextmenu" && isSetChartRmbPopupOpen() && !isInsideOpenPopup(ev.target)) {
+      try { ev.preventDefault(); } catch (e1) {}
+      try { ev.stopPropagation(); } catch (e2) {}
+      try { if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation(); } catch (e3) {}
+      closeActiveSetChartRmbPopup();
+    }
+  };
+
+  window.addEventListener("pointerdown", onCaptureDown, true);
+  window.addEventListener("mousedown", onCaptureDown, true);
+  window.addEventListener("mouseup", onCaptureFollowUp, true);
+  window.addEventListener("click", onCaptureFollowUp, true);
+  window.addEventListener("contextmenu", onCaptureFollowUp, true);
+}
+
+function registerSetChartRmbPopup(map, popup) {
+  ensureSetChartRmbOutsideClickBlocker();
+  window._ssActiveRmbMap = map || window.leafletMap || null;
+  window._ssActiveRmbPopup = popup || null;
+  if (popup && typeof popup.on === "function") {
+    popup.on("remove", () => {
+      if (window._ssActiveRmbPopup === popup) {
+        window._ssActiveRmbPopup = null;
+      }
+    });
+  }
+}
+window.registerSetChartRmbPopup = registerSetChartRmbPopup;
 
 function initMapContextMenu(map) {
+  ensureSetChartRmbOutsideClickBlocker();
 
   if (!map || map._ssContextMenuHooked) return;
 
@@ -22891,6 +22980,7 @@ function openMapContextMenu(latlng, map) {
 
 
   mapContextMenuPopup = popup;
+  registerSetChartRmbPopup(map, popup);
 
 
 
@@ -23547,8 +23637,11 @@ function addVrmEblTool(map, centerLL) {
     const doDel = (ev) => { if (ev) { ev.preventDefault(); ev.stopPropagation(); } removeTool(); };
     del.addEventListener("click", doDel);
     del.addEventListener("pointerup", doDel);
-    L.popup({ className: "ss-map-ctx-popup ss-vrm-popup-wrap", closeButton: false, autoPan: true, offset: [0, -6] })
+    const vrmPop = L.popup({ className: "ss-map-ctx-popup ss-vrm-popup-wrap", closeButton: false, autoPan: true, offset: [0, -6] })
       .setLatLng(atLatLng || center).setContent(box).openOn(map);
+    if (typeof window.registerSetChartRmbPopup === "function") {
+      window.registerSetChartRmbPopup(map, vrmPop);
+    }
   }
 
   const handleToolContextMenu = (e) => {
@@ -48126,10 +48219,13 @@ if (document.readyState === "loading") {
     };
     btn.addEventListener("click", doDel);
     btn.addEventListener("pointerup", doDel);
-    L.popup({ className: "ss-wp-del-popup-wrap", closeButton: false, autoPan: true, offset: [0, -8] })
+    const wpPop = L.popup({ className: "ss-wp-del-popup-wrap", closeButton: false, autoPan: true, offset: [0, -8] })
       .setLatLng(ll)
       .setContent(box)
       .openOn(map);
+    if (typeof window.registerSetChartRmbPopup === "function") {
+      window.registerSetChartRmbPopup(map, wpPop);
+    }
   }
   window.openRouteWpDeletePopup = openRouteWpDeletePopup;
 

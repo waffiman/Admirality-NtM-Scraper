@@ -139,15 +139,15 @@ function buildEmailContent(toEmail, report) {
   const passedCount = Number(report.passedCount) || 0;
   const utcStr = new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
 
-  let subjPrefix = "[SetSail Watch]";
-  if (alarms.length > 0) {
-    subjPrefix = "[SetSail ALARM x" + alarms.length + "]";
+  let summaryTag = "All Checks Nominal";
+  if (alarms.length > 0 && warnings.length > 0) {
+    summaryTag = alarms.length + " Alarms, " + warnings.length + " Warnings";
+  } else if (alarms.length > 0) {
+    summaryTag = alarms.length + " Alarms";
   } else if (warnings.length > 0) {
-    subjPrefix = "[SetSail Warning x" + warnings.length + "]";
-  } else {
-    subjPrefix = "[SetSail Check OK]";
+    summaryTag = warnings.length + " Warnings";
   }
-  const subject = subjPrefix + ' "' + routeName + '" — ' + modeLabel;
+  const subject = "SetSail Passage Monitoring: " + routeName + " (" + summaryTag + ")";
 
   const vessel = report.vessel && typeof report.vessel === "object" ? report.vessel : null;
   const vesselLine = vessel && vessel.name
@@ -242,50 +242,60 @@ function buildEmailContent(toEmail, report) {
       .join("");
 
   const htmlBody =
-    '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto;background:#080f22;color:#e2e8f0;border:1px solid #1e293b;border-radius:10px;overflow:hidden;">' +
-    '<div style="padding:14px 18px;background:#0c1631;border-bottom:1px solid #1e293b;">' +
-    '<div style="font-size:11px;letter-spacing:0.08em;color:#38bdf8;font-weight:700;">SETSAIL BRIDGE MONITORING</div>' +
-    '<div style="font-size:17px;font-weight:700;color:#f8fafc;margin-top:2px;">' +
+    '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto;background:#081022;color:#e2e8f0;border:1px solid #1e293b;border-radius:14px;overflow:hidden;">' +
+    '<div style="padding:0;background:#060c1a;border-bottom:1px solid #1e293b;line-height:0;">' +
+    '<a href="https://setsail-nav.com/#setchart" style="display:block;text-decoration:none;border:0;">' +
+    '<img src="https://setsail-nav.com/assets/setsail-email-banner.jpg" alt="SetSail — AI-Powered Maritime Navigation Bridge" width="640" style="display:block;width:100%;max-width:640px;height:auto;border:0;" />' +
+    '</a></div>' +
+    '<div style="padding:18px 22px;background:#0a142a;border-bottom:1px solid #1e293b;">' +
+    '<div style="font-size:10.5px;letter-spacing:0.1em;color:#38bdf8;font-weight:700;text-transform:uppercase;">Passage Monitoring Report</div>' +
+    '<div style="font-size:18px;font-weight:800;color:#f8fafc;margin-top:4px;">' +
     esc(routeName) +
-    ' <span style="font-size:11px;padding:2px 7px;border-radius:999px;background:#1e293b;color:#7dd3fc;vertical-align:middle;margin-left:6px;">' +
+    ' <span style="font-size:10.5px;padding:3px 9px;border-radius:6px;background:#112240;border:1px solid #1d3b6e;color:#7dd3fc;vertical-align:middle;margin-left:6px;">' +
     esc(modeLabel) +
     "</span></div>" +
-    '<div style="font-size:12px;color:#94a3b8;margin-top:4px;">' +
+    '<div style="font-size:12px;color:#94a3b8;margin-top:5px;">' +
     esc(vesselLine) +
     "</div>" +
-    '<div style="font-size:11px;color:#64748b;margin-top:3px;">' +
+    '<div style="font-size:11px;color:#64748b;margin-top:4px;">' +
     esc(utcStr) +
-    " &middot; Alarms: <b style=\"color:#f87171;\">" +
+    ' &middot; Alarms: <b style="color:#fb7185;">' +
     alarms.length +
-    "</b> &middot; Warnings: <b style=\"color:#fbbf24;\">" +
+    '</b> &middot; Warnings: <b style="color:#fbbf24;">' +
     warnings.length +
-    "</b> &middot; Nominal: <b style=\"color:#34d399;\">" +
+    '</b> &middot; Checks Passed: <b style="color:#34d399;">' +
     passedCount +
     "</b></div>" +
     "</div>" +
-    '<div style="padding:14px 18px;">' +
+    '<div style="padding:18px 22px;">' +
     (alarms.length > 0
-      ? '<div style="font-size:11px;font-weight:700;color:#f87171;letter-spacing:0.06em;margin:4px 0 6px;">ALARMS (' +
+      ? '<div style="font-size:11px;font-weight:700;color:#fda4af;letter-spacing:0.06em;text-transform:uppercase;margin:2px 0 8px;">Alarms &middot; Action Required (' +
         alarms.length +
-        ')</div><table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:14px;">' +
-        renderRowsHtml(alarms, "#ef4444", "rgba(239,68,68,0.2)", "#fca5a5") +
+        ')</div><table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:16px;">' +
+        renderRowsHtml(alarms, "#f43f5e", "#2d1220", "#fda4af") +
         "</table>"
       : "") +
     (warnings.length > 0
-      ? '<div style="font-size:11px;font-weight:700;color:#fbbf24;letter-spacing:0.06em;margin:4px 0 6px;">WARNINGS (' +
+      ? '<div style="font-size:11px;font-weight:700;color:#fcd34d;letter-spacing:0.06em;text-transform:uppercase;margin:2px 0 8px;">Navigational Warnings &amp; Advisories (' +
         warnings.length +
-        ')</div><table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:14px;">' +
-        renderRowsHtml(warnings, "#f59e0b", "rgba(245,158,11,0.2)", "#fde68a") +
+        ')</div><table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:16px;">' +
+        renderRowsHtml(warnings, "#f59e0b", "#2b1f0e", "#fcd34d") +
         "</table>"
       : "") +
     (alarms.length === 0 && warnings.length === 0
-      ? '<div style="padding:12px;border-radius:6px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;font-size:13px;">All monitored route systems nominal (0 Alarms, 0 Warnings).</div>'
+      ? '<div style="padding:12px 14px;border-radius:8px;background:#0a1f24;border:1px solid #134e4a;color:#6ee7b7;font-size:12.5px;">All monitored route systems nominal (0 Alarms, 0 Warnings).</div>'
       : "") +
-    '<div style="margin-top:14px;padding-top:12px;border-top:1px solid #1e293b;font-size:11px;color:#64748b;">' +
-    'Sent to SetSail account <strong style="color:#cbd5e1;">' +
+    '<div style="margin-top:16px;text-align:center;">' +
+    '<a href="https://setsail-nav.com/#setchart" style="display:inline-block;padding:10px 20px;border-radius:8px;background:#f05a36;color:#ffffff;font-size:12px;font-weight:700;text-decoration:none;">Open Route in SetChart &rarr;</a>' +
+    "</div></div>" +
+    '<div style="padding:20px 22px;background:#060c1a;border-top:1px solid #1e293b;text-align:center;">' +
+    '<a href="https://setsail-nav.com" style="display:inline-block;text-decoration:none;border:0;margin-bottom:10px;">' +
+    '<img src="https://setsail-nav.com/assets/setsail-logo-horizontal.png" alt="SetSail" width="156" style="display:block;margin:0 auto;width:156px;max-width:156px;height:auto;border:0;" />' +
+    "</a>" +
+    '<div style="font-size:11px;color:#94a3b8;">Delivered to <strong style="color:#e2e8f0;">' +
     esc(toEmail) +
-    '</strong> &middot; <a href="https://setsail-nav.com" style="color:#38bdf8;text-decoration:none;">Open SetChart</a>' +
-    "</div></div></div>";
+    '</strong> &middot; <a href="https://setsail-nav.com/#setchart" style="color:#38bdf8;text-decoration:none;">Manage preferences or unsubscribe</a></div>' +
+    "</div></div>";
 
   return { subject, textBody, htmlBody };
 }
