@@ -16829,6 +16829,7 @@ function convertManualUserChartFeaturesToNotices() {
         isPolygon: true,
         isLine: false,
         isManualUserChart: true,
+        manualShapeLabel: shapeCaption,
         lat: coords[0].lat,
         lon: coords[0].lon,
         coords: coords,
@@ -16862,6 +16863,7 @@ function convertManualUserChartFeaturesToNotices() {
         isPolygon: false,
         isLine: coords.length >= 2,
         isManualUserChart: true,
+        manualShapeLabel: shapeCaption,
         lat: coords[0].lat,
         lon: coords[0].lon,
         coords: coords
@@ -16901,6 +16903,7 @@ function convertManualUserChartFeaturesToNotices() {
           isPolygon: true,
           isLine: false,
           isManualUserChart: true,
+          manualShapeLabel: shapeCaption,
           lat: cLat,
           lon: cLon,
           coords: ring,
@@ -16928,6 +16931,7 @@ function convertManualUserChartFeaturesToNotices() {
         isPolygon: false,
         isLine: false,
         isManualUserChart: true,
+        manualShapeLabel: kind === "text" ? rawLabel : shapeCaption,
         lat: cLat,
         lon: cLon,
         coords: [{ lat: cLat, lon: cLon, dms: fmtDms(cLat, cLon) }]
@@ -35398,13 +35402,14 @@ function downloadJrcUchFile(notices, filename) {
 
 
 
-    if (coords.length >= 2) {
+    const isPolyOrLine = Boolean((n.isPolygon && coords.length >= 3) || (n.isLine && coords.length >= 2));
+    if (isPolyOrLine) {
 
-      // Close polygon loop if >= 3 vertices
+      // Close polygon loop if n.isPolygon and >= 3 vertices
 
-      const pts = coords.slice();
+      const pts = coords.filter((p, pIdx, arr) => pIdx === 0 || Math.abs(Number(p.lat) - Number(arr[pIdx - 1].lat)) > 1e-7 || Math.abs(Number(p.lon) - Number(arr[pIdx - 1].lon)) > 1e-7);
 
-      if (pts.length >= 3 && (pts[0].lat !== pts[pts.length - 1].lat || pts[0].lon !== pts[pts.length - 1].lon)) {
+      if (n.isPolygon && pts.length >= 3 && (pts[0].lat !== pts[pts.length - 1].lat || pts[0].lon !== pts[pts.length - 1].lon)) {
 
         pts.push({ lat: pts[0].lat, lon: pts[0].lon });
 

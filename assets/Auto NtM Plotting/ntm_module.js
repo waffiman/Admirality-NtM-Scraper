@@ -524,131 +524,305 @@ if (typeof window !== "undefined") {
  * @returns {ArrayBuffer}
  */
 function buildJrcUchmBuffer(notices) {
-  // Expand notices & manual user chart items into valid JRC User Map v1.1 records (up to 25 vertices per 296-byte record)
-  const MAX_REC_PTS = 25;
-  const records = [];
+  // Authentic JRC JAN-701B/901B/7201/9201 User Map File Version 1.1 (.uchm) binary generator
+  // Matches reference 'Navarea IV Warnings.uchm' byte-for-byte (208-byte header with CRC32 @ 204,
+  // variable-length records with SCALE = 1,536,000, and 4-byte body CRC32 footer).
+  const SCALE = 1536000;
+  const SCAMIN = 100000000;
+  const MAX_POLY_UNIQUE_PTS = 20;
+  const MAX_LINE_PTS = 50;
+
+  const crcTable = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      t[i] = c >>> 0;
+    }
+    return t;
+  })();
+
+  const crc32Slice = (u8, start, end) => {
+    let c = 0xffffffff;
+    for (let i = start; i < end; i++) {
+      c = crcTable[(c ^ u8[i]) & 0xff] ^ (c >>> 8);
+    }
+    return (c ^ 0xffffffff) >>> 0;
+  };
+
+  const writeAscii = (buf, offset, str, maxLen) => {
+    const s = String(str || "")
+      .replace(/[\r\n\t]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const limit = Math.max(0, maxLen - 1);
+    for (let i = 0; i < maxLen; i++) {
+      if (i < s.length && i < limit) {
+        const code = s.charCodeAt(i);
+        buf[offset + i] = (code >= 32 && code <= 126) ? code : 32;
+      } else {
+        buf[offset + i] = 0;
+      }
+    }
+  };
+
+  const toScaledPair = (pt) => ({
+    lat: Number(pt.lat),
+    lon: Number(pt.lon),
+    latS: Math.round(Number(pt.lat) * SCALE),
+    lonS: Math.round(Number(pt.lon) * SCALE)
+  });
+
+  // Type 11: On-Chart Text Label (160 bytes)
+  const makeTextRecord11 = (lat, lon, textStr, fontSizePt) => {
+    const rec = new Uint8Array(160);
+    const dv = new DataView(rec.buffer);
+    dv.setUint32(0, 11, true);
+    dv.setUint32(4, SCAMIN, true);
+    dv.setUint32(8, 1000, true);
+    // bytes 12..83 remain 0 (name='' and rec[83]=0, matching Rec 2, 4, 14 in reference .uchm)
+    rec[84] = 0x09;
+    rec[85] = fontSizePt || 0x0c;
+    writeAscii(rec, 88, textStr, 64);
+    dv.setInt32(152, Math.round(Number(lat) * SCALE), true);
+    dv.setInt32(156, Math.round(Number(lon) * SCALE), true);
+    return rec;
+  };
+
+  // Type 29 / 18: Point Warning Symbol (~WARN__1, 104 bytes)
+  const makePointRecord = (lat, lon, title) => {
+    const rec = new Uint8Array(104);
+    const dv = new DataView(rec.buffer);
+    const recType = /\bRIG\b/i.test(String(title || "")) ? 18 : 29;
+    dv.setUint32(0, recType, true);
+    dv.setUint32(4, SCAMIN, true);
+    dv.setUint32(8, 1000, true);
+    writeAscii(rec, 12, title, 64);
+    rec[83] = 1;
+    writeAscii(rec, 84, "~WARN__1", 9);
+    rec[95] = 0x09;
+    dv.setInt32(96, Math.round(Number(lat) * SCALE), true);
+    dv.setInt32(100, Math.round(Number(lon) * SCALE), true);
+    return rec;
+  };
+
+  // Type 30: Polyline / Line (88 + npts * 84 bytes)
+  const makeLineRecord30 = (rawPts, title) => {
+    const dedup = [];
+    rawPts.forEach((p) => {
+      const sp = toScaledPair(p);
+      if (!dedup.length || dedup[dedup.length - 1].latS !== sp.latS || dedup[dedup.length - 1].lonS !== sp.lonS) {
+        dedup.push(sp);
+      }
+    });
+    if (dedup.length < 2) {
+      return dedup.length === 1 ? makePointRecord(dedup[0].lat, dedup[0].lon, title) : null;
+    }
+    let pts = dedup;
+    if (pts.length > MAX_LINE_PTS) {
+      const sampled = [];
+      for (let i = 0; i < MAX_LINE_PTS - 1; i++) {
+        sampled.push(pts[Math.floor((i * (pts.length - 1)) / (MAX_LINE_PTS - 1))]);
+      }
+      sampled.push(pts[pts.length - 1]);
+      pts = sampled;
+    }
+    const npts = pts.length;
+    const rec = new Uint8Array(88 + npts * 84);
+    const dv = new DataView(rec.buffer);
+    dv.setUint32(0, 30, true);
+    dv.setUint32(4, SCAMIN, true);
+    dv.setUint32(8, 1000, true);
+    writeAscii(rec, 12, title, 64);
+    rec[83] = 1;
+    dv.setUint32(84, npts, true);
+    for (let i = 0; i < npts; i++) {
+      const base = 88 + i * 84;
+      writeAscii(rec, base, title, 64);
+      rec[base + 71] = 1;
+      rec[base + 74] = 9;
+      dv.setInt32(base + 76, pts[i].latS, true);
+      dv.setInt32(base + 80, pts[i].lonS, true);
+    }
+    return rec;
+  };
+
+  // Type 31: Closed Polygon / Area (96 + npts * 8 bytes)
+  const makePolyRecord31 = (rawPts, title) => {
+    const unique = [];
+    rawPts.forEach((p) => {
+      const sp = toScaledPair(p);
+      if (!unique.length || unique[unique.length - 1].latS !== sp.latS || unique[unique.length - 1].lonS !== sp.lonS) {
+        unique.push(sp);
+      }
+    });
+    if (
+      unique.length >= 2 &&
+      unique[0].latS === unique[unique.length - 1].latS &&
+      unique[0].lonS === unique[unique.length - 1].lonS
+    ) {
+      unique.pop();
+    }
+    if (unique.length < 3) {
+      if (unique.length === 2) return makeLineRecord30(unique, title);
+      if (unique.length === 1) return makePointRecord(unique[0].lat, unique[0].lon, title);
+      return null;
+    }
+    let ring = unique;
+    if (ring.length > MAX_POLY_UNIQUE_PTS) {
+      const sampled = [];
+      for (let i = 0; i < MAX_POLY_UNIQUE_PTS; i++) {
+        sampled.push(ring[Math.floor((i * ring.length) / MAX_POLY_UNIQUE_PTS)]);
+      }
+      ring = sampled;
+    }
+    const closedRing = ring.concat([ring[0]]);
+    const npts = closedRing.length;
+    const rec = new Uint8Array(96 + npts * 8);
+    const dv = new DataView(rec.buffer);
+    dv.setUint32(0, 31, true);
+    dv.setUint32(4, SCAMIN, true);
+    dv.setUint32(8, 1000, true);
+    writeAscii(rec, 12, title, 64);
+    rec[83] = 1;
+    rec[84] = 3;
+    rec[85] = 1;
+    rec[86] = 8;
+    rec[87] = 0;
+    rec[88] = 3;
+    rec[89] = 9;
+    rec[90] = 0;
+    rec[91] = 0;
+    dv.setUint32(92, npts, true);
+    for (let i = 0; i < npts; i++) {
+      dv.setInt32(96 + i * 8, closedRing[i].latS, true);
+      dv.setInt32(96 + i * 8 + 4, closedRing[i].lonS, true);
+    }
+    return rec;
+  };
+
+  const chunks = [];
 
   (notices || []).forEach((n, idx) => {
-    if (!n || !Array.isArray(n.coords) || n.coords.length === 0) return;
-    const cleanCoords = n.coords
+    if (!n) return;
+    const rawCoords = Array.isArray(n.coords) && n.coords.length > 0
+      ? n.coords
+      : (Number.isFinite(Number(n.lat)) && Number.isFinite(Number(n.lon)) ? [{ lat: Number(n.lat), lon: Number(n.lon) }] : []);
+    const cleanCoords = rawCoords
       .map((c) => ({ lat: Number(c.lat), lon: Number(c.lon) }))
-      .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon));
+      .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon) && Math.abs(c.lat) <= 90 && Math.abs(c.lon) <= 180);
     if (cleanCoords.length === 0) return;
 
     const rawTitle = buildNoticeEcdisSnapshot(n, idx, 62);
+    const manualCaption = String(n.manualShapeLabel || "").replace(/\s+/g, " ").trim().slice(0, 62);
+
+    // 1. Standalone Manual User Chart Text Box -> pure Type 11 Text Label record
+    if (n.isManualUserChart && String(n.category || "").toUpperCase() === "TEXT") {
+      chunks.push(makeTextRecord11(cleanCoords[0].lat, cleanCoords[0].lon, manualCaption || rawTitle, 0x14));
+      return;
+    }
 
     const isPoly = Boolean(n.isPolygon && cleanCoords.length >= 3);
-    const isLine = Boolean(!isPoly && (n.isLine || cleanCoords.length >= 2));
+    const isLine = Boolean(!isPoly && n.isLine && cleanCoords.length >= 2);
 
+    // 2. Closed Polygon / Area (or multi-zone subPolygons)
     if (isPoly) {
-      // Strip duplicate closing vertex if present, resample if > 24 unique vertices, then re-close
-      let ring = cleanCoords.slice();
-      if (
-        ring.length >= 2 &&
-        Math.abs(ring[0].lat - ring[ring.length - 1].lat) < 1e-7 &&
-        Math.abs(ring[0].lon - ring[ring.length - 1].lon) < 1e-7
-      ) {
-        ring.pop();
+      const subRings = [];
+      if (Array.isArray(n.subPolygons) && n.subPolygons.length > 0) {
+        n.subPolygons.forEach((sp) => {
+          const spPts = Array.isArray(sp && sp.coords) && sp.coords.length >= 3
+            ? sp.coords.map((c) => ({ lat: Number(c.lat), lon: Number(c.lon) }))
+            : (Array.isArray(sp && sp.points) && sp.points.length >= 3
+              ? sp.points.map((p) => (Array.isArray(p) ? { lat: Number(p[0]), lon: Number(p[1]) } : { lat: Number(p.lat), lon: Number(p.lon) }))
+              : []);
+          const validSp = spPts.filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon));
+          if (validSp.length >= 3) subRings.push(validSp);
+        });
       }
-      if (ring.length > MAX_REC_PTS - 1) {
-        const sampled = [];
-        const targetN = MAX_REC_PTS - 1;
-        for (let i = 0; i < targetN; i++) {
-          sampled.push(ring[Math.floor((i * ring.length) / targetN)]);
+      if (subRings.length === 0) {
+        subRings.push(cleanCoords);
+      }
+
+      subRings.forEach((ring) => {
+        const polyRec = makePolyRecord31(ring, rawTitle);
+        if (polyRec) chunks.push(polyRec);
+      });
+
+      // Emit companion Type 11 Text Label at centroid of primary ring (for all NtM/NAVTEX polygons, and manual shapes with a caption)
+      if (!n.isManualUserChart || manualCaption) {
+        const pRing = subRings[0];
+        let sumLat = 0, sumLon = 0;
+        for (let k = 0; k < pRing.length; k++) {
+          sumLat += pRing[k].lat;
+          sumLon += pRing[k].lon;
         }
-        ring = sampled;
+        const cLat = sumLat / pRing.length;
+        const cLon = sumLon / pRing.length;
+        chunks.push(makeTextRecord11(cLat, cLon, manualCaption || rawTitle, 0x0c));
       }
-      if (ring.length >= 3) {
-        ring.push({ lat: ring[0].lat, lon: ring[0].lon });
-        records.push({ title: rawTitle, objType: 2, pts: ring });
-        // Also emit a point/text snapshot record at polygon centroid so real JRC ECDIS shows the symbol + text snapshot
-        if (!n.isManualUserChart || n.manualShapeLabel) {
-          let sumLat = 0, sumLon = 0;
-          const cnt = Math.max(1, ring.length - 1);
-          for (let k = 0; k < cnt; k++) {
-            sumLat += ring[k].lat;
-            sumLon += ring[k].lon;
-          }
-          records.push({
-            title: rawTitle,
-            objType: 0,
-            pts: [{ lat: sumLat / cnt, lon: sumLon / cnt }]
-          });
-        }
-      }
-    } else if (isLine) {
-      // Split polylines / brush strokes longer than MAX_REC_PTS into connected segments
-      if (cleanCoords.length <= MAX_REC_PTS) {
-        records.push({ title: rawTitle, objType: 1, pts: cleanCoords });
-      } else {
-        const step = MAX_REC_PTS - 1;
-        let part = 1;
-        for (let start = 0; start < cleanCoords.length - 1; start += step) {
-          const chunk = cleanCoords.slice(start, start + MAX_REC_PTS);
-          if (chunk.length >= 2) {
-            records.push({
-              title: `${rawTitle.slice(0, 57)} #${part++}`,
-              objType: 1,
-              pts: chunk
-            });
-          }
-        }
-      }
-      if (!n.isManualUserChart || n.manualShapeLabel) {
-        const midPt = cleanCoords[Math.floor(cleanCoords.length / 2)];
-        records.push({ title: rawTitle, objType: 0, pts: [midPt] });
-      }
-    } else {
-      records.push({ title: rawTitle, objType: 0, pts: [cleanCoords[0]] });
+      return;
     }
+
+    // 3. Polyline / Line / Brush Stroke / Straight Line
+    if (isLine) {
+      const lineRec = makeLineRecord30(cleanCoords, rawTitle);
+      if (lineRec) chunks.push(lineRec);
+      if (!n.isManualUserChart || manualCaption) {
+        const midPt = cleanCoords[Math.floor(cleanCoords.length / 2)];
+        chunks.push(makeTextRecord11(midPt.lat, midPt.lon, manualCaption || rawTitle, 0x0c));
+      }
+      return;
+    }
+
+    // 4. Discrete Point Warning(s) — deduplicate identical coordinates from multi-panel UKHO notices
+    const uniquePts = [];
+    cleanCoords.forEach((pt) => {
+      const sp = toScaledPair(pt);
+      if (!uniquePts.some((u) => u.latS === sp.latS && u.lonS === sp.lonS)) {
+        uniquePts.push(sp);
+      }
+    });
+    uniquePts.forEach((pt, pIdx) => {
+      chunks.push(makePointRecord(pt.lat, pt.lon, rawTitle));
+      if (pIdx === 0 && (!n.isManualUserChart || manualCaption)) {
+        chunks.push(makeTextRecord11(pt.lat, pt.lon, manualCaption || rawTitle, 0x0c));
+      }
+    });
   });
 
-  const RECORD_SIZE = 296;
-  const HEADER_SIZE = 220;
-  const totalSize = HEADER_SIZE + records.length * RECORD_SIZE;
+  // Ensure at least one valid record exists if called with an empty list
+  if (chunks.length === 0) {
+    chunks.push(makeTextRecord11(0, 0, "SETSAIL USER CHART", 0x0c));
+  }
+
+  const HEADER_SIZE = 208;
+  const FOOTER_SIZE = 4;
+  const bodyLen = chunks.reduce((acc, c) => acc + c.length, 0);
+  const totalSize = HEADER_SIZE + bodyLen + FOOTER_SIZE;
+
   const buffer = new ArrayBuffer(totalSize);
-  const view = new DataView(buffer);
   const bytes = new Uint8Array(buffer);
+  const view = new DataView(buffer);
 
-  // 1. Write Header "User Map File Version 1.1\0"
-  const headerStr = "User Map File Version 1.1";
-  for (let i = 0; i < headerStr.length; i++) {
-    bytes[i] = headerStr.charCodeAt(i);
+  // 1. Write 208-byte Header ("User Map File Version 1.1\0", fileSizeMinus4 @ 64, timestamp @ 68, header CRC32 @ 204)
+  writeAscii(bytes, 0, "User Map File Version 1.1", 64);
+  view.setUint32(64, totalSize - 4, true);
+  view.setUint32(68, Math.floor(Date.now() / 1000), true);
+  const hdrCrc = crc32Slice(bytes, 0, 204);
+  view.setUint32(204, hdrCrc, true);
+
+  // 2. Copy variable-length records into body [208 .. 208 + bodyLen)
+  let pos = HEADER_SIZE;
+  for (let i = 0; i < chunks.length; i++) {
+    bytes.set(chunks[i], pos);
+    pos += chunks[i].length;
   }
 
-  // Record count at offset 24 (int32 little endian)
-  view.setInt32(24, records.length, true);
-
-  // 2. Write Records
-  let offset = HEADER_SIZE;
-  for (let r = 0; r < records.length; r++) {
-    const rec = records[r];
-    const recStart = offset;
-
-    // Record Name (up to 63 ASCII chars + null terminator)
-    const title = String(rec.title || `USERCHART-${r + 1}`).substring(0, 63);
-    for (let i = 0; i < title.length; i++) {
-      const code = title.charCodeAt(i);
-      bytes[recStart + i] = (code >= 32 && code <= 126) ? code : 32;
-    }
-
-    const pts = rec.pts.slice(0, MAX_REC_PTS);
-
-    // Object type flags (0 = point, 1 = line, 2 = polygon)
-    view.setInt32(recStart + 68, rec.objType, true);
-    view.setInt32(recStart + 72, pts.length, true);
-
-    // Coordinates: deg * 600,000 (1/10000 minute)
-    for (let p = 0; p < pts.length; p++) {
-      const ptOff = recStart + 84 + p * 8;
-      const latScaled = Math.round(pts[p].lat * 600000);
-      const lonScaled = Math.round(pts[p].lon * 600000);
-      view.setInt32(ptOff, latScaled, true);
-      view.setInt32(ptOff + 4, lonScaled, true);
-    }
-
-    offset += RECORD_SIZE;
-  }
+  // 3. Write 4-byte Body CRC32 footer at [208 + bodyLen .. totalSize)
+  const bodyCrc = crc32Slice(bytes, HEADER_SIZE, HEADER_SIZE + bodyLen);
+  view.setUint32(HEADER_SIZE + bodyLen, bodyCrc, true);
 
   return buffer;
 }
