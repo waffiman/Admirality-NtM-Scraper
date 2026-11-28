@@ -1838,6 +1838,9 @@
     m.on("zoom", function () {
       if (state.overlayOn) syncTextBoxesZoomScale();
     });
+    m.on("zoom", function () {
+      if (state.overlayOn) syncTextBoxesZoomScale();
+    });
     m.on("zoomend", function () {
       if (state.overlayOn) rebuildMapLayers();
     });

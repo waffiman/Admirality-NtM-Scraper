@@ -175,7 +175,8 @@ def ensure_cloudflare_email_dns(priv_key) -> None:
     if sender_ip:
         upsert_record("A", MAIL_HOST, sender_ip, extra={"proxied": False})
     upsert_record("MX", DOMAIN, MAIL_HOST, extra={"priority": 10})
-    spf_val = f"v=spf1 ip4:193.220.220.0/22{f' ip4:{sender_ip}' if sender_ip and not sender_ip.startswith('193.220.22') else ''} a mx a:{MAIL_HOST} ~all"
+    spf_ip_part = f" ip4:{sender_ip}" if sender_ip else ""
+    spf_val = f"v=spf1 ip4:193.220.0.0/16{spf_ip_part} a mx a:{MAIL_HOST} ~all"
     upsert_record("TXT", DOMAIN, spf_val, match_prefix="v=spf1")
     upsert_record("TXT", f"{SELECTOR}._domainkey.{DOMAIN}", f"v=DKIM1; k=rsa; p={pub_b64}", match_prefix="v=DKIM1")
     upsert_record("TXT", f"_dmarc.{DOMAIN}", f"v=DMARC1; p=quarantine; rua=mailto:{FROM_ADDR}", match_prefix="v=DMARC1")
@@ -634,10 +635,13 @@ def dkim_canon_body(body_bytes: bytes) -> bytes:
 
 
 def fold_dkim_value(val: str, width: int = 72) -> str:
-    tokens = val.split(" ")
+    # Fold ONLY at "; " tag boundaries so RFC 6376 relaxed canonicalization
+    # (unfold CRLF+WSP -> single space) produces the exact signed string.
+    parts = val.split("; ")
     lines = []
     cur = ""
-    for tok in tokens:
+    for i, part in enumerate(parts):
+        tok = part + (";" if i < len(parts) - 1 else "")
         if not cur:
             cur = tok
         elif len(cur) + 1 + len(tok) <= width:
@@ -647,24 +651,7 @@ def fold_dkim_value(val: str, width: int = 72) -> str:
             cur = " " + tok
     if cur:
         lines.append(cur)
-    final_lines = []
-    for ln in lines:
-        if len(ln) <= width:
-            final_lines.append(ln)
-        else:
-            # Wrap long base64 b= value onto 72-char continuation lines
-            prefix = ""
-            rest = ln
-            if "b=" in ln:
-                idx = ln.index("b=") + 2
-                prefix = ln[:idx]
-                rest = ln[idx:]
-                chunk0 = rest[: max(12, width - len(prefix))]
-                final_lines.append(prefix + chunk0)
-                rest = rest[len(chunk0) :]
-            for i in range(0, len(rest), width - 2):
-                final_lines.append(" " + rest[i : i + width - 2])
-    return "\r\n".join(final_lines)
+    return "\r\n".join(lines)
 
 
 def build_dkim_signed_mime(to_email: str, subject: str, text_body: str, html_body: str, priv_key) -> bytes:

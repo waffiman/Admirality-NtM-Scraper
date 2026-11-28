@@ -22981,6 +22981,7 @@ function openMapContextMenu(latlng, map) {
 
   mapContextMenuPopup = popup;
   registerSetChartRmbPopup(map, popup);
+  registerSetChartRmbPopup(map, popup);
 
 
 
