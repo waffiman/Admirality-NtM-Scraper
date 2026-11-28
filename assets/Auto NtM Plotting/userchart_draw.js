@@ -322,6 +322,40 @@
     return m._ssUcGroup;
   }
 
+  function syncSelectedTextboxHighlights() {
+    document.querySelectorAll(".ss-uc-textbox").forEach(function (node) {
+      var nid = node.getAttribute("data-uc-id");
+      node.classList.toggle("is-selected", Boolean(state.selectedFeatureId && nid === state.selectedFeatureId));
+    });
+  }
+
+  function syncTextBoxRowsAndDom(f, box, ta) {
+    if (!f || !ta) return;
+    f.properties = f.properties || {};
+    var val = String(ta.value != null ? ta.value : "");
+    var lines = val.split("\n");
+    var rowCount = Math.max(1, Math.min(30, lines.length));
+    f.properties.text = val;
+    f.properties.rows = rowCount;
+
+    var fs = Math.max(8, Math.min(120, Number(f.properties.fontSize) || 15));
+    var wp = Math.max(48, Math.min(1200, Number(f.properties.widthPx) || 148));
+    var lh = Math.round(fs * 1.32);
+    var hp = Math.max(lh + 10, rowCount * lh + 10);
+
+    ta.rows = rowCount;
+    ta.style.fontSize = fs + "px";
+    ta.style.lineHeight = lh + "px";
+    ta.style.width = wp + "px";
+    ta.style.height = hp + "px";
+    if (ta.scrollHeight > hp + 2) {
+      ta.style.height = ta.scrollHeight + "px";
+    }
+    if (box) {
+      box.style.width = wp + "px";
+    }
+  }
+
   function wireTextBoxEvents(marker, f) {
     var el = marker.getElement && marker.getElement();
     if (!el) return;
@@ -333,32 +367,112 @@
 
     if (ta) {
       ta.addEventListener("mousedown", function (ev) {
+        if (ev.button !== 0) return;
         if (state.tool === "eraser") {
           ev.preventDefault();
           ev.stopPropagation();
           removeFeatureById(fId);
           return;
         }
-        state.selectedFeatureId = fId;
-        box.classList.add("is-selected");
+        // Only select for color/editing when explicitly clicked with LMB in neutral cursor-arrow ("select") mode
         if (state.tool === "select") {
+          var changedSel = state.selectedFeatureId !== fId;
+          state.selectedFeatureId = fId;
+          syncSelectedTextboxHighlights();
+          if (changedSel) {
+            // Update vector stroke weights if another shape was previously selected
+            var chart = activeChart();
+            if (chart && Array.isArray(chart.features)) {
+              chart.features.forEach(function (feat) {
+                var fid0 = (feat.properties && feat.properties.id) || feat.id;
+                var lyr0 = layerById[fid0];
+                if (lyr0 && typeof lyr0.setStyle === "function" && (!feat.properties || feat.properties.kind !== "text")) {
+                  lyr0.setStyle(featureStyle(feat.properties && feat.properties.color, fid0 === fId, feat.properties && feat.properties.kind));
+                }
+              });
+            }
+          }
           startTextBoxInteriorDragOrFocus(ev, f, marker, box, ta);
           return;
         }
         ev.stopPropagation();
       });
 
-      ta.addEventListener("input", function () {
-        f.properties = f.properties || {};
-        f.properties.text = ta.value;
-        persist();
+      ta.addEventListener("dblclick", function (ev) {
+        ev.stopPropagation();
+        if (state.tool === "eraser") return;
+        state.selectedFeatureId = fId;
+        syncSelectedTextboxHighlights();
+        try {
+          ta.focus();
+        } catch (eF) {}
       });
 
-      ta.addEventListener("focus", function () {
-        state.selectedFeatureId = fId;
-        box.classList.add("is-selected");
+      ta.addEventListener("keydown", function (ev) {
+        ev.stopPropagation();
+        if (ev.key === "Escape") {
+          ev.preventDefault();
+          try { ta.blur(); } catch (eB) {}
+          return;
+        }
+        if (ev.key === "Enter") {
+          // Ensure Enter always creates a new line at the caret and immediately expands the Text Box frame
+          setTimeout(function () {
+            syncTextBoxRowsAndDom(f, box, ta);
+            persist();
+          }, 0);
+          return;
+        }
+        if (ev.key === "Delete" || ev.key === "Backspace") {
+          var val = String(ta.value || "");
+          var lines = val.split("\n");
+          var selStart = typeof ta.selectionStart === "number" ? ta.selectionStart : val.length;
+          var selEnd = typeof ta.selectionEnd === "number" ? ta.selectionEnd : selStart;
+          if (ev.key === "Delete" && selStart === selEnd && lines.length > 1) {
+            var curLineIdx = val.slice(0, selStart).split("\n").length - 1;
+            var delIdx = -1;
+            if (curLineIdx >= 1 && lines[curLineIdx].trim() === "") {
+              delIdx = curLineIdx;
+            } else if (curLineIdx + 1 < lines.length && lines[curLineIdx + 1].trim() === "") {
+              delIdx = curLineIdx + 1;
+            } else if (lines[lines.length - 1].trim() === "") {
+              delIdx = lines.length - 1;
+            }
+            if (delIdx >= 1) {
+              ev.preventDefault();
+              lines.splice(delIdx, 1);
+              var nextVal = lines.join("\n");
+              var caretLine = Math.min(delIdx - 1, lines.length - 1);
+              var nextCaret = lines.slice(0, caretLine + 1).join("\n").length;
+              ta.value = nextVal;
+              try { ta.setSelectionRange(nextCaret, nextCaret); } catch (eS) {}
+              syncTextBoxRowsAndDom(f, box, ta);
+              persist();
+              return;
+            }
+          }
+          setTimeout(function () {
+            syncTextBoxRowsAndDom(f, box, ta);
+            persist();
+          }, 0);
+        }
+      });
+
+      ta.addEventListener("input", function () {
+        syncTextBoxRowsAndDom(f, box, ta);
+        persist();
       });
     }
+
+    box.addEventListener("dblclick", function (ev) {
+      ev.stopPropagation();
+      if (state.tool === "eraser") return;
+      state.selectedFeatureId = fId;
+      syncSelectedTextboxHighlights();
+      if (ta) {
+        try { ta.focus(); } catch (eF) {}
+      }
+    });
 
     box.addEventListener("mousedown", function (ev) {
       if (ev.button !== 0) return;
@@ -373,8 +487,10 @@
       var handle = handleEl.getAttribute("data-tb-handle");
       ev.preventDefault();
       ev.stopPropagation();
-      state.selectedFeatureId = fId;
-      box.classList.add("is-selected");
+      if (state.tool === "select") {
+        state.selectedFeatureId = fId;
+        syncSelectedTextboxHighlights();
+      }
       startTextBoxHandleAction(ev, f, marker, box, ta, handle);
     });
 
@@ -933,7 +1049,9 @@
     if (!chart) return;
     if (!chart.features) chart.features = [];
     chart.features.push(feature);
-    state.selectedFeatureId = (feature.properties && feature.properties.id) || feature.id;
+    // Do NOT auto-select newly placed objects: changing palette color after placing an object
+    // must only recolor an object if the user explicitly clicked it with LMB in neutral arrow mode.
+    state.selectedFeatureId = null;
     persist();
     rebuildMapLayers(focusTextId);
     renderLayerList();
@@ -1469,7 +1587,15 @@
     if (tool === "select" || tool === "shapes") {
       var hit = hitTestAllFeatures(pt);
       if (hit && !(tool === "shapes" && state.shapeKind === "polygon" && state.draftPts.length > 0)) {
-        state.selectedFeatureId = hit.id;
+        if (tool === "select") {
+          var prevSel = state.selectedFeatureId;
+          state.selectedFeatureId = hit.id;
+          if (prevSel !== hit.id) {
+            rebuildMapLayers();
+          }
+        } else {
+          state.selectedFeatureId = null;
+        }
         L.DomEvent.stop(e);
         try { m.dragging.disable(); } catch (e2) {}
         state.suppressNextClick = true;
@@ -1914,7 +2040,9 @@
     if (!newColor) return;
     state.color = newColor;
     persist();
-    if (state.selectedFeatureId) {
+    // Only recolor an existing object if the user is in neutral cursor-arrow ("select") mode
+    // and has explicitly clicked that object with LMB to select it.
+    if (state.tool === "select" && state.selectedFeatureId) {
       var f = findFeatureById(state.selectedFeatureId);
       if (f) {
         f.properties = f.properties || {};
@@ -1928,6 +2056,8 @@
 
   function setTool(tool, opts) {
     state.tool = tool || "select";
+    // Clear any selected feature when switching tools or auto-resetting cursor after placing an object
+    state.selectedFeatureId = null;
     clearDraft();
     setMapHoverCursor("");
     syncMapCursorClasses();

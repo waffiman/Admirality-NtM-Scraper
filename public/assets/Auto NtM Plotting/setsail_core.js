@@ -48444,8 +48444,8 @@ if (document.readyState === "loading") {
     const isEditing = Boolean(st.editMode);
 
     const editOrSaveSvg = isEditing
-      ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>'
-      : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+      ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
 
     const ppDrawerHtml = st.ppMenuOpen
       ? '<div class="ntm-nv-subdrawer">' +
@@ -48459,18 +48459,21 @@ if (document.readyState === "loading") {
       '<div class="ntm-nv-pinned-header">' +
         '<div class="ntm-nv-hdr-top">' +
           '<button type="button" class="ntm-hdr-back-btn ntm-nv-back-compact" id="' + (isWptView ? 'btnNvHdrBackFromWpt' : 'btnNvBackToRoutes') + '" title="' + (isWptView ? 'Back to route waypoints' : 'Back to Routes list') + '" aria-label="Back">' +
-            '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
+            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
           '</button>' +
           '<input type="text" id="nvRouteNameInput" class="ntm-nv-route-name-input ' + (!isEditing ? 'is-locked' : '') + '" value="' + escHtml(routeName) + '" ' + (!isEditing ? 'readonly title="Click Edit button to rename route"' : 'title="Route name (editable)"') + ' aria-label="Route name" />' +
-          '<div class="ntm-nv-hdr-icons">' +
-            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (isEditing ? 'is-editing-save' : '') + '" id="btnNvHdrEdit" aria-pressed="' + (isEditing ? 'true' : 'false') + '" title="' + (isEditing ? 'Save route (exit Edit mode)' : 'Edit route') + '">' +
-              editOrSaveSvg +
+          '<div class="ntm-hdr-actions ntm-nv-hdr-icons">' +
+            '<button type="button" class="ntm-hdr-action-btn ntm-nv-hdr-icon-btn ' + (isEditing ? 'is-editing-save' : '') + '" id="btnNvHdrEdit" aria-pressed="' + (isEditing ? 'true' : 'false') + '" title="' + (isEditing ? 'Save route (exit Edit mode)' : 'Edit route') + '">' +
+              '<span class="ntm-hdr-action-ico" aria-hidden="true">' + editOrSaveSvg + '</span>' +
+              '<span class="ntm-hdr-action-lbl">' + (isEditing ? 'Save' : 'Edit') + '</span>' +
             '</button>' +
-            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (isCurrent ? 'is-current' : '') + '" id="btnNvHdrCurrent" data-nv-hdr-current="1" aria-pressed="' + (isCurrent ? 'true' : 'false') + '" title="' + (isCurrent ? 'Current route (click to unmark)' : 'Mark as Current') + '">' +
-              '<svg viewBox="0 0 24 24" width="16" height="16" fill="' + (isCurrent ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5"/></svg>' +
+            '<button type="button" class="ntm-hdr-action-btn ntm-nv-hdr-icon-btn ' + (isCurrent ? 'is-current' : '') + '" id="btnNvHdrCurrent" data-nv-hdr-current="1" aria-pressed="' + (isCurrent ? 'true' : 'false') + '" title="' + (isCurrent ? 'Current route (click to unmark)' : 'Mark as Current') + '">' +
+              '<span class="ntm-hdr-action-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="' + (isCurrent ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5"/></svg></span>' +
+              '<span class="ntm-hdr-action-lbl">Current</span>' +
             '</button>' +
-            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (st.ppMenuOpen ? 'is-open' : '') + '" id="btnNvHdrPassagePlan" title="Passage plan">' +
-              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>' +
+            '<button type="button" class="ntm-hdr-action-btn ntm-nv-hdr-icon-btn ' + (st.ppMenuOpen ? 'is-open' : '') + '" id="btnNvHdrPassagePlan" title="Passage plan">' +
+              '<span class="ntm-hdr-action-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span>' +
+              '<span class="ntm-hdr-action-lbl">Plan</span>' +
             '</button>' +
           '</div>' +
         '</div>' +
